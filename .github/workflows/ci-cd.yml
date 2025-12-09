@@ -38,7 +38,7 @@ jobs:
         .github/scripts/deploy-vercel.sh preview
       env:
         # Application environment variables
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
 
   # Deploy to Production (main branch only)
   deploy_production:
@@ -62,5 +62,5 @@ jobs:
         .github/scripts/deploy-vercel.sh production
       env:
         # Application environment variables
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
 

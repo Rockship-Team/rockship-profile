@@ -30,7 +30,7 @@ if [ -n "$VERCEL_PROJECT_ID" ]; then
 
   # List of environment variables to set
   ENV_VARS=(
-    "GEMINI_API_KEY"
+    "NEXT_PUBLIC_GEMINI_API_KEY"
   )
 
   # Set environment variables using Vercel CLI
