@@ -136,7 +136,7 @@ export const Solutions: React.FC = () => {
 
         {/* Bento Grid */}
         <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 md:auto-rows-fr">
             {/* Core Engine - Large Card */}
             <PlatformFeatureCard
               className="md:col-span-6 lg:col-span-8"
@@ -162,7 +162,7 @@ export const Solutions: React.FC = () => {
             />
 
             {/* Enterprise - Large Card */}
-            <SpotlightCard className="md:col-span-6 lg:col-span-8 p-10 relative overflow-hidden group">
+            <SpotlightCard className="md:col-span-6 lg:col-span-8 p-6 md:p-10 relative overflow-hidden group">
               {/* Background Elements */}
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-105 duration-700 pointer-events-none">
                 <LayoutTemplate size={180} strokeWidth={0.5} />
@@ -176,7 +176,7 @@ export const Solutions: React.FC = () => {
                   Enterprise Ready
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-4 mt-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
                   {[
                     {
                       title: "Hybrid Deployment",
@@ -197,7 +197,7 @@ export const Solutions: React.FC = () => {
                   ].map((feature, i) => (
                     <div
                       key={i}
-                      className="flex gap-4 items-start p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-200 group/feature"
+                      className="flex gap-4 items-start p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-200 group/feature"
                     >
                       <div className="mt-1.5 w-2 h-2 rounded-full bg-rockship-accent shrink-0 group-hover/feature:shadow-[0_0_10px_rgba(var(--color-rockship-accent),0.8)] transition-shadow" />
                       <div>

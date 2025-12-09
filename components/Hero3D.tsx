@@ -182,6 +182,7 @@ const ExhaustParticles = ({ scene }: { scene: THREE.Scene }) => {
 const RocketLogic = () => {
   const group = useRef<THREE.Group>(null);
   const [hovered, setHover] = useState(false);
+  const { viewport } = useThree();
 
   // Materials
   const matBodyMain = useMemo(
@@ -225,8 +226,60 @@ const RocketLogic = () => {
   );
 
   // Logic Constants
-  const HOME_POS = useMemo(() => new THREE.Vector3(5, 0, 0), []);
+  // Responsive Position: On narrow screens (< 12 width), center the rocket higher up
+  // Responsive Position: On narrow screens (< 12 width), center the rocket higher up
+  const isMobile = viewport.width < 12;
+
+  // Auto-fly Effect for Mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // Function to trigger a single flight
+    const triggerFlight = () => {
+      setHover(true);
+      // Reset hover flag shortly after ensuring flight started
+      // This prevents instant re-looping, allowing a pause
+      setTimeout(() => setHover(false), 1000);
+    };
+
+    // Start first flight after 1s delay
+    const startTimer = setTimeout(triggerFlight, 1000);
+
+    // Continue flying every 7 seconds (approx 5.5s flight + 1.5s pause)
+    const loopTimer = setInterval(triggerFlight, 7000);
+
+    return () => {
+      clearTimeout(startTimer);
+      clearInterval(loopTimer);
+    };
+  }, [isMobile]);
+
+  const HOME_POS = useMemo(
+    () =>
+      isMobile
+        ? new THREE.Vector3(2.5, -0.5, 0.5) // Moved up further as requested
+        : new THREE.Vector3(5, 0, 0),
+    [isMobile]
+  );
+
   const flightPath = useMemo(() => {
+    // Mobile Path: Tighter simple loop in visible range
+    if (isMobile) {
+      const points = [
+        HOME_POS.clone(),
+        new THREE.Vector3(0, 2, 1), // Up higher
+        new THREE.Vector3(-2, 0, 0), // Mid-left
+        new THREE.Vector3(0, -2, 0), // Bottom center (higher than before)
+        new THREE.Vector3(2, -1, 1), // Rightish return
+        HOME_POS.clone(),
+      ];
+      const curve = new THREE.CatmullRomCurve3(points);
+      curve.closed = false;
+      curve.tension = 0.5;
+      return curve;
+    }
+
+    // Default Desktop Path
     const points = [
       HOME_POS.clone(),
       new THREE.Vector3(1, 4, 2),
@@ -241,7 +294,7 @@ const RocketLogic = () => {
     curve.closed = false;
     curve.tension = 0.5;
     return curve;
-  }, [HOME_POS]);
+  }, [HOME_POS, isMobile]);
 
   // State Refs
   const state = useRef({
@@ -321,7 +374,8 @@ const RocketLogic = () => {
   return (
     <group
       ref={group}
-      position={[5, 0, 0]}
+      // Initial position from HOME_POS, but animation loop takes over
+      position={HOME_POS}
       rotation={[0, 0, Math.PI / 6]}
       onPointerOver={() => {
         document.body.style.cursor = "pointer";
