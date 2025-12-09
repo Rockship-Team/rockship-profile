@@ -8,6 +8,7 @@ import {
   Mic,
   Server,
   ShieldCheck,
+  Zap,
 } from "lucide-react";
 import React from "react";
 import { FadeIn } from "./FadeIn";
@@ -19,7 +20,7 @@ const SpotlightCard: React.FC<{
 }> = ({
   children,
   className = "",
-  spotlightColor = "rgba(255, 255, 255, 0.25)",
+  spotlightColor = "rgba(99, 102, 241, 0.15)", // Rockship Accent color
 }) => {
   const divRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
@@ -41,41 +42,20 @@ const SpotlightCard: React.FC<{
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative rounded-3xl overflow-hidden bg-rockship-900/40 group", // Removed standard border
+        "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-colors duration-300",
         className
       )}
     >
-      {/* Base Border (Static) */}
-      <div
-        className="pointer-events-none absolute inset-0 z-10"
-        style={{
-          background: "rgba(255, 255, 255, 0.05)", // border-white/5
-          maskImage:
-            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskImage:
-            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          WebkitMaskComposite: "xor",
-          padding: "1px",
-        }}
-      />
-
-      {/* Spotlight Border (Dynamic) */}
+      {/* Dynamic Cursor Spotlight */}
       <div
         className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300"
         style={{
           opacity,
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
-          maskImage:
-            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskImage:
-            "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "exclude",
-          WebkitMaskComposite: "xor",
-          padding: "1px",
         }}
       />
-      {children}
+      {/* Content wrapper */}
+      <div className="relative z-20 h-full">{children}</div>
     </div>
   );
 };
@@ -87,30 +67,36 @@ const PlatformFeatureCard: React.FC<{
   className?: string;
   delay?: string;
 }> = ({ icon, title, desc, className, delay }) => (
-  <SpotlightCard
-    className={cn(
-      "p-8 hover:bg-rockship-800/40 transition-all duration-300",
-      className
-    )}
-  >
-    {/* Inner decorative gradient */}
-    <div className="absolute inset-0 bg-gradient-to-br from-rockship-accent/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+  <SpotlightCard className={cn("p-8 h-full flex flex-col", className)}>
+    {/* Inner decorative gradient - only visible on hover */}
+    <div className="absolute inset-0 bg-gradient-to-br from-rockship-accent/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 -z-10" />
 
-    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none">
-      {React.cloneElement(icon as React.ReactElement<any>, { size: 120 })}
+    {/* Large Background Icon Faded */}
+    <div className="absolute -top-4 -right-4 text-white/[0.03] group-hover:text-white/[0.07] transition-all duration-500 group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+      {React.cloneElement(icon as React.ReactElement<any>, {
+        size: 160,
+        strokeWidth: 0.5,
+      })}
     </div>
 
-    <div className="relative z-10 flex flex-col h-full">
-      <div className="w-12 h-12 rounded-2xl bg-rockship-800/50 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-rockship-accent/20 transition-all duration-300">
-        <div className="text-rockship-300 group-hover:text-rockship-accent transition-colors">
+    {/* Header */}
+    <div className="mb-6 relative">
+      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:shadow-[0_0_20px_-5px_rgba(var(--color-rockship-accent),0.5)] transition-all duration-300">
+        <div className="text-rockship-200 group-hover:text-white transition-colors">
           {icon}
         </div>
       </div>
 
-      <h3 className="text-2xl font-bold font-display text-white mb-3">
+      <h3 className="text-2xl font-bold font-display text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-rockship-200 transition-all">
         {title}
       </h3>
-      <p className="text-rockship-300 leading-relaxed">{desc}</p>
+    </div>
+
+    {/* Body */}
+    <div className="mt-auto relative">
+      <p className="text-rockship-300 leading-relaxed text-sm group-hover:text-rockship-200 transition-colors">
+        {desc}
+      </p>
     </div>
   </SpotlightCard>
 );
@@ -121,20 +107,24 @@ export const Solutions: React.FC = () => {
       id="platform"
       className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-rockship-800 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-rockship-800 to-transparent" />
-      <div className="absolute right-0 top-1/4 w-96 h-96 bg-rockship-accent/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Atmosphere */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none" />
+      <div className="absolute right-0 top-1/4 w-[600px] h-[600px] bg-rockship-accent/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-6 relative z-10">
         <FadeIn className="max-w-3xl mx-auto text-center mb-20">
-          <h2 className="text-rockship-accent font-semibold tracking-widest uppercase text-sm mb-4">
-            The Rockship Platform
-          </h2>
-          <h3 className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400">
-            Everything you need to rockship intelligence
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
+            <Zap className="text-rockship-accent w-4 h-4" />
+            <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
+              The Rockship Platform
+            </span>
+          </div>
+          <h3 className="text-4xl md:text-5xl font-display font-medium mb-6 leading-tight">
+            Everything you need to <br />
+            <span className="gradient-text">rockship intelligence</span>
           </h3>
-          <p className="text-lg text-rockship-300 leading-relaxed">
+          <p className="text-lg text-rockship-300 leading-relaxed max-w-2xl mx-auto">
             A unified infrastructure designed for the next generation of
             AI-native enterprises. From data ingestion to deployment, we have
             you covered.
@@ -143,10 +133,10 @@ export const Solutions: React.FC = () => {
 
         {/* Bento Grid */}
         <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 auto-rows-fr">
             {/* Core Engine - Large Card */}
             <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-8 bg-gradient-to-br from-rockship-900/60 to-rockship-900/20"
+              className="md:col-span-6 lg:col-span-8 bg-gradient-to-br from-white/5 to-transparent"
               icon={<Brain size={32} />}
               title="Rockship LLM Engine"
               desc="Our flagship inference engine. Fine-tune open weights or distill proprietary models on your private data clusters. Includes built-in RAG with vector store management."
@@ -169,49 +159,55 @@ export const Solutions: React.FC = () => {
             />
 
             {/* Enterprise - Large Card */}
-            <SpotlightCard className="md:col-span-6 lg:col-span-8 p-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <LayoutTemplate size={120} />
+            <SpotlightCard className="md:col-span-6 lg:col-span-8 p-10 relative overflow-hidden group">
+              {/* Background Elements */}
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-105 duration-700 pointer-events-none">
+                <LayoutTemplate size={180} strokeWidth={0.5} />
               </div>
 
-              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <Server className="text-rockship-accent" /> Enterprise Ready
-              </h3>
-
-              <div className="grid md:grid-cols-2 gap-4 relative z-10">
-                {[
-                  {
-                    title: "Hybrid Deployment",
-                    desc: "On-prem, Cloud, or Air-gapped.",
-                  },
-                  {
-                    title: "SSO & RBAC",
-                    desc: "Granular access control policies.",
-                  },
-                  {
-                    title: "Legacy Integration",
-                    desc: "Connectors for SAP, Salesforce, & Oracle.",
-                  },
-                  {
-                    title: "24/7 Support",
-                    desc: "Dedicated engineering response teams.",
-                  },
-                ].map((feature, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-3 items-start p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                  >
-                    <div className="mt-1 w-1.5 h-1.5 rounded-full bg-rockship-accent shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-white text-sm">
-                        {feature.title}
-                      </h4>
-                      <p className="text-xs text-rockship-400 mt-0.5">
-                        {feature.desc}
-                      </p>
-                    </div>
+              <div className="relative z-10 flex flex-col h-full">
+                <h3 className="text-2xl font-bold font-display text-white mb-8 flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-rockship-accent/20 text-rockship-accent">
+                    <Server size={24} />
                   </div>
-                ))}
+                  Enterprise Ready
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4 mt-auto">
+                  {[
+                    {
+                      title: "Hybrid Deployment",
+                      desc: "On-prem, Cloud, or Air-gapped.",
+                    },
+                    {
+                      title: "SSO & RBAC",
+                      desc: "Granular access control policies.",
+                    },
+                    {
+                      title: "Legacy Integration",
+                      desc: "Connectors for SAP, Salesforce, & Oracle.",
+                    },
+                    {
+                      title: "24/7 Support",
+                      desc: "Dedicated engineering response teams.",
+                    },
+                  ].map((feature, i) => (
+                    <div
+                      key={i}
+                      className="flex gap-4 items-start p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-200 group/feature"
+                    >
+                      <div className="mt-1.5 w-2 h-2 rounded-full bg-rockship-accent shrink-0 group-hover/feature:shadow-[0_0_10px_rgba(var(--color-rockship-accent),0.8)] transition-shadow" />
+                      <div>
+                        <h4 className="font-bold text-white text-sm tracking-wide">
+                          {feature.title}
+                        </h4>
+                        <p className="text-xs text-rockship-300 mt-1 font-medium">
+                          {feature.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </SpotlightCard>
 
@@ -224,28 +220,30 @@ export const Solutions: React.FC = () => {
             />
 
             {/* Security - Wide Card at Bottom */}
-            <SpotlightCard className="md:col-span-8 p-1 bg-gradient-to-r from-rockship-800 to-rockship-900/50 relative overflow-hidden">
-              <div className="absolute inset-0 bg-rockship-accent/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
-              <div className="bg-rockship-950/90 rounded-[22px] p-8 md:p-10 h-full flex flex-col md:flex-row items-center gap-10 relative z-10">
+            <SpotlightCard className="md:col-span-full border-rockship-accent/20 bg-rockship-900/40">
+              <div className="absolute inset-0 bg-gradient-to-r from-rockship-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="p-8 md:p-12 h-full flex flex-col md:flex-row items-center gap-12 relative z-10">
                 <div className="flex-1 space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold tracking-wide uppercase">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold tracking-wide uppercase shadow-[0_0_15px_-5px_rgba(34,197,94,0.3)]">
                     <ShieldCheck size={14} /> DOD Level Security
                   </div>
-                  <h3 className="text-3xl font-display font-bold text-white">
+                  <h3 className="text-3xl md:text-4xl font-display font-medium text-white">
                     GovCloud & Compliance
                   </h3>
-                  <p className="text-rockship-300 max-w-2xl">
+                  <p className="text-rockship-300 max-w-2xl text-lg leading-relaxed">
                     We engineered our platform for the world's most regulated
                     industries. Fully compliant with ISO 27001, SOC2 Type II,
                     HIPAA, and GDPR. Our Defense AI unit provides specialized
                     air-gapped solutions for national security.
                   </p>
-                  <div className="flex flex-wrap gap-2">
+
+                  <div className="flex flex-wrap gap-2 pt-2">
                     {["ISO 27001", "SOC2", "HIPAA", "GDPR", "FedRAMP High"].map(
                       (badge) => (
                         <span
                           key={badge}
-                          className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-rockship-300"
+                          className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-rockship-200 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all cursor-default"
                         >
                           {badge}
                         </span>
@@ -253,13 +251,19 @@ export const Solutions: React.FC = () => {
                     )}
                   </div>
                 </div>
+
                 {/* Visual Security Element */}
-                <div className="w-full md:w-auto flex justify-center">
-                  <div className="relative w-48 h-48 flex items-center justify-center">
-                    <div className="absolute inset-0 border-2 border-dashed border-gray-700 rounded-full animate-spin-slow" />
-                    <div className="absolute inset-4 border border-green-500/30 rounded-full" />
-                    <Lock size={64} className="text-white relative z-10" />
-                    <div className="absolute inset-0 bg-green-500/20 blur-[40px] rounded-full" />
+                <div className="w-full md:w-auto flex justify-center shrink-0">
+                  <div className="relative w-64 h-64 flex items-center justify-center">
+                    <div className="absolute inset-0 border border-green-500/10 rounded-full animate-ping [animation-duration:3s]" />
+                    <div className="absolute inset-4 border border-green-500/20 rounded-full animate-spin-slow duration-[10s]" />
+                    <div className="absolute inset-12 border-2 border-dashed border-green-500/30 rounded-full animate-spin-slow duration-[20s] reverse" />
+
+                    <div className="relative z-10 bg-rockship-950/80 p-6 rounded-2xl border border-green-500/30 shadow-[0_0_40px_-10px_rgba(34,197,94,0.4)] backdrop-blur-sm">
+                      <Lock size={48} className="text-green-400" />
+                    </div>
+
+                    <div className="absolute inset-0 bg-green-500/5 blur-[60px] rounded-full pointer-events-none" />
                   </div>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Cloud, Cpu, Database, Layout, Smartphone } from "lucide-react";
+import { Cloud, Cpu, Database, Layers, Layout, Smartphone } from "lucide-react";
 import React from "react";
 import { FadeIn } from "./FadeIn";
 
@@ -19,38 +19,66 @@ const TechCard = ({
   return (
     <div
       className={cn(
-        "group relative p-8 rounded-3xl border border-white/5 bg-rockship-900/20 backdrop-blur-sm overflow-hidden hover:bg-rockship-900/40 transition-all duration-500 h-full",
+        "group relative p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:bg-white/10 transition-all duration-500 h-full",
         delay
       )}
     >
-      {/* Glow Effect */}
+      {/* Dynamic Glow Effect */}
       <div
         className={cn(
-          "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br",
+          "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700 bg-gradient-to-br blur-xl",
+          colorClass
+        )}
+      />
+
+      {/* Corner Accent */}
+      <div
+        className={cn(
+          "absolute top-0 right-0 w-24 h-24 bg-gradient-to-br opacity-10 rounded-bl-full transition-all duration-500 group-hover:scale-150",
           colorClass
         )}
       />
 
       <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-center gap-4 mb-8">
+        {/* Header Section */}
+        <div className="flex items-center gap-5 mb-8">
           <div
             className={cn(
-              "p-3 rounded-xl bg-white/5 ring-1 ring-white/10 group-hover:scale-110 transition-transform duration-300",
+              "p-3.5 rounded-2xl bg-rockship-950/50 border border-white/10 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300",
               "text-white"
             )}
           >
-            <Icon size={24} />
+            <Icon size={26} strokeWidth={1.5} />
           </div>
-          <h3 className="text-xl font-bold font-display text-white">{title}</h3>
+          <div>
+            <h3 className="text-xl font-bold font-display text-white tracking-tight">
+              {title}
+            </h3>
+            <div
+              className={cn(
+                "h-1 w-0 rounded-full mt-1 transition-all duration-700 group-hover:w-full bg-gradient-to-r",
+                colorClass
+              )}
+            />
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 content-start">
-          {items.map((item) => (
+        {/* Tech Items Grid */}
+        <div className="flex flex-wrap gap-2.5 content-start">
+          {items.map((item, idx) => (
             <div
               key={item}
-              className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-sm font-mono text-rockship-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-default"
+              style={{ transitionDelay: `${idx * 30}ms` }}
+              className="px-3 py-1.5 rounded-md bg-white/5 border border-white/5 text-sm font-mono text-rockship-200 
+                         hover:text-white hover:bg-white/15 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 
+                         transition-all duration-200 cursor-default flex items-center gap-2 group/item"
             >
-              <span className="opacity-50 mr-2">$</span>
+              <span
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full opacity-50 group-hover/item:opacity-100 transition-opacity bg-gradient-to-r",
+                  colorClass
+                )}
+              />
               {item}
             </div>
           ))}
@@ -68,7 +96,7 @@ export const TechStack: React.FC = () => {
       "JAX",
       "LangChain",
       "YOLO v8",
-      "HuggingFace Transformers",
+      "HuggingFace",
       "vLLM",
       "LlamaIndex",
     ],
@@ -114,23 +142,25 @@ export const TechStack: React.FC = () => {
   return (
     <section
       id="tech-stack"
-      className="py-24 md:py-32 bg-rockship-950/80 relative border-t border-white/5"
+      className="py-24 md:py-32 bg-rockship-950 relative border-t border-white/5 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none"></div>
+      {/* Background Atmosphere */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/4 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <FadeIn className="mb-16 md:mb-24 flex flex-col md:flex-row items-end justify-between gap-8">
+        <FadeIn className="mb-20 flex flex-col md:flex-row items-end justify-between gap-8">
           <div className="max-w-2xl">
-            <h2 className="text-rockship-accent font-semibold tracking-widest uppercase text-sm mb-4">
-              Our Technology
-            </h2>
-            <h3 className="text-4xl md:text-5xl font-display font-medium text-white mb-6">
-              Built on{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rockship-accent to-purple-400">
-                Giant Shoulders
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
+              <Layers className="text-rockship-accent w-4 h-4" />
+              <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
+                Architecture
               </span>
-            </h3>
-            <p className="text-lg text-rockship-300">
+            </div>
+            <h2 className="text-4xl md:text-6xl font-display font-medium text-white mb-6 leading-tight">
+              Built on <span className="gradient-text">Giant Shoulders</span>
+            </h2>
+            <p className="text-lg text-rockship-300 max-w-xl leading-relaxed">
               We leverage an ecosystem of battle-tested open source frameworks
               and proprietary optimizations to deliver state-of-the-art
               performance.
@@ -162,13 +192,13 @@ export const TechStack: React.FC = () => {
               title="Infra & Ops"
               icon={Cloud}
               items={stack.ops}
-              colorClass="from-green-500 to-emerald-500"
+              colorClass="from-emerald-500 to-teal-500"
             />
           </FadeIn>
 
           <FadeIn delay="400ms" className="lg:col-span-3">
             <TechCard
-              title="Frontend"
+              title="Frontend Experience"
               icon={Layout}
               items={stack.frontend}
               colorClass="from-pink-500 to-rose-500"
@@ -177,10 +207,10 @@ export const TechStack: React.FC = () => {
 
           <FadeIn delay="500ms" className="lg:col-span-3">
             <TechCard
-              title="Mobile"
+              title="Mobile & Cross-Platform"
               icon={Smartphone}
               items={stack.mobile}
-              colorClass="from-orange-500 to-red-500"
+              colorClass="from-orange-500 to-yellow-500"
             />
           </FadeIn>
         </div>

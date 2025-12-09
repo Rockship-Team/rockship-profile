@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   BookOpen,
   GraduationCap,
   Microscope,
@@ -13,79 +14,108 @@ const ResearchCard: React.FC<{
   title: string;
   category: string;
   description: string;
-}> = ({ icon, title, category, description }) => (
-  <div className="group relative overflow-hidden rounded-2xl bg-rockship-900 border border-white/10 p-8 hover:border-rockship-accent/50 transition-all duration-300 hover:shadow-2xl hover:shadow-rockship-accent/10">
-    <div className="absolute inset-0 bg-gradient-to-br from-rockship-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-    <div className="relative z-10">
-      <div className="flex justify-between items-start mb-6">
-        <div className="p-3 bg-white/5 rounded-lg text-rockship-accent group-hover:bg-rockship-accent group-hover:text-black transition-colors duration-300">
-          {icon}
+  delay: number;
+}> = ({ icon, title, category, description, delay }) => (
+  <FadeIn delay={delay} className="h-full">
+    <div className="group relative h-full flex flex-col justify-between overflow-hidden rounded-3xl p-1 bg-gradient-to-b from-white/10 to-transparent hover:from-rockship-accent/50 hover:to-rockship-accent/10 transition-all duration-500">
+      {/* Inner Content Wrapper for border effect */}
+      <div className="relative h-full bg-rockship-950/80 rounded-[22px] p-8 flex flex-col overflow-hidden backdrop-blur-md transition-colors duration-500 group-hover:bg-rockship-950/60">
+        {/* Decorative background glow on hover */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-rockship-accent/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col h-full">
+          <div className="flex justify-between items-start mb-8">
+            <div className="p-3 bg-white/5 rounded-xl text-rockship-accent border border-white/10 group-hover:scale-110 group-hover:bg-rockship-accent group-hover:text-white transition-all duration-300 shadow-[0_0_20px_-10px_rgba(var(--color-rockship-accent),0.5)]">
+              {icon}
+            </div>
+            <span className="text-[10px] font-bold text-rockship-400 bg-white/5 border border-white/10 px-3 py-1 rounded-full uppercase tracking-wider group-hover:text-white transition-colors">
+              {category}
+            </span>
+          </div>
+
+          <h3 className="text-2xl font-display font-medium text-white mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-rockship-200 transition-all">
+            {title}
+          </h3>
+
+          <p className="text-rockship-300 text-sm leading-relaxed mb-8 flex-grow">
+            {description}
+          </p>
+
+          <div className="pt-6 border-t border-white/5 flex items-center justify-between group-hover:border-white/20 transition-colors">
+            <span className="text-sm font-semibold text-white/50 group-hover:text-white transition-colors">
+              Read Paper
+            </span>
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 group-hover:bg-rockship-accent group-hover:text-white transition-all duration-300 group-hover:translate-x-1">
+              <ArrowRight size={14} />
+            </div>
+          </div>
         </div>
-        <span className="text-xs font-mono text-gray-400 border border-white/10 px-2 py-1 rounded full uppercase tracking-wider">
-          {category}
-        </span>
       </div>
-      <h3 className="text-xl font-display font-bold text-white mb-3 group-hover:text-rockship-accent transition-colors">
-        {title}
-      </h3>
-      <p className="text-gray-400 text-sm leading-relaxed mb-6">
-        {description}
-      </p>
-      <a
-        href="#"
-        className="inline-flex items-center text-sm font-bold text-white/70 hover:text-white transition group-hover:translate-x-1 duration-200"
-      >
-        Read Paper <span className="ml-2">→</span>
-      </a>
     </div>
-  </div>
+  </FadeIn>
 );
 
 export const Research: React.FC = () => {
   return (
-    <section id="research" className="py-24 md:py-32 bg-rockship-950 relative">
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+    <section
+      id="research"
+      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
+    >
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">
-        <FadeIn className="flex flex-col md:flex-row justify-between items-end mb-16">
+        <FadeIn className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="text-rockship-accent w-5 h-5" />
-              <span className="text-rockship-accent font-mono text-sm uppercase tracking-widest">
-                R&D Labs
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
+              <Sparkles className="text-rockship-accent w-4 h-4" />
+              <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
+                Rockship R&D Labs
               </span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
-              Inventing the{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rockship-accent to-purple-400">
-                Unseen
-              </span>
+
+            <h2 className="text-4xl md:text-6xl font-display font-medium text-white mb-6 leading-tight">
+              Inventing the <br />
+              <span className="gradient-text">Unseen Future</span>
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-rockship-300 text-lg leading-relaxed max-w-xl">
               Our research division publishes top-tier work in generative
-              models, reinforcement learning, and ethical AI alignment.
+              models, reinforcement learning, and ethical AI alignment, pushing
+              the boundaries of what's possible.
             </p>
           </div>
-          <button className="hidden md:flex items-center gap-2 px-6 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all duration-300">
-            <BookOpen size={18} />
-            <span>View All Publications</span>
+
+          <button className="group flex items-center gap-3 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white transition-all duration-300 backdrop-blur-md">
+            <BookOpen
+              size={18}
+              className="text-rockship-400 group-hover:text-white transition-colors"
+            />
+            <span className="font-medium">View All Publications</span>
+            <ArrowRight
+              size={16}
+              className="text-rockship-400 group-hover:text-white group-hover:translate-x-1 transition-all"
+            />
           </button>
         </FadeIn>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           <ResearchCard
+            delay={0.1}
             icon={<Network size={24} />}
             category="Architecture"
             title="Liquid Neural Networks"
             description="A new class of adaptive neural networks that can change their underlying structure during inference, reducing compute by 60%."
           />
           <ResearchCard
+            delay={0.2}
             icon={<Microscope size={24} />}
             category="Healthcare"
             title="Protein Folding at Scale"
             description="Using diffusion models to predict protein structure variations in real-time for rapid drug discovery pipelines."
           />
           <ResearchCard
+            delay={0.3}
             icon={<GraduationCap size={24} />}
             category="Alignment"
             title="Constitutional AI Safety"

@@ -14,10 +14,12 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: "Platform", href: "#platform" },
+    { label: "Home", href: "#home" },
+    { label: "Solutions", href: "#platform" },
+    { label: "Case Studies", href: "#case-studies" },
     { label: "Technology", href: "#tech-stack" },
     { label: "Research", href: "#research" },
-    { label: "Company", href: "#company" },
+    { label: "About", href: "#company" },
   ];
 
   return (
