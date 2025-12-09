@@ -108,7 +108,7 @@ export const Solutions: React.FC = () => {
   return (
     <section
       id="platform"
-      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
+      className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
       {/* Background Atmosphere */}
       <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none" />

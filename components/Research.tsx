@@ -59,7 +59,7 @@ export const Research: React.FC = () => {
   return (
     <section
       id="research"
-      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
+      className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />

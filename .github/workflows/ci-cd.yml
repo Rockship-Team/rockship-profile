@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_PROJECT_NAME: ${{ secrets.VERCEL_PROJECT_NAME || github.event.repository.name }}
+  VERCEL_BUILD_COMMAND: ${{ secrets.VERCEL_BUILD_COMMAND || 'pnpm run build' }}
+  VERCEL_FRAMEWORK: ${{ secrets.VERCEL_FRAMEWORK || 'nextjs' }}
+  VERCEL_OUTPUT_DIR: ${{ secrets.VERCEL_OUTPUT_DIR || '.next' }}
+  CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+
+jobs:
+  # Deploy to Vercel Preview (for PRs and non-main branches)
+  deploy_preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Install pnpm and Vercel CLI
+      run: |
+        npm install -g pnpm vercel
+
+    - name: Deploy to Vercel Preview
+      run: |
+        chmod +x .github/scripts/deploy-vercel.sh
+        .github/scripts/deploy-vercel.sh preview
+      env:
+        # Application environment variables
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        REDIS_URL: ${{ secrets.REDIS_URL }}
+        WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        SUPABASE_STORAGE_URL: ${{ secrets.SUPABASE_STORAGE_URL }}
+
+  # Deploy to Production (main branch only)
+  deploy_production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Install pnpm and Vercel CLI
+      run: |
+        npm install -g pnpm vercel
+
+    - name: Deploy to Vercel Production
+      run: |
+        chmod +x .github/scripts/deploy-vercel.sh
+        .github/scripts/deploy-vercel.sh production
+      env:
+        # Application environment variables
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        REDIS_URL: ${{ secrets.REDIS_URL }}
+        WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        SUPABASE_STORAGE_URL: ${{ secrets.SUPABASE_STORAGE_URL }}
+

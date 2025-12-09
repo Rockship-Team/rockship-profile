@@ -65,7 +65,7 @@ export function Testimonials() {
     testimonials.find((t) => t.id === activeId) || testimonials[0];
 
   return (
-    <section className="py-24 md:py-32 bg-rockship-950 text-center px-6 border-t border-white/10 relative overflow-hidden">
+    <section className="py-16 md:py-32 bg-rockship-950 text-center px-6 border-t border-white/10 relative overflow-hidden">
       <FadeIn className="max-w-6xl mx-auto">
         <h2 className="text-rockship-accent font-semibold tracking-widest uppercase text-sm mb-4">
           Customers

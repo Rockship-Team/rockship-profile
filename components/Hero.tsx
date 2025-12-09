@@ -29,7 +29,7 @@ export const Hero: React.FC = () => {
             </FadeIn>
 
             <FadeIn delay={100}>
-              <h1 className="font-display text-5xl md:text-7xl font-bold mb-8 leading-tight drop-shadow-2xl">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-2xl">
                 Rockship Intelligence <br />
                 <span className="gradient-text">For The Enterprise</span>
               </h1>

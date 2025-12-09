@@ -19,7 +19,7 @@ const TechCard = ({
   return (
     <div
       className={cn(
-        "group relative p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:bg-white/10 transition-all duration-500 h-full",
+        "group relative p-6 md:p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:bg-white/10 transition-all duration-500 h-full",
         delay
       )}
     >
@@ -144,7 +144,7 @@ export const TechStack: React.FC = () => {
   return (
     <section
       id="tech-stack"
-      className="py-24 md:py-32 bg-rockship-950 relative border-t border-white/5 overflow-hidden"
+      className="py-16 md:py-32 bg-rockship-950 relative border-t border-white/5 overflow-hidden"
     >
       {/* Background Atmosphere */}
       <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none"></div>
@@ -159,7 +159,7 @@ export const TechStack: React.FC = () => {
                 Architecture
               </span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-display font-medium text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-display font-medium text-white mb-6 leading-tight">
               Built on <span className="gradient-text">Giant Shoulders</span>
             </h2>
             <p className="text-lg text-rockship-300 max-w-xl leading-relaxed">

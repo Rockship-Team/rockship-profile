@@ -65,7 +65,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-rockship-900 border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl">
           {navLinks.map((link) => (
             <a
               key={link.label}

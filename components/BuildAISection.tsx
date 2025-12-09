@@ -160,7 +160,7 @@ export const BuildAISection: React.FC = () => {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-rockship-950 text-white border-t border-white/5">
+    <section className="py-16 md:py-32 bg-rockship-950 text-white border-t border-white/5">
       <div className="container mx-auto px-6">
         <FadeIn className="text-center mb-20">
           <h2 className="text-rockship-accent font-semibold tracking-widest uppercase text-sm mb-4">

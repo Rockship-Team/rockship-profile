@@ -6,7 +6,7 @@ export const Company: React.FC = () => {
   return (
     <section
       id="company"
-      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
+      className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
       {/* Decorative large text */}
       <div className="absolute -left-10 top-20 text-[20rem] font-bold text-white/[0.02] pointer-events-none select-none font-display">

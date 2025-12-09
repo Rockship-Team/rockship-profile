@@ -64,7 +64,7 @@ export function Clients() {
   return (
     <section
       id="clients"
-      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden flex flex-col items-center justify-center gap-10"
+      className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden flex flex-col items-center justify-center gap-10"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--color-rockship-800)_0%,_transparent_70%)] opacity-20 pointer-events-none" />
