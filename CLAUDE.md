@@ -1,0 +1,8 @@
+- Always use pnpm instead of npm
+- The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+- Always write components in the "components" folder.
+- Always write pages in the "app" folder.
+- Always write API routes in the "api" folder.
+- Always write server actions in the "actions" folder.
+- Always write docs in the "docs" folder.
+- Always write types in the "types" folder.

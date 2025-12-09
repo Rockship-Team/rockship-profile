@@ -1,0 +1,214 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Deep Space Palette - Premium & Modern */
+  --color-rockship-950: #02040a;
+  --color-rockship-900: #0b101b;
+  --color-rockship-800: #161e2e;
+  --color-rockship-700: #1e293b;
+  --color-rockship-600: #334155;
+  --color-rockship-500: #475569;
+  --color-rockship-400: #64748b;
+  --color-rockship-300: #94a3b8;
+  --color-rockship-200: #cbd5e1;
+  --color-rockship-100: #e2e8f0;
+  --color-rockship-50: #f8fafc;
+  
+  /* Vibrant Accent - Electric Indigo/Cyan gradient start */
+  --color-rockship-accent: #6366f1; 
+  --color-rockship-accent-secondary: #0ea5e9;
+
+  /* Shadcn Semantic Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-scroll: scroll 40s linear infinite;
+
+  @keyframes accordion-down {
+    from { height: 0 }
+    to { height: var(--radix-accordion-content-height) }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height) }
+    to { height: 0 }
+  }
+  @keyframes scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+:root {
+  --background: var(--color-rockship-950);
+  --foreground: var(--color-rockship-50);
+
+  --card: var(--color-rockship-900);
+  --card-foreground: var(--color-rockship-50);
+
+  --popover: var(--color-rockship-950);
+  --popover-foreground: var(--color-rockship-50);
+
+  --primary: var(--color-rockship-accent);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-rockship-800);
+  --secondary-foreground: var(--color-rockship-50);
+
+  --muted: var(--color-rockship-800);
+  --muted-foreground: var(--color-rockship-400);
+
+  --accent: var(--color-rockship-800);
+  --accent-foreground: var(--color-rockship-50);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: var(--color-rockship-800);
+  --input: var(--color-rockship-800);
+  --ring: var(--color-rockship-accent);
+  
+  --radius: 0.5rem;
+
+  --chart-1: var(--color-rockship-accent);
+  --chart-2: var(--color-rockship-accent-secondary);
+  --chart-3: #a855f7;
+  --chart-4: #ec4899;
+  --chart-5: #eab308;
+}
+
+/* Custom Utilities */
+
+/* 
+   Note: Tailwin v4 automatically handles border colors for * if configured, 
+   but specific base styles can be added here.
+*/
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(11, 16, 27, 0.6);
+    backdrop-filter: blur(12px);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08); /* Fallback or manual override if needed */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Glow Effect */
+  .glow {
+    box-shadow: 0 0 20px -5px var(--color-rockship-accent);
+  }
+  
+  /* Gradient text utility */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-rockship-accent), var(--color-rockship-accent-secondary), #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-move 4s ease infinite;
+  }
+
+  /* Utility to hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  /* Mask gradient for scrolling content fade */
+  .mask-gradient-b {
+    mask-image: linear-gradient(to bottom, transparent, black 5%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 100%);
+  }
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-rockship-950); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-rockship-700); 
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-rockship-600); 
+}
