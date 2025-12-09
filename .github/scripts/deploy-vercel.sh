@@ -5,9 +5,7 @@ set -e
 DEPLOY_TYPE=$1 # 'preview' or 'production'
 
 if [ -z "$VERCEL_PROJECT_ID" ]; then
-  echo "🔍 VERCEL_PROJECT_ID is not set. Using Vercel CLI to link project..."
-  # Try to link to existing project or create new one using Vercel CLI
-  echo "🔗 Linking to Vercel project..."
+  echo "🔍 VERCEL_PROJECT_ID is not set. Will create or link project during deployment..."
 
   # Create a temporary vercel.json for project configuration
   cat > vercel.json << EOF
@@ -19,64 +17,52 @@ if [ -z "$VERCEL_PROJECT_ID" ]; then
 }
 EOF
 
-  # Use Vercel CLI to link/create project
-  if vercel link --confirm --token "$VERCEL_TOKEN" <<< "n"; then
-    echo "✅ Successfully linked to Vercel project"
-    # Get the project ID from the linked configuration (simple parsing without jq)
-    if [ -f .vercel/project.json ]; then
-      export VERCEL_PROJECT_ID=$(grep -o '"projectId":"[^"]*"' .vercel/project.json | cut -d'"' -f4 || echo "")
-    fi
-  else
-    echo "⚠️  Could not link to project, will attempt deployment anyway"
-  fi
-
-  # Clean up temporary vercel.json
-  rm -f vercel.json
+  echo "📝 Project configuration prepared for: $VERCEL_PROJECT_NAME"
+  echo "🔧 Vercel CLI will automatically create or link the project during deployment"
 else
   echo "🔑 Using predefined VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
 fi
 
-# Set environment variables for Vercel
-echo "🔧 Setting environment variables for Vercel..."
+# Set environment variables for Vercel (only if we have VERCEL_PROJECT_ID or after project is created)
+# Skip for now to avoid errors during project creation
+if [ -n "$VERCEL_PROJECT_ID" ]; then
+  echo "🔧 Setting environment variables for Vercel..."
 
-# List of environment variables to set
-ENV_VARS=(
-  "NEXT_PUBLIC_SUPABASE_URL"
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY"
-  "SUPABASE_SERVICE_ROLE_KEY"
-  "DATABASE_URL"
-  "REDIS_URL"
-  "WEBHOOK_SECRET"
-  "SUPABASE_STORAGE_URL"
-)
+  # List of environment variables to set
+  ENV_VARS=(
+    "GEMINI_API_KEY"
+  )
 
-# Set environment variables using Vercel CLI
-for var in "${ENV_VARS[@]}"; do
-  if [ -n "${!var}" ]; then
-    echo "📝 Setting $var..."
-    # First try to remove the variable if it exists
-    vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "$([ "$DEPLOY_TYPE" = "production" ] && echo "production" || echo "preview")" 2>/dev/null || true
-    sleep 1  # Give Vercel API time to process the removal
-    # Try to add the variable, if it fails, try to update it instead
-    if ! vercel env add "$var" "$([ "$DEPLOY_TYPE" = "production" ] && echo "production" || echo "preview")" --token "$VERCEL_TOKEN" <<< "${!var}"; then
-      echo "⚠️  Failed to add $var, trying to remove with different scope and add again..."
-      # Try removing from both scopes to ensure clean state
-      vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "production" 2>/dev/null || true
-      vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "preview" 2>/dev/null || true
-      sleep 2  # Give more time for API to process
-      # Try adding again
+  # Set environment variables using Vercel CLI
+  for var in "${ENV_VARS[@]}"; do
+    if [ -n "${!var}" ]; then
+      echo "📝 Setting $var..."
+      # First try to remove the variable if it exists
+      vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "$([ "$DEPLOY_TYPE" = "production" ] && echo "production" || echo "preview")" 2>/dev/null || true
+      sleep 1  # Give Vercel API time to process the removal
+      # Try to add the variable, if it fails, try to update it instead
       if ! vercel env add "$var" "$([ "$DEPLOY_TYPE" = "production" ] && echo "production" || echo "preview")" --token "$VERCEL_TOKEN" <<< "${!var}"; then
-        echo "⚠️  Warning: Failed to set $var environment variable after multiple attempts"
+        echo "⚠️  Failed to add $var, trying to remove with different scope and add again..."
+        # Try removing from both scopes to ensure clean state
+        vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "production" 2>/dev/null || true
+        vercel env rm "$var" --token "$VERCEL_TOKEN" --scope "preview" 2>/dev/null || true
+        sleep 2  # Give more time for API to process
+        # Try adding again
+        if ! vercel env add "$var" "$([ "$DEPLOY_TYPE" = "production" ] && echo "production" || echo "preview")" --token "$VERCEL_TOKEN" <<< "${!var}"; then
+          echo "⚠️  Warning: Failed to set $var environment variable after multiple attempts"
+        else
+          echo "✅ Successfully set $var environment variable (second attempt)"
+        fi
       else
-        echo "✅ Successfully set $var environment variable (second attempt)"
+        echo "✅ Successfully set $var environment variable"
       fi
     else
-      echo "✅ Successfully set $var environment variable"
+      echo "⚠️  Warning: $var is not set"
     fi
-  else
-    echo "⚠️  Warning: $var is not set"
-  fi
-done
+  done
+else
+  echo "⏭️  Skipping environment variable setup (will be set after project creation)"
+fi
 
 # Install dependencies and remove .git directory to optimize deployment
 echo "📦 Installing dependencies..."
@@ -96,9 +82,16 @@ rm -rf .next dist
 echo "✅ Build artifacts removed successfully"
 
 # Set up Vercel configuration for deployment
-export VERCEL_ORG_ID=$VERCEL_ORG_ID
+# Only export VERCEL_ORG_ID if we have VERCEL_PROJECT_ID
+# Otherwise, let Vercel CLI handle the project creation/linking
 if [ -n "$VERCEL_PROJECT_ID" ]; then
+  export VERCEL_ORG_ID=$VERCEL_ORG_ID
   export VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID
+  echo "🔑 Using existing VERCEL_ORG_ID and VERCEL_PROJECT_ID"
+else
+  # Unset VERCEL_ORG_ID to allow Vercel CLI to create/link project freely
+  unset VERCEL_ORG_ID
+  echo "🆕 No VERCEL_PROJECT_ID set, will create or link project automatically"
 fi
 
 # Now perform the deployment with optimized settings
@@ -124,3 +117,6 @@ else
   echo "❌ Invalid deployment type specified: $DEPLOY_TYPE. Must be 'preview' or 'production'."
   exit 1
 fi
+
+# Clean up temporary vercel.json if it exists
+rm -f vercel.json
