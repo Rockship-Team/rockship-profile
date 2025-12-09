@@ -2,6 +2,7 @@
 
 import { Clients } from "@/components/Clients";
 import { FadeIn } from "@/components/FadeIn";
+import { Testimonials } from "@/components/Testimonials";
 import { BuildAISection } from "../components/BuildAISection";
 import { Company } from "../components/Company";
 import { Footer } from "../components/Footer";
@@ -24,31 +25,7 @@ export default function Home() {
         <Research />
         <TechStack />
         <Company />
-
-        {/* Case Study Teaser / Quote */}
-        <section className="py-24 bg-gradient-to-b from-rockship-900 to-black text-center px-6">
-          <FadeIn className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-4xl font-display font-bold text-white mb-8">
-              "RockshipAI transformed our logistics operations, improving
-              routing efficiency by 35% in just three months."
-            </h2>
-            <div className="flex items-center justify-center gap-4">
-              <div className="w-12 h-12 bg-gray-700 rounded-full overflow-hidden">
-                <img
-                  src="https://picsum.photos/100/100?grayscale"
-                  alt="Director"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-left">
-                <div className="text-white font-bold">Sarah Chen</div>
-                <div className="text-gray-500 text-sm">
-                  CTO, Global Logistics Corp
-                </div>
-              </div>
-            </div>
-          </FadeIn>
-        </section>
+        <Testimonials />
 
         {/* Careers / CTA */}
         <section className="py-20 border-t border-white/5 relative overflow-hidden">

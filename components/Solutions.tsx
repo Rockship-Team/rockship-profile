@@ -224,7 +224,7 @@ export const Solutions: React.FC = () => {
             />
 
             {/* Security - Wide Card at Bottom */}
-            <SpotlightCard className="md:col-span-12 p-1 bg-gradient-to-r from-rockship-800 to-rockship-900/50 relative overflow-hidden">
+            <SpotlightCard className="md:col-span-8 p-1 bg-gradient-to-r from-rockship-800 to-rockship-900/50 relative overflow-hidden">
               <div className="absolute inset-0 bg-rockship-accent/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
               <div className="bg-rockship-950/90 rounded-[22px] p-8 md:p-10 h-full flex flex-col md:flex-row items-center gap-10 relative z-10">
                 <div className="flex-1 space-y-6">
