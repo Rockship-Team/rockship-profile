@@ -38,12 +38,12 @@ let chatSession: Chat | null = null;
 let genAI: GoogleGenAI | null = null;
 
 export const initGemini = (): boolean => {
-  if (!process.env.API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     console.warn("Gemini API Key missing.");
     return false;
   }
   try {
-    genAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     return true;
   } catch (e) {
     console.error("Failed to init Gemini", e);
@@ -52,7 +52,7 @@ export const initGemini = (): boolean => {
 };
 
 export const getChatResponse = async (userMessage: string): Promise<string> => {
-  if (!process.env.API_KEY || !genAI) {
+  if (!process.env.GEMINI_API_KEY || !genAI) {
     return "I'm currently offline (API Key missing). Please check back later.";
   }
 
