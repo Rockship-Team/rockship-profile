@@ -69,9 +69,11 @@ const TechCard = ({
             <div
               key={item}
               style={{ transitionDelay: `${idx * 30}ms` }}
-              className="px-3 py-1.5 rounded-md bg-white/5 border border-white/5 text-sm font-mono text-rockship-200 
-                         hover:text-white hover:bg-white/15 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 
-                         transition-all duration-200 cursor-default flex items-center gap-2 group/item"
+              className={cn(
+                "px-3 py-1.5 rounded-md bg-white/5 border border-white/5 text-sm font-mono text-rockship-200",
+                "hover:text-white hover:bg-white/15 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20",
+                "transition-all duration-200 cursor-default flex items-center gap-2 group/item"
+              )}
             >
               <span
                 className={cn(

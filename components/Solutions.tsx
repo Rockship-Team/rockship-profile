@@ -42,7 +42,7 @@ const SpotlightCard: React.FC<{
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-colors duration-300",
+        "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-rockship-accent/5",
         className
       )}
     >
@@ -67,36 +67,39 @@ const PlatformFeatureCard: React.FC<{
   className?: string;
   delay?: string;
 }> = ({ icon, title, desc, className, delay }) => (
-  <SpotlightCard className={cn("p-8 h-full flex flex-col", className)}>
-    {/* Inner decorative gradient - only visible on hover */}
-    <div className="absolute inset-0 bg-gradient-to-br from-rockship-accent/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 -z-10" />
+  <SpotlightCard className={cn("h-full flex flex-col", className)}>
+    {/* Inner decorative gradient - fills the whole card */}
+    <div className="absolute inset-0 bg-gradient-to-br from-rockship-accent/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
 
-    {/* Large Background Icon Faded */}
-    <div className="absolute -top-4 -right-4 text-white/[0.03] group-hover:text-white/[0.07] transition-all duration-500 group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+    {/* Large Background Icon Faded - fills the whole card area */}
+    <div className="absolute -top-4 -right-4 text-white/[0.03] group-hover:text-white/[0.08] transition-all duration-500 group-hover:scale-110 group-hover:rotate-12 pointer-events-none z-0">
       {React.cloneElement(icon as React.ReactElement<any>, {
         size: 160,
         strokeWidth: 0.5,
       })}
     </div>
 
-    {/* Header */}
-    <div className="mb-6 relative">
-      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:shadow-[0_0_20px_-5px_rgba(var(--color-rockship-accent),0.5)] transition-all duration-300">
-        <div className="text-rockship-200 group-hover:text-white transition-colors">
-          {icon}
+    {/* Content Container - Padded */}
+    <div className="p-8 flex flex-col h-full relative z-10">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:shadow-[0_0_20px_-5px_rgba(var(--color-rockship-accent),0.5)] transition-all duration-300">
+          <div className="text-rockship-200 group-hover:text-white transition-colors">
+            {icon}
+          </div>
         </div>
+
+        <h3 className="text-2xl font-bold font-display text-white mb-3 group-hover:text-rockship-100 transition-colors">
+          {title}
+        </h3>
       </div>
 
-      <h3 className="text-2xl font-bold font-display text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-rockship-200 transition-all">
-        {title}
-      </h3>
-    </div>
-
-    {/* Body */}
-    <div className="mt-auto relative">
-      <p className="text-rockship-300 leading-relaxed text-sm group-hover:text-rockship-200 transition-colors">
-        {desc}
-      </p>
+      {/* Body */}
+      <div className="mt-auto">
+        <p className="text-rockship-300 leading-relaxed text-sm group-hover:text-rockship-200 transition-colors">
+          {desc}
+        </p>
+      </div>
     </div>
   </SpotlightCard>
 );
@@ -136,7 +139,7 @@ export const Solutions: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 auto-rows-fr">
             {/* Core Engine - Large Card */}
             <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-8 bg-gradient-to-br from-white/5 to-transparent"
+              className="md:col-span-6 lg:col-span-8"
               icon={<Brain size={32} />}
               title="Rockship LLM Engine"
               desc="Our flagship inference engine. Fine-tune open weights or distill proprietary models on your private data clusters. Includes built-in RAG with vector store management."
@@ -220,7 +223,7 @@ export const Solutions: React.FC = () => {
             />
 
             {/* Security - Wide Card at Bottom */}
-            <SpotlightCard className="md:col-span-full border-rockship-accent/20 bg-rockship-900/40">
+            <SpotlightCard className="md:col-span-8 border-rockship-accent/20 bg-rockship-900/40">
               <div className="absolute inset-0 bg-gradient-to-r from-rockship-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="p-8 md:p-12 h-full flex flex-col md:flex-row items-center gap-12 relative z-10">
