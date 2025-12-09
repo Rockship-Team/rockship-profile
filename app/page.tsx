@@ -28,7 +28,7 @@ export default function Home() {
         <Testimonials />
 
         {/* Careers / CTA */}
-        <section className="py-20 border-t border-white/5 relative overflow-hidden">
+        <section className="py-24 md:py-32 border-t border-white/5 relative overflow-hidden">
           <div className="absolute inset-0 bg-rockship-accent/5 pointer-events-none"></div>
           <FadeIn className="container mx-auto px-6 text-center relative z-10">
             <h2 className="text-3xl font-display font-bold text-white mb-6">

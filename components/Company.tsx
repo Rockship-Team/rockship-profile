@@ -6,7 +6,7 @@ export const Company: React.FC = () => {
   return (
     <section
       id="company"
-      className="py-24 bg-rockship-950 relative overflow-hidden"
+      className="py-24 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
       {/* Decorative large text */}
       <div className="absolute -left-10 top-20 text-[20rem] font-bold text-white/[0.02] pointer-events-none select-none font-display">
@@ -68,7 +68,7 @@ export const Company: React.FC = () => {
                   <img
                     src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop"
                     className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
-                    alt="Team member"
+                    alt="Elena Ross - Chief Scientist at Rockship AI"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
                     <span className="text-white font-bold">Elena Ross</span>
@@ -78,7 +78,11 @@ export const Company: React.FC = () => {
                   </div>
                 </div>
                 <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition">
-                  <Globe className="text-rockship-accent mb-4" size={32} />
+                  <Globe
+                    className="text-rockship-accent mb-4"
+                    size={32}
+                    aria-hidden="true"
+                  />
                   <span className="text-white font-bold text-sm">
                     San Francisco HQ
                   </span>
@@ -89,7 +93,11 @@ export const Company: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition">
-                  <Users className="text-purple-400 mb-4" size={32} />
+                  <Users
+                    className="text-purple-400 mb-4"
+                    size={32}
+                    aria-hidden="true"
+                  />
                   <span className="text-white font-bold text-sm">
                     Open Positions
                   </span>
@@ -101,7 +109,7 @@ export const Company: React.FC = () => {
                   <img
                     src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop"
                     className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
-                    alt="Team member"
+                    alt="David Chen - CEO & Founder of Rockship AI"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
                     <span className="text-white font-bold">David Chen</span>

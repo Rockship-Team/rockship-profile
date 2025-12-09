@@ -65,15 +65,15 @@ export function Testimonials() {
     testimonials.find((t) => t.id === activeId) || testimonials[0];
 
   return (
-    <section className="py-24 bg-black text-center px-6 border-t border-white/10">
+    <section className="py-24 md:py-32 bg-rockship-950 text-center px-6 border-t border-white/10 relative overflow-hidden">
       <FadeIn className="max-w-6xl mx-auto">
-        <h2 className="text-xs md:text-sm font-semibold tracking-widest text-gray-400 uppercase mb-8">
+        <h2 className="text-rockship-accent font-semibold tracking-widest uppercase text-sm mb-4">
           Customers
         </h2>
-        <h3 className="text-3xl md:text-5xl font-display font-medium text-white mb-4">
+        <h3 className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400">
           We have changed the game of AI data
         </h3>
-        <p className="text-gray-400 max-w-2xl mx-auto mb-16 text-lg">
+        <p className="text-lg text-rockship-300 leading-relaxed pb-16">
           Hear it from the experts building the future.
         </p>
 

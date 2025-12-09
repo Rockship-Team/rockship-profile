@@ -43,7 +43,7 @@ const ResearchCard: React.FC<{
 
 export const Research: React.FC = () => {
   return (
-    <section id="research" className="py-24 bg-rockship-950 relative">
+    <section id="research" className="py-24 md:py-32 bg-rockship-950 relative">
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
 
       <div className="container mx-auto px-6 relative z-10">

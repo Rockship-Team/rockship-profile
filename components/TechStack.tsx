@@ -126,7 +126,9 @@ export const TechStack: React.FC = () => {
             </h2>
             <h3 className="text-4xl md:text-5xl font-display font-medium text-white mb-6">
               Built on{" "}
-              <span className="text-rockship-400">Giant Shoulders</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rockship-accent to-purple-400">
+                Giant Shoulders
+              </span>
             </h3>
             <p className="text-lg text-rockship-300">
               We leverage an ecosystem of battle-tested open source frameworks

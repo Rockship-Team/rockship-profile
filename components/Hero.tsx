@@ -48,15 +48,22 @@ export const Hero: React.FC = () => {
               delay={300}
               className="flex flex-col sm:flex-row gap-4 mb-12"
             >
-              <button className="relative px-8 py-4 bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white rounded-lg font-bold hover:brightness-110 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] border border-white/20 overflow-hidden group">
+              <button
+                className="relative px-8 py-4 bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white rounded-lg font-bold hover:brightness-110 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] border border-white/20 overflow-hidden group"
+                aria-label="Explore Rockship AI Platform"
+              >
                 <span className="relative z-10 flex items-center gap-2">
-                  Explore Platform <ArrowRight size={20} />
+                  Explore Platform <ArrowRight size={20} aria-hidden="true" />
                 </span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
 
-              <button className="px-8 py-4 bg-rockship-900/50 backdrop-blur-sm border border-white/20 text-white rounded-lg font-bold hover:bg-white/10 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center">
-                <Play size={20} className="fill-current" /> Watch Showreel
+              <button
+                className="px-8 py-4 bg-rockship-900/50 backdrop-blur-sm border border-white/20 text-white rounded-lg font-bold hover:bg-white/10 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center"
+                aria-label="Watch Rockship AI Showreel"
+              >
+                <Play size={20} className="fill-current" aria-hidden="true" />{" "}
+                Watch Showreel
               </button>
             </FadeIn>
 
