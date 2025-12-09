@@ -1,9 +1,13 @@
 import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -75,7 +79,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn(inter.className, "bg-rockship-950 text-white")}
+        className={cn(
+          dmSans.className,
+          dmSans.variable,
+          "bg-rockship-950 text-white"
+        )}
         suppressHydrationWarning={true}
       >
         {children}
