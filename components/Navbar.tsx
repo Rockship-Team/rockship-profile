@@ -15,10 +15,11 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: "Home", href: "#home" },
-    { label: "Solutions", href: "#platform" },
-    { label: "Case Studies", href: "#case-studies" },
+    { label: "What We Build", href: "#platform" },
+    { label: "How It Works", href: "#solutions" },
     { label: "Technology", href: "#tech-stack" },
-    { label: "Research", href: "#research" },
+    { label: "Case Studies", href: "#case-studies" },
+    { label: "Resources", href: "#research" },
     { label: "About", href: "#company" },
   ];
 

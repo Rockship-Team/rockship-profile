@@ -10,6 +10,7 @@ import { Footer } from "../components/Footer";
 import { GeminiAssistant } from "../components/GeminiAssistant";
 import { Hero } from "../components/Hero";
 import { Navbar } from "../components/Navbar";
+import { Platform } from "../components/Platform";
 import { Research } from "../components/Research";
 import { Solutions } from "../components/Solutions";
 import { TechStack } from "../components/TechStack";
@@ -21,6 +22,7 @@ export default function Home() {
       <main>
         <Hero />
         <Clients />
+        <Platform />
         <Solutions />
         <BuildAISection />
         <CaseStudies />

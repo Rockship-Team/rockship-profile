@@ -107,7 +107,7 @@ const PlatformFeatureCard: React.FC<{
 export const Solutions: React.FC = () => {
   return (
     <section
-      id="platform"
+      id="solutions"
       className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
       {/* Background Atmosphere */}
@@ -120,17 +120,17 @@ export const Solutions: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
             <Zap className="text-rockship-accent w-4 h-4" />
             <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
-              The Rockship Platform
+              How It Work
             </span>
           </div>
           <h3 className="text-4xl md:text-5xl font-display font-medium mb-6 leading-tight">
-            Everything you need to <br />
-            <span className="gradient-text">rockship intelligence</span>
+            AI Systems Built for <br />
+            <span className="gradient-text">Real Business Operations</span>
           </h3>
           <p className="text-lg text-rockship-300 leading-relaxed max-w-2xl mx-auto">
-            A unified infrastructure designed for the next generation of
-            AI-native enterprises. From data ingestion to deployment, we have
-            you covered.
+            We design and deploy <b>end-to-end AI systems</b> tailored to your business
+            — from intelligent agents and automation to enterprise integration
+            and governance.
           </p>
         </FadeIn>
 
@@ -141,24 +141,24 @@ export const Solutions: React.FC = () => {
             <PlatformFeatureCard
               className="md:col-span-6 lg:col-span-8"
               icon={<Brain size={32} />}
-              title="Rockship LLM Engine"
-              desc="Our flagship inference engine. Fine-tune open weights or distill proprietary models on your private data clusters. Includes built-in RAG with vector store management."
+              title="Custom LLM & AI Agent Deployment"
+              desc="Design and deploy custom LLM-powered agents, RAG systems, and enterprise AI workflows — optimized for your data, security, and operations."
             />
 
             {/* Vision - Standard Card */}
             <PlatformFeatureCard
               className="md:col-span-6 lg:col-span-4"
               icon={<Eye size={32} />}
-              title="Computer Vision"
-              desc="Real-time object detection and anomaly recognition pipeline. Process video streams at the edge with <100ms latency."
+              title="Computer Vision & Document AI Systems"
+              desc="Implement computer vision solutions for document processing, inspection, and anomaly detection — integrated directly into enterprise workflows."
             />
 
             {/* Orchestrator */}
             <PlatformFeatureCard
               className="md:col-span-6 lg:col-span-4"
               icon={<GitBranch size={32} />}
-              title="ML Orchestrator"
-              desc="End-to-end pipeline management. Version control for data, models, and experiments in a single dashboard."
+              title="AI Workflow Orchestration & Automation"
+              desc="Orchestrate AI agents, models, and business logic into end-to-end automated workflows across sales, operations, and internal systems."
             />
 
             {/* Enterprise - Large Card */}
@@ -173,7 +173,7 @@ export const Solutions: React.FC = () => {
                   <div className="p-2 rounded-lg bg-rockship-accent/20 text-rockship-accent">
                     <Server size={24} />
                   </div>
-                  Enterprise Ready
+                  Enterprise-Grade Deployment & Integration
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
@@ -218,8 +218,8 @@ export const Solutions: React.FC = () => {
             <PlatformFeatureCard
               className="md:col-span-6 lg:col-span-4"
               icon={<Mic size={32} />}
-              title="Voice & Multimodal"
-              desc="Conversational AI agents with <500ms voice-to-voice latency. Sentiment analysis and speaker diarization included."
+              title="Conversational & Multimodal AI Solutions"
+              desc="Deploy voice, chat, and multimodal AI assistants for customer support, internal operations, and decision support."
             />
 
             {/* Security - Wide Card at Bottom */}

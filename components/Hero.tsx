@@ -23,24 +23,18 @@ export const Hero: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Text Content - Enable pointer events for buttons/text */}
           <div className="text-left pointer-events-auto">
-            <FadeIn className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rockship-900/80 border border-white/10 text-rockship-accent text-xs font-semibold tracking-wide uppercase mb-8 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-rockship-accent animate-pulse"></span>
-              Rockship GenAI Engine v2.5 Live
-            </FadeIn>
-
             <FadeIn delay={100}>
               <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-2xl">
-                Rockship Intelligence <br />
-                <span className="gradient-text">For The Enterprise</span>
+                From AI Strategy <br />
+                <span className="gradient-text">To AI Operations</span>
               </h1>
             </FadeIn>
 
             <FadeIn delay={200}>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl mb-10 leading-relaxed drop-shadow-md">
-                We build the cognitive infrastructure for the next generation of
-                business. From custom LLMs to computer vision pipelines,
-                RockshipAI delivers secure, compliant, and rockship AI
-                solutions.
+                We help enterprises <b>design</b>, <b>build</b>, and <b>deploy AI-driven systems</b>
+                that automate workflows, integrate with existing operations, and
+                deliver measurable business impact.
               </p>
             </FadeIn>
 
@@ -53,7 +47,7 @@ export const Hero: React.FC = () => {
                 aria-label="Explore Rockship AI Platform"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  Explore Platform <ArrowRight size={20} aria-hidden="true" />
+                  Book AI Consultation <ArrowRight size={20} aria-hidden="true" />
                 </span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>

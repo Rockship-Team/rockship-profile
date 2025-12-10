@@ -71,10 +71,10 @@ export function Clients() {
 
       <FadeIn className="container text-center relative z-10 px-4">
         <h2 className="text-sm md:text-base font-semibold tracking-[0.2em] uppercase text-rockship-accent mb-3">
-          Trusted Ecosystem
+          TRUSTED BY ENTERPRISE TEAMS
         </h2>
         <p className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400">
-          Powering the world's most innovative teams
+          Trusted by Enterprises to Deploy AI into Real Operations
         </p>
       </FadeIn>
 
