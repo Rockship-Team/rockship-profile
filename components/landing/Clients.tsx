@@ -1,4 +1,4 @@
-import { companyData } from "@/lib/company-data";
+import { companyData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
   Activity,
@@ -14,7 +14,7 @@ import {
   Triangle,
   Zap,
 } from "lucide-react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 
 // Map client names to icons for a more polished look
 const iconMap: Record<string, LucideIcon> = {

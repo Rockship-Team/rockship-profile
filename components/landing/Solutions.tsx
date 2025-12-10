@@ -1,3 +1,4 @@
+import { solutionsData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
   Brain,
@@ -5,13 +6,22 @@ import {
   GitBranch,
   LayoutTemplate,
   Lock,
+  LucideIcon,
   Mic,
   Server,
   ShieldCheck,
   Zap,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
+
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  Brain,
+  Eye,
+  GitBranch,
+  Mic,
+};
 
 const SpotlightCard: React.FC<{
   children: React.ReactNode;
@@ -128,38 +138,33 @@ export const Solutions: React.FC = () => {
             <span className="gradient-text">Real Business Operations</span>
           </h3>
           <p className="text-lg text-rockship-300 leading-relaxed max-w-2xl mx-auto">
-            We design and deploy <b>end-to-end AI systems</b> tailored to your business
-            — from intelligent agents and automation to enterprise integration
-            and governance.
+            We design and deploy <b>end-to-end AI systems</b> tailored to your
+            business — from intelligent agents and automation to enterprise
+            integration and governance.
           </p>
         </FadeIn>
 
         {/* Bento Grid */}
         <FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 md:auto-rows-fr">
-            {/* Core Engine - Large Card */}
-            <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-8"
-              icon={<Brain size={32} />}
-              title="Custom LLM & AI Agent Deployment"
-              desc="Design and deploy custom LLM-powered agents, RAG systems, and enterprise AI workflows — optimized for your data, security, and operations."
-            />
+            {/* Solution Cards */}
+            {solutionsData.solutions.map((solution, index) => {
+              const Icon = iconMap[solution.icon] || Brain;
+              const cardClass =
+                solution.size === "large"
+                  ? "md:col-span-4 lg:col-span-4"
+                  : "md:col-span-6 lg:col-span-4";
 
-            {/* Vision - Standard Card */}
-            <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-4"
-              icon={<Eye size={32} />}
-              title="Computer Vision & Document AI Systems"
-              desc="Implement computer vision solutions for document processing, inspection, and anomaly detection — integrated directly into enterprise workflows."
-            />
-
-            {/* Orchestrator */}
-            <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-4"
-              icon={<GitBranch size={32} />}
-              title="AI Workflow Orchestration & Automation"
-              desc="Orchestrate AI agents, models, and business logic into end-to-end automated workflows across sales, operations, and internal systems."
-            />
+              return (
+                <PlatformFeatureCard
+                  key={index}
+                  className={cardClass}
+                  icon={<Icon size={32} />}
+                  title={solution.title}
+                  desc={solution.desc}
+                />
+              );
+            })}
 
             {/* Enterprise - Large Card */}
             <SpotlightCard className="md:col-span-6 lg:col-span-8 p-6 md:p-10 relative overflow-hidden group">
@@ -177,24 +182,7 @@ export const Solutions: React.FC = () => {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
-                  {[
-                    {
-                      title: "Hybrid Deployment",
-                      desc: "On-prem, Cloud, or Air-gapped.",
-                    },
-                    {
-                      title: "SSO & RBAC",
-                      desc: "Granular access control policies.",
-                    },
-                    {
-                      title: "Legacy Integration",
-                      desc: "Connectors for SAP, Salesforce, & Oracle.",
-                    },
-                    {
-                      title: "24/7 Support",
-                      desc: "Dedicated engineering response teams.",
-                    },
-                  ].map((feature, i) => (
+                  {solutionsData.enterpriseFeatures.map((feature, i) => (
                     <div
                       key={i}
                       className="flex gap-4 items-start p-3 md:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-200 group/feature"
@@ -213,14 +201,6 @@ export const Solutions: React.FC = () => {
                 </div>
               </div>
             </SpotlightCard>
-
-            {/* Voice - Standard Card */}
-            <PlatformFeatureCard
-              className="md:col-span-6 lg:col-span-4"
-              icon={<Mic size={32} />}
-              title="Conversational & Multimodal AI Solutions"
-              desc="Deploy voice, chat, and multimodal AI assistants for customer support, internal operations, and decision support."
-            />
 
             {/* Security - Wide Card at Bottom */}
             <SpotlightCard className="md:col-span-8 border-rockship-accent/20 bg-rockship-900/40">
@@ -242,16 +222,14 @@ export const Solutions: React.FC = () => {
                   </p>
 
                   <div className="flex flex-wrap gap-2 pt-2">
-                    {["ISO 27001", "SOC2", "HIPAA", "GDPR", "FedRAMP High"].map(
-                      (badge) => (
-                        <span
-                          key={badge}
-                          className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-rockship-200 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all cursor-default"
-                        >
-                          {badge}
-                        </span>
-                      )
-                    )}
+                    {solutionsData.complianceBadges.map((badge) => (
+                      <span
+                        key={badge}
+                        className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-rockship-200 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all cursor-default"
+                      >
+                        {badge}
+                      </span>
+                    ))}
                   </div>
                 </div>
 

@@ -1,14 +1,26 @@
+import { platformData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
   Cpu,
   Database,
   Globe,
   Layers,
+  LucideIcon,
   Rocket,
   Settings,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
+
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  Cpu,
+  Database,
+  Globe,
+  Layers,
+  Rocket,
+  Settings,
+};
 
 const PlatformCard: React.FC<{
   icon: React.ReactNode;
@@ -55,57 +67,37 @@ export const Platform: React.FC = () => {
             Built for <span className="gradient-text">Scale</span>
           </h2>
           <p className="text-xl text-rockship-300 max-w-2xl mx-auto">
-            Our platform handles everything from data ingestion to model deployment,
-            so you can focus on building intelligent solutions.
+            Our platform handles everything from data ingestion to model
+            deployment, so you can focus on building intelligent solutions.
           </p>
         </FadeIn>
 
         <FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <PlatformCard
-              icon={<Cpu size={28} />}
-              title="High Performance Computing"
-              desc="Leverage GPU clusters and distributed computing for faster model training and inference."
-            />
-
-            <PlatformCard
-              icon={<Database size={28} />}
-              title="Data Management"
-              desc="Unified data lake with automated pipelines for preprocessing, versioning, and governance."
-            />
-
-            <PlatformCard
-              icon={<Globe size={28} />}
-              title="Global Deployment"
-              desc="Deploy models across multiple regions with built-in CDN and edge computing capabilities."
-            />
-
-            <PlatformCard
-              icon={<Layers size={28} />}
-              title="Model Registry"
-              desc="Centralized repository for model versioning, metadata tracking, and lifecycle management."
-            />
-
-            <PlatformCard
-              icon={<Settings size={28} />}
-              title="AutoML & Tuning"
-              desc="Automated hyperparameter optimization and neural architecture search for optimal performance."
-            />
-
-            <PlatformCard
-              icon={<Rocket size={28} />}
-              title="Real-time APIs"
-              desc="Scalable REST and GraphQL APIs with sub-second latency and built-in rate limiting."
-            />
+            {platformData.features.map((feature, index) => {
+              const Icon = iconMap[feature.icon] || Cpu;
+              return (
+                <PlatformCard
+                  key={index}
+                  icon={<Icon size={28} />}
+                  title={feature.title}
+                  desc={feature.desc}
+                />
+              );
+            })}
           </div>
         </FadeIn>
 
         <FadeIn className="mt-20">
           <div className="text-center">
             <div className="inline-flex flex-col items-center p-8 rounded-3xl bg-gradient-to-br from-rockship-accent/10 to-transparent border border-white/10 backdrop-blur-sm">
-              <div className="text-5xl font-bold gradient-text mb-2">99.9%</div>
+              <div className="text-5xl font-bold gradient-text mb-2">
+                {platformData.uptimeSLA}
+              </div>
               <div className="text-rockship-300 font-medium">Uptime SLA</div>
-              <div className="text-sm text-rockship-400 mt-1">Enterprise-grade reliability</div>
+              <div className="text-sm text-rockship-400 mt-1">
+                Enterprise-grade reliability
+              </div>
             </div>
           </div>
         </FadeIn>

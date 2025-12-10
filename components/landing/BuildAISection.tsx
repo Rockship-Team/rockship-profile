@@ -1,7 +1,8 @@
+import { buildAIData } from "@/lib/data";
 import { cn } from "@/lib/utils"; // Assuming cn utility is available
 import { ArrowRight } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 
 export const BuildAISection: React.FC = () => {
   /*
@@ -22,21 +23,7 @@ export const BuildAISection: React.FC = () => {
     "user" | "ai" | "thinking" | "idle"
   >("idle");
 
-  const script = React.useMemo(
-    () => [
-      { role: "user", text: "Why is human feedback essential for LLMs?" },
-      {
-        role: "ai",
-        text: "RLHF (Reinforcement Learning from Human Feedback) aligns models with human intent, ensuring they are helpful, harmless, and honest.",
-      },
-      { role: "user", text: "How does Rockship help with this?" },
-      {
-        role: "ai",
-        text: "We provide enterprise-grade data generation and expert human feedback loops to fine-tune your models effectively.",
-      },
-    ],
-    []
-  );
+  const script = React.useMemo(() => buildAIData.script, []);
 
   React.useEffect(() => {
     let isMounted = true;

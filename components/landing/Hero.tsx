@@ -1,6 +1,7 @@
+import { heroData } from "@/lib/data";
 import { ArrowRight, Play } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 import { Hero3D } from "./Hero3D";
 
 export const Hero: React.FC = () => {
@@ -32,7 +33,8 @@ export const Hero: React.FC = () => {
 
             <FadeIn delay={200}>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl mb-10 leading-relaxed drop-shadow-md">
-                We help enterprises <b>design</b>, <b>build</b>, and <b>deploy AI-driven systems</b>
+                We help enterprises <b>design</b>, <b>build</b>, and{" "}
+                <b>deploy AI-driven systems</b>
                 that automate workflows, integrate with existing operations, and
                 deliver measurable business impact.
               </p>
@@ -47,7 +49,8 @@ export const Hero: React.FC = () => {
                 aria-label="Explore Rockship AI Platform"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  Book AI Consultation <ArrowRight size={20} aria-hidden="true" />
+                  Book AI Consultation{" "}
+                  <ArrowRight size={20} aria-hidden="true" />
                 </span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
@@ -62,17 +65,11 @@ export const Hero: React.FC = () => {
             </FadeIn>
 
             {/* Stats Strip */}
-            {/* Stats Strip */}
             <FadeIn
               delay={400}
               className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8"
             >
-              {[
-                { label: "Enterprises", val: "150+" },
-                { label: "Data Points", val: "500M+" },
-                { label: "Accuracy", val: "40%+" },
-                { label: "Uptime", val: "99.9%" },
-              ].map((stat, i) => (
+              {heroData.stats.map((stat, i) => (
                 <div key={i} className="flex flex-col text-left">
                   <span className="text-2xl font-display font-bold text-white">
                     {stat.val}

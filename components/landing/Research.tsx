@@ -1,3 +1,4 @@
+import { researchData } from "@/lib/data";
 import {
   ArrowRight,
   BookOpen,
@@ -7,7 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 
 const ResearchCard: React.FC<{
   icon: React.ReactNode;
@@ -100,27 +101,24 @@ export const Research: React.FC = () => {
         </FadeIn>
 
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          <ResearchCard
-            delay={0.1}
-            icon={<Network size={24} />}
-            category="Architecture"
-            title="Liquid Neural Networks"
-            description="A new class of adaptive neural networks that can change their underlying structure during inference, reducing compute by 60%."
-          />
-          <ResearchCard
-            delay={0.2}
-            icon={<Microscope size={24} />}
-            category="Healthcare"
-            title="Protein Folding at Scale"
-            description="Using diffusion models to predict protein structure variations in real-time for rapid drug discovery pipelines."
-          />
-          <ResearchCard
-            delay={0.3}
-            icon={<GraduationCap size={24} />}
-            category="Alignment"
-            title="Constitutional AI Safety"
-            description="Frameworks for self-supervising AI models to ensure adherence to human values without massive human labeling."
-          />
+          {researchData.map((item, index) => {
+            const iconMap: Record<string, React.ReactNode> = {
+              Network: <Network size={24} />,
+              Microscope: <Microscope size={24} />,
+              GraduationCap: <GraduationCap size={24} />,
+            };
+
+            return (
+              <ResearchCard
+                key={index}
+                delay={0.1 * (index + 1)}
+                icon={iconMap[item.icon as string] || <Network size={24} />}
+                category={item.category}
+                title={item.title}
+                description={item.description}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

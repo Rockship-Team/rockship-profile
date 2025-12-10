@@ -1,6 +1,7 @@
+import { companyData } from "@/lib/data";
 import { ArrowUpRight, Globe, Users } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 
 export const Company: React.FC = () => {
   return (
@@ -34,22 +35,14 @@ export const Company: React.FC = () => {
             </p>
 
             <div className="grid grid-cols-2 gap-8 mb-10">
-              <div>
-                <h4 className="text-3xl font-bold text-white mb-1">150+</h4>
-                <p className="text-gray-500 text-sm">Enterprise Clients</p>
-              </div>
-              <div>
-                <h4 className="text-3xl font-bold text-white mb-1">40+</h4>
-                <p className="text-gray-500 text-sm">PhD Researchers</p>
-              </div>
-              <div>
-                <h4 className="text-3xl font-bold text-white mb-1">$50M</h4>
-                <p className="text-gray-500 text-sm">Series A Funding</p>
-              </div>
-              <div>
-                <h4 className="text-3xl font-bold text-white mb-1">3</h4>
-                <p className="text-gray-500 text-sm">Global Offices</p>
-              </div>
+              {companyData.companyStats.map((stat, index) => (
+                <div key={index}>
+                  <h4 className="text-3xl font-bold text-white mb-1">
+                    {stat.value}
+                  </h4>
+                  <p className="text-gray-500 text-sm">{stat.label}</p>
+                </div>
+              ))}
             </div>
 
             <button className="group flex items-center gap-3 text-white font-bold hover:text-rockship-accent transition-colors">
@@ -64,19 +57,23 @@ export const Company: React.FC = () => {
           <FadeIn className="relative" delay={200}>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4 translate-y-8">
+                {/* First team member */}
                 <div className="aspect-[4/5] bg-gray-800 rounded-2xl overflow-hidden relative group">
                   <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop"
+                    src={companyData.teamMembers[0].image}
                     className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
-                    alt="Elena Ross - Chief Scientist at Rockship AI"
+                    alt={`${companyData.teamMembers[0].name} - ${companyData.teamMembers[0].role} at Rockship AI`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
-                    <span className="text-white font-bold">Elena Ross</span>
+                    <span className="text-white font-bold">
+                      {companyData.teamMembers[0].name}
+                    </span>
                     <span className="text-xs text-gray-400">
-                      Chief Scientist
+                      {companyData.teamMembers[0].role}
                     </span>
                   </div>
                 </div>
+                {/* Office */}
                 <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition">
                   <Globe
                     className="text-rockship-accent mb-4"
@@ -84,10 +81,10 @@ export const Company: React.FC = () => {
                     aria-hidden="true"
                   />
                   <span className="text-white font-bold text-sm">
-                    San Francisco HQ
+                    {companyData.offices[0].city}
                   </span>
                   <span className="text-gray-500 text-xs mt-1">
-                    Foundry St.
+                    {companyData.offices[0].street}
                   </span>
                 </div>
               </div>
@@ -105,15 +102,20 @@ export const Company: React.FC = () => {
                     We are hiring
                   </span>
                 </div>
+                {/* Second team member */}
                 <div className="aspect-[4/5] bg-gray-800 rounded-2xl overflow-hidden relative group">
                   <img
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop"
+                    src={companyData.teamMembers[1].image}
                     className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
-                    alt="David Chen - CEO & Founder of Rockship AI"
+                    alt={`${companyData.teamMembers[1].name} - ${companyData.teamMembers[1].role} of Rockship AI`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
-                    <span className="text-white font-bold">David Chen</span>
-                    <span className="text-xs text-gray-400">CEO & Founder</span>
+                    <span className="text-white font-bold">
+                      {companyData.teamMembers[1].name}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {companyData.teamMembers[1].role}
+                    </span>
                   </div>
                 </div>
               </div>

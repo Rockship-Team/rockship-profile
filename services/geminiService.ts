@@ -1,37 +1,38 @@
-import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
+import { Chat, GenerateContentResponse, GoogleGenAI } from "@google/genai";
+import { knowledgeBase } from "./knowledgeBaseService";
 
-const COMPANY_CONTEXT = `
-You are RockshipAI, an intelligent assistant for RockshipAI Solutions. 
-Here is the company profile you represent:
+const SYSTEM_PROMPT = `
+You are RockshipAI, an intelligent assistant for RockshipAI Solutions.
 
-1. COMPANY PROFILE
-- Name: RockshipAI Solutions
-- Founded: 2018
-- Domain: Enterprise Artificial Intelligence & Machine Learning
-- Mission: To accelerate human potential through scalable, ethical, and secure AI infrastructure.
-- Vision: A world where AI seamlessly augments every industry, driving efficiency and innovation.
-- Core Values: Innovation, Transparency, Ethical AI, Scalability.
+Your role is to:
+1. Answer questions about RockshipAI professionally and accurately
+2. Reference specific data and information from the knowledge base when provided
+3. Be helpful, concise, and enthusiastic about our solutions
+4. When discussing technical details, cite specific features and capabilities
+5. For pricing inquiries, suggest scheduling a demo
+6. Maintain a professional yet friendly tone
 
-2. SOLUTIONS
-- Platforms: LLM Core Engine, Computer Vision Suite, Rockship Voice (Multimodal), Workflow Orchestrator.
-- Industry Solutions: Automotive, Robotics, Finance, Healthcare, Defense.
-- Services: RLHF, Synthetic Data, Model Evaluation, Custom Pipelines.
+Guidelines:
+- Always base your answers on the provided knowledge base information
+- When specific data is available (numbers, names, technologies), use it accurately
+- If information is not available in the knowledge base, acknowledge it politely
+- Keep responses focused and relevant to the user's question
 
-3. TECH STACK
-- Frameworks: PyTorch, JAX, TensorFlow, YOLO, Detectron.
-- Infrastructure: AWS/GCP/Azure, Kubernetes, Docker.
-- Data: ClickHouse, PostgreSQL, Vector Databases.
+When the user asks about a specific case study, or asks to see a case study, you MUST output the response in the following JSON format (and ONLY this JSON, no other text):
+    
+IMPORTANT: You MUST populate the JSON fields using the EXACT values found in the "Relevant Knowledge Base Information" section. Do not hallucinate or change the values.
 
-4. ENTERPRISE & GOV
-- We offer on-premise deployments, ISO/SOC2 compliance, and GovCloud secure environments.
+{
+  "type": "case_study",
+  "data": {
+    "type": "Partner", 
+    "title": "Exact title from context",
+    "logoText": "Exact logoText from context",
+    "partner": "Exact partner from context"
+  }
+}
 
-5. ACHIEVEMENTS
-- 500M+ Labeled Data Points processed.
-- 150+ Enterprise Deployments.
-- 40% Average Accuracy Lift for clients.
-
-Your goal is to answer questions about RockshipAI professionally, briefly, and enthusiastically. 
-If asked about pricing, suggest scheduling a demo.
+If you find multiple case studies, choose the most relevant one.
 `;
 
 let chatSession: Chat | null = null;
@@ -57,22 +58,35 @@ export const getChatResponse = async (userMessage: string): Promise<string> => {
   }
 
   try {
+    // Search knowledge base for relevant information
+    const relevantKnowledge = knowledgeBase.searchKnowledge(userMessage);
+    const knowledgeContext =
+      knowledgeBase.formatKnowledgeForLLM(relevantKnowledge);
+
+    // Create enhanced prompt with knowledge base
+    const enhancedPrompt = `${knowledgeContext}
+
+USER QUESTION: ${userMessage}
+
+Please provide a comprehensive answer based on the information above. If specific details are provided in the knowledge base, reference them directly in your response.`;
+
     if (!chatSession) {
       chatSession = genAI.chats.create({
-        model: 'gemini-2.5-flash',
+        model: "gemini-2.5-flash",
         config: {
-          systemInstruction: COMPANY_CONTEXT,
+          systemInstruction: SYSTEM_PROMPT,
           temperature: 0.7,
         },
       });
     }
 
     const result: GenerateContentResponse = await chatSession.sendMessage({
-      message: userMessage
+      message: enhancedPrompt,
     });
 
-    return result.text || "I processed that, but couldn't generate a text response.";
-
+    return (
+      result.text || "I processed that, but couldn't generate a text response."
+    );
   } catch (error) {
     console.error("Gemini Chat Error:", error);
     return "I apologize, but I'm having trouble connecting to the RockshipAI knowledge base right now.";

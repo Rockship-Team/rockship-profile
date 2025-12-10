@@ -1,19 +1,19 @@
 "use client";
 
-import { Clients } from "@/components/Clients";
-import { Testimonials } from "@/components/Testimonials";
-import { BuildAISection } from "../components/BuildAISection";
-import CareerCTA from "../components/CareerCTA";
-import { CaseStudies } from "../components/CaseStudies";
-import { Company } from "../components/Company";
+import { Clients } from "@/components/landing/Clients";
+import { Testimonials } from "@/components/landing/Testimonials";
 import { Footer } from "../components/Footer";
 import { GeminiAssistant } from "../components/GeminiAssistant";
-import { Hero } from "../components/Hero";
+import { BuildAISection } from "../components/landing/BuildAISection";
+import CareerCTA from "../components/landing/CareerCTA";
+import { CaseStudies } from "../components/landing/CaseStudies";
+import { Company } from "../components/landing/Company";
+import { Hero } from "../components/landing/Hero";
+import { Platform } from "../components/landing/Platform";
+import { Research } from "../components/landing/Research";
+import { Solutions } from "../components/landing/Solutions";
+import { TechStack } from "../components/landing/TechStack";
 import { Navbar } from "../components/Navbar";
-import { Platform } from "../components/Platform";
-import { Research } from "../components/Research";
-import { Solutions } from "../components/Solutions";
-import { TechStack } from "../components/TechStack";
 
 export default function Home() {
   return (
@@ -24,10 +24,10 @@ export default function Home() {
         <Clients />
         <Platform />
         <Solutions />
-        <BuildAISection />
+        <TechStack />
         <CaseStudies />
         <Research />
-        <TechStack />
+        <BuildAISection />
         <Company />
         <Testimonials />
         <CareerCTA />

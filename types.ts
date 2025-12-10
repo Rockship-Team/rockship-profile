@@ -18,8 +18,8 @@ export interface TechItem {
 }
 
 export enum ChatRole {
-  USER = 'user',
-  MODEL = 'model',
+  USER = "user",
+  MODEL = "model",
 }
 
 export interface ChatMessage {

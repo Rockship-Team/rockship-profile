@@ -1,7 +1,8 @@
+import { techStackData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Cloud, Cpu, Database, Layers, Layout, Smartphone } from "lucide-react";
 import React from "react";
-import { FadeIn } from "./FadeIn";
+import { FadeIn } from "../FadeIn";
 
 const TechCard = ({
   title,
@@ -91,56 +92,6 @@ const TechCard = ({
 };
 
 export const TechStack: React.FC = () => {
-  const stack = {
-    frameworks: [
-      "PyTorch",
-      "TensorFlow",
-      "JAX",
-      "LangChain",
-      "YOLO v8",
-      "HuggingFace",
-      "vLLM",
-      "LlamaIndex",
-    ],
-    backend: [
-      "FastAPI",
-      "gRPC",
-      "Next.js",
-      "PostgreSQL",
-      "ClickHouse",
-      "Redis",
-      "Qdrant",
-      "ElasticSearch",
-    ],
-    ops: [
-      "Kubernetes",
-      "Docker",
-      "Terraform",
-      "Prometheus",
-      "Grafana",
-      "AWS SageMaker",
-      "MLFlow",
-      "Argocd",
-    ],
-    frontend: [
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "Three.js",
-      "Framer Motion",
-      "Vite",
-      "Zustand",
-    ],
-    mobile: [
-      "React Native",
-      "Expo",
-      "SwiftUI",
-      "Kotlin",
-      "Flutter",
-      "Capacitor",
-    ],
-  };
-
   return (
     <section
       id="tech-stack"
@@ -175,7 +126,7 @@ export const TechStack: React.FC = () => {
             <TechCard
               title="Models & AI"
               icon={Cpu}
-              items={stack.frameworks}
+              items={techStackData.frameworks}
               colorClass="from-indigo-500 to-purple-500"
             />
           </FadeIn>
@@ -184,7 +135,7 @@ export const TechStack: React.FC = () => {
             <TechCard
               title="Data & Backend"
               icon={Database}
-              items={stack.backend}
+              items={techStackData.backend}
               colorClass="from-blue-500 to-cyan-500"
             />
           </FadeIn>
@@ -193,7 +144,7 @@ export const TechStack: React.FC = () => {
             <TechCard
               title="Infra & Ops"
               icon={Cloud}
-              items={stack.ops}
+              items={techStackData.ops}
               colorClass="from-emerald-500 to-teal-500"
             />
           </FadeIn>
@@ -202,7 +153,7 @@ export const TechStack: React.FC = () => {
             <TechCard
               title="Frontend Experience"
               icon={Layout}
-              items={stack.frontend}
+              items={techStackData.frontend}
               colorClass="from-pink-500 to-rose-500"
             />
           </FadeIn>
@@ -211,7 +162,7 @@ export const TechStack: React.FC = () => {
             <TechCard
               title="Mobile & Cross-Platform"
               icon={Smartphone}
-              items={stack.mobile}
+              items={techStackData.mobile}
               colorClass="from-orange-500 to-yellow-500"
             />
           </FadeIn>

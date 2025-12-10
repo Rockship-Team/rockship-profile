@@ -10,59 +10,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
-
-interface Testimonial {
-  id: string;
-  logoName: string;
-  LogoIcon?: LucideIcon; // Optional icon component
-  quote: string;
-  author: string;
-  role: string;
-}
-
-const testimonials: Testimonial[] = [
-  {
-    id: "meta",
-    logoName: "Meta",
-    LogoIcon: InfinityIcon,
-    quote:
-      "We partnered with RockshipAI to work with Enterprises to adopt Llama and train custom models with their own data. We are excited to collectively make Llama the industry standard and bring the benefits of AI to everyone.",
-    author: "Mark Zuckerberg",
-    role: "Founder and CEO, Meta",
-  },
-  {
-    id: "deepmind",
-    logoName: "DeepMind",
-    LogoIcon: Brain,
-    quote:
-      "RockshipAI's data engine has been instrumental in refining our reinforcement learning models, accelerating our path to AGI safely and efficiently.",
-    author: "Demis Hassabis",
-    role: "CEO, Google DeepMind",
-  },
-  {
-    id: "eureka",
-    logoName: "Eureka Labs",
-    LogoIcon: Lightbulb,
-    quote:
-      "The quality of data labeling from RockshipAI is unmatched. It's the high-octane fuel that powers our educational models to reasoning capabilities we didn't think possible yet.",
-    author: "Andrej Karpathy",
-    role: "Founder, Eureka Labs",
-  },
-  {
-    id: "nfdg",
-    logoName: "nfdg",
-    LogoIcon: PenTool,
-    quote:
-      "Speed and precision are everything in design. RockshipAI delivers the generative assets we need with a level of fidelity that creates entirely new creative workflows.",
-    author: "Nat Friedman",
-    role: "Partner, nfdg",
-  },
-];
+import { testimonialsData } from "@/lib/data";
 
 export function Testimonials() {
-  const [activeId, setActiveId] = useState(testimonials[0].id);
+  const [activeId, setActiveId] = useState(testimonialsData[0].id);
   const activeTestimonial =
-    testimonials.find((t) => t.id === activeId) || testimonials[0];
+    testimonialsData.find((t) => t.id === activeId) || testimonialsData[0];
 
   return (
     <section className="py-16 md:py-32 bg-rockship-950 text-center px-6 border-t border-white/10 relative overflow-hidden">
@@ -111,8 +64,15 @@ export function Testimonials() {
 
         {/* Logos Navigation */}
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 mt-16">
-          {testimonials.map((t) => {
-            const Icon = t.LogoIcon;
+          {testimonialsData.map((t) => {
+            const iconMap: Record<string, LucideIcon> = {
+              "InfinityIcon": InfinityIcon,
+              "Brain": Brain,
+              "Lightbulb": Lightbulb,
+              "PenTool": PenTool,
+            };
+            const Icon = iconMap[t.logoIcon as string];
+
             return (
               <button
                 key={t.id}

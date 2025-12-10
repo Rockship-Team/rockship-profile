@@ -1,4 +1,4 @@
-import { FadeIn } from './FadeIn'
+import { FadeIn } from "../FadeIn";
 
 export default function CareerCTA() {
   return (
@@ -9,8 +9,8 @@ export default function CareerCTA() {
           Ready to Rockship Intelligence?
         </h2>
         <p className="text-gray-400 mb-8 max-w-xl mx-auto">
-          Whether you need a custom LLM or a full-scale digital
-          transformation, our team is ready to deploy.
+          Whether you need a custom LLM or a full-scale digital transformation,
+          our team is ready to deploy.
         </p>
         <div className="flex justify-center gap-4">
           <button className="px-8 py-3 bg-white text-rockship-900 font-bold rounded-lg hover:bg-gray-100 transition hover:scale-105 active:scale-95 duration-200">
@@ -22,5 +22,5 @@ export default function CareerCTA() {
         </div>
       </FadeIn>
     </section>
-  )
+  );
 }

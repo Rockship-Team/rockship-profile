@@ -1,7 +1,10 @@
 import { Bot, Send, Sparkles, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { getChatResponse, initGemini } from "../services/geminiService";
 import { ChatMessage, ChatRole } from "../types";
+import { CaseStudyCard } from "./CaseStudyCard";
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +103,121 @@ export const GeminiAssistant: React.FC = () => {
                       : "bg-rockship-800 text-gray-200 rounded-bl-none border border-white/5"
                   }`}
                 >
-                  {msg.text}
+                  {msg.role === ChatRole.MODEL
+                    ? (() => {
+                        try {
+                          let text = msg.text.trim();
+                          // Handle markdown code blocks
+                          const jsonMatch = text.match(
+                            /```(?:json)?\s*([\s\S]*?)\s*```/
+                          );
+                          if (jsonMatch) {
+                            text = jsonMatch[1].trim();
+                          }
+
+                          // Try to find the JSON object boundaries if it's not wrapped in code blocks but has noise
+                          const firstBrace = text.indexOf("{");
+                          const lastBrace = text.lastIndexOf("}");
+
+                          if (
+                            firstBrace !== -1 &&
+                            lastBrace !== -1 &&
+                            lastBrace > firstBrace
+                          ) {
+                            const potentialJson = text.substring(
+                              firstBrace,
+                              lastBrace + 1
+                            );
+                            try {
+                              const parsed = JSON.parse(potentialJson);
+                              if (parsed.type === "case_study" && parsed.data) {
+                                return (
+                                  <CaseStudyCard item={parsed.data} index={0} />
+                                );
+                              }
+                            } catch (e) {
+                              // Failed to parse inner content, fall through to normal render
+                            }
+                          }
+                        } catch (e) {}
+
+                        return (
+                          <div className="markdown-content">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p: ({ children }) => (
+                                  <p className="mb-2 last:mb-0">{children}</p>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="list-disc list-inside mb-2 space-y-1">
+                                    {children}
+                                  </ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="list-decimal list-inside mb-2 space-y-1">
+                                    {children}
+                                  </ol>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="text-gray-200">{children}</li>
+                                ),
+                                strong: ({ children }) => (
+                                  <strong className="font-bold text-white">
+                                    {children}
+                                  </strong>
+                                ),
+                                em: ({ children }) => (
+                                  <em className="italic">{children}</em>
+                                ),
+                                code: ({ children }) => (
+                                  <code className="bg-rockship-900/50 px-1.5 py-0.5 rounded text-xs font-mono text-cyan-300">
+                                    {children}
+                                  </code>
+                                ),
+                                pre: ({ children }) => (
+                                  <pre className="bg-rockship-900/80 p-2 rounded-lg overflow-x-auto mb-2 text-xs font-mono">
+                                    {children}
+                                  </pre>
+                                ),
+                                a: ({ children, href }) => (
+                                  <a
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-rockship-accent hover:text-cyan-300 underline"
+                                  >
+                                    {children}
+                                  </a>
+                                ),
+                                blockquote: ({ children }) => (
+                                  <blockquote className="border-l-2 border-rockship-accent/50 pl-3 italic text-gray-300 mb-2">
+                                    {children}
+                                  </blockquote>
+                                ),
+                                h1: ({ children }) => (
+                                  <h1 className="text-lg font-bold text-white mb-2">
+                                    {children}
+                                  </h1>
+                                ),
+                                h2: ({ children }) => (
+                                  <h2 className="text-base font-bold text-white mb-2">
+                                    {children}
+                                  </h2>
+                                ),
+                                h3: ({ children }) => (
+                                  <h3 className="text-sm font-bold text-white mb-1">
+                                    {children}
+                                  </h3>
+                                ),
+                              }}
+                            >
+                              {msg.text}
+                            </ReactMarkdown>
+                          </div>
+                        );
+                      })()
+                    : msg.text}
                 </div>
               </div>
             ))}
