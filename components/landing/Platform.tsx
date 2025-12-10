@@ -87,20 +87,6 @@ export const Platform: React.FC = () => {
             })}
           </div>
         </FadeIn>
-
-        <FadeIn className="mt-20">
-          <div className="text-center">
-            <div className="inline-flex flex-col items-center p-8 rounded-3xl bg-gradient-to-br from-rockship-accent/10 to-transparent border border-white/10 backdrop-blur-sm">
-              <div className="text-5xl font-bold gradient-text mb-2">
-                {platformData.uptimeSLA}
-              </div>
-              <div className="text-rockship-300 font-medium">Uptime SLA</div>
-              <div className="text-sm text-rockship-400 mt-1">
-                Enterprise-grade reliability
-              </div>
-            </div>
-          </div>
-        </FadeIn>
       </div>
     </section>
   );

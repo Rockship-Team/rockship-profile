@@ -5,11 +5,9 @@ import {
   Eye,
   GitBranch,
   LayoutTemplate,
-  Lock,
   LucideIcon,
   Mic,
   Server,
-  ShieldCheck,
   Zap,
 } from "lucide-react";
 import React from "react";
@@ -201,9 +199,8 @@ export const Solutions: React.FC = () => {
                 </div>
               </div>
             </SpotlightCard>
-
             {/* Security - Wide Card at Bottom */}
-            <SpotlightCard className="md:col-span-8 border-rockship-accent/20 bg-rockship-900/40">
+            {/* <SpotlightCard className="md:col-span-8 border-rockship-accent/20 bg-rockship-900/40">
               <div className="absolute inset-0 bg-gradient-to-r from-rockship-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="p-8 md:p-12 h-full flex flex-col md:flex-row items-center gap-12 relative z-10">
@@ -233,7 +230,6 @@ export const Solutions: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Visual Security Element */}
                 <div className="w-full md:w-auto flex justify-center shrink-0">
                   <div className="relative w-64 h-64 flex items-center justify-center">
                     <div className="absolute inset-0 border border-green-500/10 rounded-full animate-ping [animation-duration:3s]" />
@@ -248,7 +244,7 @@ export const Solutions: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </SpotlightCard>
+            </SpotlightCard> */}
           </div>
         </FadeIn>
       </div>
