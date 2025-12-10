@@ -118,6 +118,12 @@ class KnowledgeBaseService {
         "openai",
         "cohere",
         "success stories",
+        "healthcare",
+        "finance",
+        "enterprise",
+        "technology",
+        "infrastructure",
+        "generative ai",
       ],
     });
 
