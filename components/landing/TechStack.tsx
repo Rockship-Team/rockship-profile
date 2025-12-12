@@ -121,8 +121,8 @@ export const TechStack: React.FC = () => {
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-          <FadeIn delay="100ms" className="lg:col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+          <FadeIn delay="100ms" className="sm:col-span-1 lg:col-span-2">
             <TechCard
               title="Models & AI"
               icon={Cpu}
@@ -131,7 +131,7 @@ export const TechStack: React.FC = () => {
             />
           </FadeIn>
 
-          <FadeIn delay="200ms" className="lg:col-span-2">
+          <FadeIn delay="200ms" className="sm:col-span-1 lg:col-span-2">
             <TechCard
               title="Data & Backend"
               icon={Database}

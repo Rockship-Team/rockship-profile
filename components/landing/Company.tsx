@@ -55,8 +55,8 @@ export const Company: React.FC = () => {
           </FadeIn>
 
           <FadeIn className="relative" delay={200}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4 translate-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4 sm:translate-y-8">
                 {/* First team member */}
                 <div className="aspect-[4/5] bg-gray-800 rounded-2xl overflow-hidden relative group">
                   <img

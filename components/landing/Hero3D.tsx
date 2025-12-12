@@ -99,7 +99,8 @@ const AISphere = () => {
 
   const isDesktop = viewport.width > 8;
   const positionX = isDesktop ? 3.5 : 0;
-  const positionY = isDesktop ? 0 : 1.5;
+  const positionY = isDesktop ? 0 : -2.5; // Move deeply down on mobile so it's below text
+  const scale = isDesktop ? 1 : 0.55; // Much smaller on mobile to be subtle
 
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -268,6 +269,7 @@ const AISphere = () => {
   return (
     <mesh
       ref={meshRef}
+      scale={scale}
       onPointerOver={() => {
         document.body.style.cursor = "pointer";
         setHover(true);

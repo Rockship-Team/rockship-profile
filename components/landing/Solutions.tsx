@@ -144,14 +144,11 @@ export const Solutions: React.FC = () => {
 
         {/* Bento Grid */}
         <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 md:auto-rows-fr">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             {/* Solution Cards */}
             {solutionsData.solutions.map((solution, index) => {
               const Icon = iconMap[solution.icon] || Brain;
-              const cardClass =
-                solution.size === "large"
-                  ? "md:col-span-4 lg:col-span-4"
-                  : "md:col-span-6 lg:col-span-4";
+              const cardClass = ""; // Use default 1x1 size for regularity, or adapt if needed
 
               return (
                 <PlatformFeatureCard
@@ -165,7 +162,7 @@ export const Solutions: React.FC = () => {
             })}
 
             {/* Enterprise - Large Card */}
-            <SpotlightCard className="md:col-span-6 lg:col-span-8 p-6 md:p-10 relative overflow-hidden group">
+            <SpotlightCard className="md:col-span-2 lg:col-span-2 p-6 md:p-10 relative overflow-hidden group">
               {/* Background Elements */}
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-105 duration-700 pointer-events-none">
                 <LayoutTemplate size={180} strokeWidth={0.5} />

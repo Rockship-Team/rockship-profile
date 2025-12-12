@@ -19,6 +19,9 @@ export const Hero: React.FC = () => {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-rockship-purple/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rockship-accent/5 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
 
+      {/* Mobile Overlay for Readability */}
+      <div className="absolute inset-0 z-5 md:hidden bg-gradient-to-b from-rockship-950 via-rockship-950/80 to-rockship-950 pointer-events-none" />
+
       {/* Main Content */}
       <div className="container mx-auto px-6 pt-20 md:pt-0 relative z-10 pointer-events-none">
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -60,15 +63,12 @@ export const Hero: React.FC = () => {
                 aria-label="Watch Rockship AI Showreel"
               >
                 <Play size={20} className="fill-current" aria-hidden="true" />{" "}
-  Watch Overview Video
+                Watch Overview Video
               </button>
             </FadeIn>
 
             {/* Stats Strip */}
-            <FadeIn
-              delay={400}
-              className="pt-8"
-            >
+            <FadeIn delay={400} className="pt-8">
               {heroData.title && (
                 <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-6">
                   {heroData.title}
