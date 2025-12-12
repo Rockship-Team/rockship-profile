@@ -12,9 +12,9 @@ const NeuralNetwork = ({ count = 100, color = "#6366f1" }) => {
     for (let i = 0; i < count; i++) {
       const x = (Math.random() - 0.5) * 35;
       const y = (Math.random() - 0.5) * 20;
-      // FIX: Push points deep into background (Z: -15 to -5)
-      // This ensures they never overlap with the main object at Z ~ 0
-      const z = -5 - Math.random() * 10;
+      // FIX: Push points deeper into background (Z: -20 to -10)
+      // This ensures they definitely render behind the main object (Z ~ 0 + radius)
+      const z = -10 - Math.random() * 15;
       p[i * 3] = x;
       p[i * 3 + 1] = y;
       p[i * 3 + 2] = z;
@@ -212,6 +212,11 @@ const AISphere = () => {
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
+    const { pointer } = state;
+
+    // Movement intensity
+    const moveIntensity = 0.5; // Sensitivity to mouse movement
+    const floatIntensity = 0.15; // Vertical floating amplitude
 
     shaderMaterial.uniforms.time.value = time;
     shaderMaterial.uniforms.hoverStrength.value = THREE.MathUtils.lerp(
@@ -220,11 +225,44 @@ const AISphere = () => {
       0.1
     );
 
-    const floatY = Math.sin(time * 0.4) * 0.15;
-    meshRef.current.position.set(positionX, positionY + floatY, 0);
+    // Calculate proximity to the object's base position to limit influence
+    const anchor = new THREE.Vector3(positionX, positionY, 0);
+    anchor.project(state.camera); // Project world position to NDC
+    const dist = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y);
+    const proximity = 1.0 - THREE.MathUtils.smoothstep(0.0, 0.8, dist); // Radius approx 0.8 NDC
 
-    meshRef.current.rotation.y = time * 0.05;
-    meshRef.current.rotation.z = Math.sin(time * 0.15) * 0.05;
+    // Calculate target position combining base position, floating, and mouse sway
+    // Apply proximity factor so it only moves when mouse is near
+    const targetX = positionX + pointer.x * 2 * moveIntensity * proximity; // Move on X axis
+    const targetY =
+      positionY +
+      Math.sin(time * 0.4) * floatIntensity +
+      pointer.y * 1.5 * moveIntensity * proximity; // Move on Y axis
+
+    // Smoothly interpolate position (Flying effect)
+    meshRef.current.position.x = THREE.MathUtils.lerp(
+      meshRef.current.position.x,
+      targetX,
+      0.05
+    );
+    meshRef.current.position.y = THREE.MathUtils.lerp(
+      meshRef.current.position.y,
+      targetY,
+      0.05
+    );
+
+    // Dynamic rotation dependent on mouse
+    // Base rotation + mouse influence
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(
+      meshRef.current.rotation.y,
+      time * 0.15 + pointer.x * 0.5,
+      0.05
+    );
+    meshRef.current.rotation.z = THREE.MathUtils.lerp(
+      meshRef.current.rotation.z,
+      Math.sin(time * 0.2) * 0.1 - pointer.y * 0.3,
+      0.05
+    );
   });
 
   return (

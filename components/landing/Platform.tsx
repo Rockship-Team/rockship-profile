@@ -57,18 +57,20 @@ export const Platform: React.FC = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <FadeIn className="max-w-3xl mx-auto text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rockship-accent/10 border border-rockship-accent/20 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
             <Rocket className="text-rockship-accent w-5 h-5" />
-            <span className="text-sm font-semibold text-rockship-accent">
-              What We Build
+            <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
+              Our Solutions
             </span>
           </div>
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            Built for <span className="gradient-text">Scale</span>
+            AI Solutions Built for{" "}
+            <span className="gradient-text">Real Business Operations</span>
           </h2>
           <p className="text-xl text-rockship-300 max-w-2xl mx-auto">
-            Our platform handles everything from data ingestion to model
-            deployment, so you can focus on building intelligent solutions.
+            We build AI-driven automation, agent systems, and workflow
+            intelligence that help enterprises reduce manual workload, improve
+            efficiency, and modernize operations.
           </p>
         </FadeIn>
 

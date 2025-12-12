@@ -1,54 +1,40 @@
-import { companyData } from "@/lib/data";
 import { cn } from "@/lib/utils";
-import {
-  Activity,
-  Box,
-  Cloud,
-  Cpu,
-  Globe,
-  Hexagon,
-  Infinity,
-  Layers,
-  LucideIcon,
-  Share2,
-  Triangle,
-  Zap,
-} from "lucide-react";
 import { FadeIn } from "../FadeIn";
 
-// Map client names to icons for a more polished look
-const iconMap: Record<string, LucideIcon> = {
-  QuantumLeap: Zap,
-  DataWeave: Share2,
-  FutureTech: Cpu,
-  Synergy: Infinity,
-  AlphaInc: Hexagon,
-  NextGen: Activity,
-  CloudScale: Cloud,
-  "Innovate Hub": Box,
-  "AI Alliance": Globe,
-  TechForward: Layers,
-};
+const industries = [
+  "E-commerce & Retail",
+  "Tourism & Hospitality",
+  "F&B & Distribution",
+  "Fintech & Banking",
+  "SaaS / Startup",
+  "Marketing & Agency",
+  "HRTech / Workforce",
+  "Logistics & Supply Chain",
+  "Manufacturing",
+  "PropTech / Real Estate",
+  "Education",
+  "Study Abroad / Counseling",
+  "Healthcare & Wellness",
+];
 
-const ClientLogo = ({
+const IndustryItem = ({
   name,
   className,
 }: {
   name: string;
   className?: string;
 }) => {
-  const Icon = iconMap[name] || Triangle;
   return (
     <div
       className={cn(
-        "flex items-center gap-3 px-8 py-4 opacity-50 hover:opacity-100 transition-all duration-300 group cursor-pointer grayscale hover:grayscale-0",
+        "flex items-center gap-3 px-8 py-4 opacity-50 hover:opacity-100 transition-all duration-300 group cursor-pointer",
         className
       )}
     >
-      <div className="p-2 rounded-lg bg-rockship-800/50 group-hover:bg-rockship-800 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300">
-        <Icon className="w-6 h-6 md:w-8 md:h-8 text-rockship-300 group-hover:text-rockship-accent transition-colors duration-300" />
+      <div className="p-2 rounded-full border border-rockship-700/50 bg-rockship-900/50 group-hover:bg-rockship-800 group-hover:border-rockship-600 transition-all duration-300">
+        <div className="w-2 h-2 rounded-full bg-rockship-400 group-hover:bg-rockship-accent group-hover:shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-300" />
       </div>
-      <span className="text-xl md:text-2xl font-bold font-heading traling-wide text-rockship-400 group-hover:text-white transition-colors duration-300">
+      <span className="text-xl md:text-2xl font-bold font-heading whitespace-nowrap text-rockship-300 group-hover:text-white transition-colors duration-300">
         {name}
       </span>
     </div>
@@ -56,10 +42,13 @@ const ClientLogo = ({
 };
 
 export function Clients() {
-  // Combine and duplicate to ensure we have enough items for a smooth loop
-  const allClients = [...companyData.clients, ...companyData.partners];
-  const row1 = [...allClients, ...allClients];
-  const row2 = [...allClients.reverse(), ...allClients]; // Reverse for variety
+  // Split industries into two rows and duplicate for smooth scrolling loop
+  const midPoint = Math.ceil(industries.length / 2);
+  const firstHalf = industries.slice(0, midPoint);
+  const secondHalf = industries.slice(midPoint);
+
+  const row1 = [...firstHalf, ...firstHalf, ...firstHalf, ...firstHalf]; // Repeat more for smoothness
+  const row2 = [...secondHalf, ...secondHalf, ...secondHalf, ...secondHalf];
 
   return (
     <section
@@ -86,8 +75,8 @@ export function Clients() {
       >
         {/* Row 1: Left to Right (Standard) */}
         <div className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4">
-          {row1.map((client, index) => (
-            <ClientLogo key={`${client}-1-${index}`} name={client} />
+          {row1.map((industry, index) => (
+            <IndustryItem key={`${industry}-1-${index}`} name={industry} />
           ))}
         </div>
 
@@ -96,12 +85,11 @@ export function Clients() {
           className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4 mt-2 md:mt-6"
           style={{ animationDirection: "reverse" }}
         >
-          {row2.map((client, index) => (
-            <ClientLogo key={`${client}-2-${index}`} name={client} />
+          {row2.map((industry, index) => (
+            <IndustryItem key={`${industry}-2-${index}`} name={industry} />
           ))}
         </div>
       </div>
-
     </section>
   );
 }

@@ -34,7 +34,10 @@ export const Navbar: React.FC = () => {
           href="#home"
           className="text-2xl font-display font-bold text-white tracking-tight"
         >
-          <span className="font-inter">Rockship</span><span className="text-rockship-accent">AI</span>
+          <span className="text-white lowercase font-medium tracking-tighter">
+            rockship
+          </span>
+          <span className="gradient-text">AI</span>
         </a>
 
         {/* Desktop Nav */}
