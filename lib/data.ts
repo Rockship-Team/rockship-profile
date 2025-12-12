@@ -41,11 +41,12 @@ export const companyData = {
 
 // Landing page data
 export const heroData = {
+  title: "Proven AI Impact",
   stats: [
-    { label: "Enterprises", val: "150+" },
-    { label: "Data Points", val: "500M+" },
-    { label: "Accuracy", val: "40%+" },
-    { label: "Uptime", val: "99.9%" },
+    { label: "Enterprise Clients", val: "150+" },
+    { label: "Processed Data Points", val: "500M+" },
+    { label: "Workflow Automation", val: "60–70%" },
+    { label: "System Uptime", val: "99.9%" },
   ],
 };
 

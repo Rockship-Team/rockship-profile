@@ -60,25 +60,32 @@ export const Hero: React.FC = () => {
                 aria-label="Watch Rockship AI Showreel"
               >
                 <Play size={20} className="fill-current" aria-hidden="true" />{" "}
-                Watch Showreel
+  Watch Overview Video
               </button>
             </FadeIn>
 
             {/* Stats Strip */}
             <FadeIn
               delay={400}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8"
+              className="pt-8"
             >
-              {heroData.stats.map((stat, i) => (
-                <div key={i} className="flex flex-col text-left">
-                  <span className="text-2xl font-display font-bold text-white">
-                    {stat.val}
-                  </span>
-                  <span className="text-xs text-gray-500 uppercase tracking-wider">
-                    {stat.label}
-                  </span>
-                </div>
-              ))}
+              {heroData.title && (
+                <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-6">
+                  {heroData.title}
+                </h3>
+              )}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8">
+                {heroData.stats.map((stat, i) => (
+                  <div key={i} className="flex flex-col text-left">
+                    <span className="text-2xl font-display font-bold text-white">
+                      {stat.val}
+                    </span>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">
+                      {stat.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </FadeIn>
           </div>
 

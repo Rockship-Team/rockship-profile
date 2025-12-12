@@ -14,13 +14,11 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "What We Build", href: "#platform" },
+    { label: "Solutions", href: "#platform" },
     { label: "How It Works", href: "#solutions" },
-    { label: "Technology", href: "#tech-stack" },
+    { label: "AI Technology", href: "#tech-stack" },
     { label: "Case Studies", href: "#case-studies" },
-    { label: "Resources", href: "#research" },
-    { label: "About", href: "#company" },
+    { label: "About Us", href: "#company" },
   ];
 
   return (
@@ -33,10 +31,10 @@ export const Navbar: React.FC = () => {
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
         <a
-          href="#"
+          href="#home"
           className="text-2xl font-display font-bold text-white tracking-tight"
         >
-          Rockship<span className="text-rockship-accent">AI</span>
+          <span className="font-inter">Rockship</span><span className="text-rockship-accent">AI</span>
         </a>
 
         {/* Desktop Nav */}
@@ -51,7 +49,7 @@ export const Navbar: React.FC = () => {
             </a>
           ))}
           <button className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white text-sm font-bold transition">
-            Book Demo
+            Book AI Consultation
           </button>
         </div>
 
@@ -78,7 +76,7 @@ export const Navbar: React.FC = () => {
             </a>
           ))}
           <button className="w-full py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2">
-            Book Demo
+            Book AI Consultation
           </button>
         </div>
       )}
