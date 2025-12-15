@@ -1,6 +1,23 @@
 import { cn } from "@/lib/utils";
 import { FadeIn } from "../FadeIn";
 
+import {
+  Briefcase,
+  Building2,
+  Factory,
+  GraduationCap,
+  HeartPulse,
+  Landmark,
+  LayoutTemplate,
+  LucideIcon,
+  Megaphone,
+  Plane,
+  Rocket,
+  ShoppingBag,
+  Truck,
+  Utensils,
+} from "lucide-react";
+
 const industries = [
   "E-commerce & Retail",
   "Tourism & Hospitality",
@@ -17,6 +34,22 @@ const industries = [
   "Healthcare & Wellness",
 ];
 
+const iconMap: Record<string, LucideIcon> = {
+  "E-commerce & Retail": ShoppingBag,
+  "Tourism & Hospitality": Plane,
+  "F&B & Distribution": Utensils,
+  "Fintech & Banking": Landmark,
+  "SaaS / Startup": Rocket,
+  "Marketing & Agency": Megaphone,
+  "HRTech / Workforce": Briefcase,
+  "Logistics & Supply Chain": Truck,
+  Manufacturing: Factory,
+  "PropTech / Real Estate": Building2,
+  Education: GraduationCap,
+  "Study Abroad / Counseling": LayoutTemplate,
+  "Healthcare & Wellness": HeartPulse,
+};
+
 const IndustryItem = ({
   name,
   className,
@@ -24,6 +57,8 @@ const IndustryItem = ({
   name: string;
   className?: string;
 }) => {
+  const Icon = iconMap[name];
+
   return (
     <div
       className={cn(
@@ -32,7 +67,11 @@ const IndustryItem = ({
       )}
     >
       <div className="p-2 rounded-full border border-rockship-700/50 bg-rockship-900/50 group-hover:bg-rockship-800 group-hover:border-rockship-600 transition-all duration-300">
-        <div className="w-2 h-2 rounded-full bg-rockship-400 group-hover:bg-rockship-accent group-hover:shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-300" />
+        {Icon ? (
+          <Icon className="w-5 h-5 text-rockship-400 group-hover:text-rockship-accent transition-colors duration-300" />
+        ) : (
+          <div className="w-2 h-2 rounded-full bg-rockship-400 group-hover:bg-rockship-accent group-hover:shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-300" />
+        )}
       </div>
       <span className="text-xl md:text-2xl font-bold font-heading whitespace-nowrap text-rockship-300 group-hover:text-white transition-colors duration-300">
         {name}

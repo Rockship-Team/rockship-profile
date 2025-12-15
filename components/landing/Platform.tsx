@@ -63,10 +63,10 @@ export const Platform: React.FC = () => {
               Operational Challenges
             </span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
+          <h3 className="text-4xl md:text-5xl font-display font-medium mb-6 leading-tight">
             The Enterprise Problems We{" "}
             <span className="gradient-text">Solve</span>
-          </h2>
+          </h3>
           <p className="text-xl text-rockship-300 max-w-2xl mx-auto">
             We focus on the operational bottlenecks that slow enterprises down —
             and turn them into scalable, automated systems.
