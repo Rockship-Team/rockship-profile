@@ -278,11 +278,6 @@ export const GeminiAssistant: React.FC = () => {
         ) : (
           <Image src="/chatbot.png" alt="AI" width={50} height={50} />
         )}
-        {!isOpen && (
-          <span className="font-bold font-display pr-1 tracking-wide drop-shadow-md text-sm">
-            Ask Our AI Assistant
-          </span>
-        )}
       </button>
     </div>
   );
