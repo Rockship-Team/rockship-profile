@@ -60,17 +60,15 @@ export const Platform: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
             <Rocket className="text-rockship-accent w-5 h-5" />
             <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
-              Our Solutions
+              Operational Challenges
             </span>
           </div>
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            AI Solutions Built for{" "}
-            <span className="gradient-text">Real Business Operations</span>
+            The Enterprise Problems We {" "}
+            <span className="gradient-text">Solve</span>
           </h2>
           <p className="text-xl text-rockship-300 max-w-2xl mx-auto">
-            We build AI-driven automation, agent systems, and workflow
-            intelligence that help enterprises reduce manual workload, improve
-            efficiency, and modernize operations.
+          We focus on the operational bottlenecks that slow enterprises down — and turn them into scalable, automated systems.
           </p>
         </FadeIn>
 

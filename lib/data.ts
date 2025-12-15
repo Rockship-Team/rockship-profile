@@ -11,30 +11,29 @@ export const companyData = {
 
   companyStats: [
     { value: "150+", label: "Enterprise Clients" },
-    { value: "40+", label: "PhD Researchers" },
-    { value: "$50M", label: "Series A Funding" },
-    { value: "3", label: "Global Offices" },
+    { value: "10+ Years", label: "Combined AI & Engineering Experience" },
+    { value: "Multi-Industry", label: "Enterprise Deployments" },
   ],
 
   teamMembers: [
     {
-      name: "Elena Ross",
-      role: "Chief Scientist",
-      image:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop",
-    },
-    {
-      name: "David Chen",
+      name: "Ngoc Tran",
       role: "CEO & Founder",
       image:
-        "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop",
+        "Ngoc.png",
+    },
+    {
+      name: "Quan Do",
+      role: "Head of Engineering",
+      image:
+        "Quan.png",
     },
   ],
 
   offices: [
     {
-      city: "San Francisco HQ",
-      street: "Foundry St.",
+      city: "Rockship AI",
+      street: "Asia-Pacific Operations",
     },
   ],
 };
@@ -43,10 +42,9 @@ export const companyData = {
 export const heroData = {
   title: "Proven AI Impact",
   stats: [
-    { label: "Enterprise Clients", val: "150+" },
-    { label: "Processed Data Points", val: "500M+" },
     { label: "Workflow Automation", val: "60–70%" },
     { label: "System Uptime", val: "99.9%" },
+    { label: "Enterprise Clients", val: "150+" },
   ],
 };
 
@@ -54,33 +52,33 @@ export const platformData = {
   features: [
     {
       icon: "Cpu",
-      title: "High Performance Computing",
-      desc: "Leverage GPU clusters and distributed computing for faster model training and inference.",
+      title: "Manual-Heavy Operational Workflows",
+      desc: "Core operational processes rely heavily on manual, repetitive tasks, slowing execution and increasing operational risk and cost.",
     },
     {
       icon: "Database",
-      title: "Data Management",
-      desc: "Unified data lake with automated pipelines for preprocessing, versioning, and governance.",
+      title: "Fragmented Systems & Data Silos",
+      desc: "Operational data lives across disconnected systems, preventing end-to-end automation and creating delays in decision-making.",
     },
     {
       icon: "Globe",
-      title: "Global Deployment",
-      desc: "Deploy models across multiple regions with built-in CDN and edge computing capabilities.",
+      title: "Slow Internal Support & Operations Response",
+      desc: "Internal support and operations teams struggle with growing request volumes due to manual triage and inefficient handoffs.",
     },
     {
       icon: "Layers",
-      title: "Model Registry",
-      desc: "Centralized repository for model versioning, metadata tracking, and lifecycle management.",
+      title: "Limited Real-Time Operational Visibility",
+      desc: "Leaders lack real-time visibility into operations, resulting in reactive decisions instead of proactive control.",
     },
     {
       icon: "Settings",
-      title: "AutoML & Tuning",
-      desc: "Automated hyperparameter optimization and neural architecture search for optimal performance.",
+      title: "High Operational Cost with Low Automation",
+      desc: "Operations scale by adding headcount rather than systems, driving higher costs without proportional efficiency gains.",
     },
     {
       icon: "Rocket",
-      title: "Real-time APIs",
-      desc: "Scalable REST and GraphQL APIs with sub-second latency and built-in rate limiting.",
+      title: "Scaling Operations Without Scaling Headcount",
+      desc: "Enterprises face difficulty expanding operations while maintaining consistency, quality, and control across teams.",
     },
   ],
   uptimeSLA: "99.9%",
@@ -90,26 +88,26 @@ export const solutionsData = {
   solutions: [
     {
       icon: "Brain",
-      title: "Custom LLM & AI Agent Deployment",
-      desc: "Design and deploy custom LLM-powered agents, RAG systems, and enterprise AI workflows — optimized for your data, security, and operations.",
+      title: "Discover & Prioritize Operational Problems",
+      desc: "We work with your stakeholders to understand real workflows, constraints, and operational bottlenecks — and identify where automation can create the highest business impact.",
       size: "large",
     },
     {
       icon: "Eye",
-      title: "Computer Vision & Document AI Systems",
-      desc: "Implement computer vision solutions for document processing, inspection, and anomaly detection — integrated directly into enterprise workflows.",
+      title: "Design AI Systems Around Your Operations",
+      desc: "We design AI systems that fit your existing processes, data, and governance model — ensuring reliability, compliance, and adoption from day one.",
       size: "standard",
     },
     {
       icon: "GitBranch",
-      title: "AI Workflow Orchestration & Automation",
-      desc: "Orchestrate AI agents, models, and business logic into end-to-end automated workflows across sales, operations, and internal systems.",
+      title: "Build, Integrate, and Deploy in Production",
+      desc: "We build production-ready systems and integrate them into your enterprise environment — with security, monitoring, and operational ownership clearly defined.",
       size: "standard",
     },
     {
       icon: "Mic",
-      title: "Conversational & Multimodal AI Solutions",
-      desc: "Deploy voice, chat, and multimodal AI assistants for customer support, internal operations, and decision support.",
+      title: "Operate, Optimize, and Scale",
+      desc: "After deployment, we continuously monitor performance, expand automation coverage, and support scaling across teams, regions, and use cases.",
       size: "standard",
     },
   ],
@@ -120,16 +118,16 @@ export const solutionsData = {
       desc: "On-prem, Cloud, or Air-gapped.",
     },
     {
-      title: "SSO & RBAC",
-      desc: "Granular access control policies.",
+      title: "Identity & Access Control",
+      desc: "Enterprise SSO and role-based access.",
     },
     {
       title: "Legacy Integration",
-      desc: "Connectors for SAP, Salesforce, & Oracle.",
+      desc: "Works with existing enterprise systems.",
     },
     {
-      title: "24/7 Support",
-      desc: "Dedicated engineering response teams.",
+      title: "Operational Ownership",
+      desc: "Clear ownership, monitoring, and ongoing support.",
     },
   ],
 
@@ -181,42 +179,47 @@ export const techStackData = {
 
 export const caseStudiesData = [
   {
-    type: "Partner",
+    type: "Case Studies",
     title:
-      "Anthropic Partners with Rockship to Bring Generative AI to Enterprises",
-    logoText: "ANTHROPIC",
-    partner: "Anthropic",
-    industries: ["Generative AI", "Enterprise", "Technology", "Finance"],
-  },
-  {
-    type: "Partner",
-    title: "Meta and Rockship Partner to Drive Enterprise Adoption of Llama",
-    logoText: "Meta",
-    partner: "Meta",
-    industries: ["Enterprise", "Open Source", "Technology", "Marketing"],
+      "Automated borrower engagement, document validation, and credit assessment — cutting loan approval time by up to 70%.",
+    logoText: "AI Loan Automation for Microfinance",
+    partner: "",
+    industries: ["AI", "Fintech", "Microfinance", "Lending"],
   },
   {
     type: "Case Studies",
-    title: "Customer Case Study: Cohere - Scaling Fine-tuning Infrastructure",
-    logoText: "cohere",
-    partner: "Cohere",
-    industries: ["Infrastructure", "Machine Learning", "Technology"],
+    title:
+      "24/7 AI chatbot enabled product discovery, instant ordering, and automated support — driving 35% revenue growth and 140% ROI within 6 months.",
+    logoText: "AI Conversational Commerce for B2B Food Distribution",
+    partner: "B2B Food",
+    industries: ["AI", "E-commerce", "Food Distribution", "B2B Sales"],
   },
   {
-    type: "Blog",
-    title: "Rockship's Expert-in-the-Loop Platform for LLM Evaluation",
-    logoText: "OpenAI",
-    partner: "OpenAI",
-    industries: ["Evaluation", "Compliance", "Technology"],
+    type: "Case Studies",
+    title:
+      "Culturally-aware AI coaching for female health, fitness, and lifestyle — improving goal achievement by up to 84% with privacy-first, 24/7 support.",
+    logoText: "AI Women’s Wellness Coach Platform",
+    partner: "",
+    industries: ["AI", "HealthTech", "Wellness", "Lifestyle"],
   },
   {
-    type: "Research",
-    title: "Advancing State-of-the-Art in RLHF with PPO and DPO",
-    logoText: "Google",
-    partner: "Google",
-    industries: ["Research", "Healthcare", "Life Sciences"],
+    type: "Case Studies",
+    title:
+      "Automated invoice processing, consolidated financial reporting, and settlement workflows — reducing manual operations by over 60% across clinic networks.",
+    logoText: "AI Finance Automation for Multi-Branch Dental Clinics",
+    partner: "",
+    industries: ["AI", "HealthTech", "Dental Clinics", "Finance Automation"],
+  },
+  {
+    type: "Case Studies",
+    title:
+      "Centralized knowledge chatbot handling resident inquiries in real time — reducing manual workload by 92.5% and boosting response accuracy to 98%.",
+    logoText: "AI Resident Support Automation for Property Management",
+    partner: "",
+    industries: ["AI", "PropTech", "Property Management", "Customer Support"],
   },
 ];
+
 
 export const researchData = [
   {
@@ -293,5 +296,28 @@ export const testimonialsData = [
       "Speed and precision are everything in design. RockshipAI delivers the generative assets we need with a level of fidelity that creates entirely new creative workflows.",
     author: "Nat Friedman",
     role: "Partner, nfdg",
+  },
+];
+
+export const whyUsData = [
+  {
+    title: "AI Native",
+    description: "We don't just add AI to existing software. We rebuild workflows from the ground up with AI as the core engine.",
+    icon: "BrainCircuit",
+  },
+  {
+    title: "Production Ready",
+    description: "Our solutions are not POCs. We build robust, scalable systems designed for high-availability enterprise environments.",
+    icon: "Rocket",
+  },
+  {
+    title: "Data Secure",
+    description: "Your data is your IP. We deploy private models within your infrastructure with banking-grade security and compliance.",
+    icon: "ShieldCheck",
+  },
+  {
+    title: "Fast Implementation",
+    description: "We move fast. From discovery to deployment in weeks, not months, delivering immediate ROI.",
+    icon: "Zap",
   },
 ];

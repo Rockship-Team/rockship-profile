@@ -28,16 +28,15 @@ export const CaseStudies: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-rockship-accent animate-pulse" />
             <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
-              Proven Results
+              PROVEN ENTERPRISE DEPLOYMENTS
             </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-display font-medium mb-6">
-            <span className="gradient-text">Case Studies</span> & Collaboration
+            Enterprise <span className="gradient-text">Case Studies</span>
           </h2>
           <p className="text-lg text-rockship-300 max-w-2xl mx-auto leading-relaxed">
-            We partner with the world&apos;s leading AI research labs and
-            enterprises to build the infrastructure for the next generation of
-            intelligence.
+            Real-world AI systems we designed, built, and deployed to solve
+            enterprise operational challenges.
           </p>
         </FadeIn>
 

@@ -132,13 +132,12 @@ export const Solutions: React.FC = () => {
             </span>
           </div>
           <h3 className="text-4xl md:text-5xl font-display font-medium mb-6 leading-tight">
-            AI Systems Built for <br />
-            <span className="gradient-text">Real Business Operations</span>
+            From Problem Discovery to <br />
+            <span className="gradient-text">Production Deployment</span>
           </h3>
           <p className="text-lg text-rockship-300 leading-relaxed max-w-2xl mx-auto">
-            We design and deploy <b>end-to-end AI systems</b> tailored to your
-            business — from intelligent agents and automation to enterprise
-            integration and governance.
+            A structured, low-risk approach to designing, building, and
+            deploying AI systems inside enterprise operations.
           </p>
         </FadeIn>
 

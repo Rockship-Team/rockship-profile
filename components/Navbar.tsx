@@ -1,4 +1,5 @@
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 export const Navbar: React.FC = () => {
@@ -16,9 +17,9 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { label: "Solutions", href: "#platform" },
     { label: "How It Works", href: "#solutions" },
-    { label: "AI Technology", href: "#tech-stack" },
     { label: "Case Studies", href: "#case-studies" },
-    { label: "About Us", href: "#company" },
+    { label: "Why Us", href: "#why-us" },
+    { label: "About", href: "#company" },
   ];
 
   return (
@@ -34,10 +35,11 @@ export const Navbar: React.FC = () => {
           href="#home"
           className="text-2xl font-display font-bold text-white tracking-tight"
         >
-          <span className="text-white lowercase font-medium tracking-tighter">
+          <Image src="/rockship.svg" alt="Rockship" width={150} height={150} />
+          {/* <span className="text-white lowercase font-medium tracking-tighter">
             rockship
-          </span>
-          <span className="gradient-text">AI</span>
+          </span> */}
+          {/* <span className="gradient-text">AI</span> */}
         </a>
 
         {/* Desktop Nav */}
@@ -52,7 +54,7 @@ export const Navbar: React.FC = () => {
             </a>
           ))}
           <button className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white text-sm font-bold transition">
-            Book AI Consultation
+            Start an AI Pilot
           </button>
         </div>
 
@@ -79,7 +81,7 @@ export const Navbar: React.FC = () => {
             </a>
           ))}
           <button className="w-full py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2">
-            Book AI Consultation
+            Start an AI Pilot
           </button>
         </div>
       )}

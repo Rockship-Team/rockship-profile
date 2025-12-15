@@ -21,17 +21,19 @@ export const Company: React.FC = () => {
               EST. 2024
             </div>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6 leading-tight">
-              We are builders of the <br />
+              We build and operate
+              <br />
               <span className="text-white decoration-rockship-accent/50 underline decoration-4 underline-offset-4">
-                Intelligence Age
+                enterprise AI systems.
               </span>
             </h2>
             <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-              Rockship AI was founded by a team of ex-DeepMind and OpenAI
-              researchers with a singular mission: to democratize access to
-              safe, enterprise-grade artificial intelligence. We believe that
-              powerful AI should be accessible, transparent, and aligned with
-              human progress.
+              - Rockship partners with enterprises to design, deploy, and scale
+              AI systems that automate real business workflows.
+              <br />
+              - We work end-to-end — from problem definition and system
+              architecture, to production deployment and ongoing operations —
+              helping organizations turn AI into measurable operational impact.
             </p>
 
             <div className="grid grid-cols-2 gap-8 mb-10">

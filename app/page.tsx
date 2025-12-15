@@ -1,18 +1,15 @@
 "use client";
 
 import { Clients } from "@/components/landing/Clients";
-import { Testimonials } from "@/components/landing/Testimonials";
 import { Footer } from "../components/Footer";
 import { GeminiAssistant } from "../components/GeminiAssistant";
-import { BuildAISection } from "../components/landing/BuildAISection";
 import CareerCTA from "../components/landing/CareerCTA";
 import { CaseStudies } from "../components/landing/CaseStudies";
 import { Company } from "../components/landing/Company";
 import { Hero } from "../components/landing/Hero";
 import { Platform } from "../components/landing/Platform";
-import { Research } from "../components/landing/Research";
 import { Solutions } from "../components/landing/Solutions";
-import { TechStack } from "../components/landing/TechStack";
+import { WhyUs } from "../components/landing/WhyUs";
 import { Navbar } from "../components/Navbar";
 
 export default function Home() {
@@ -21,15 +18,16 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <Clients />
         <Platform />
         <Solutions />
-        <TechStack />
+        <Clients />
+        {/* <TechStack /> */}
         <CaseStudies />
-        <Research />
-        <BuildAISection />
+        {/* <Research /> */}
+        {/* <BuildAISection /> */}
+        <WhyUs />
         <Company />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <CareerCTA />
       </main>
       <Footer />

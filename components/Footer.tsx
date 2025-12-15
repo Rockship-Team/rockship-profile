@@ -1,4 +1,5 @@
 import { Github, Linkedin, Twitter } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 
 export const Footer: React.FC = () => {
@@ -7,14 +8,19 @@ export const Footer: React.FC = () => {
       <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 mb-12">
         <div className="col-span-2">
           <div className="text-2xl font-display font-bold text-white mb-4">
-            <span className="text-white lowercase font-medium tracking-tighter">
+            <Image
+              src="/rockship.svg"
+              alt="Rockship"
+              width={150}
+              height={150}
+            />
+            {/* <span className="text-white lowercase font-medium tracking-tighter">
               rockship
-            </span>
-            <span className="gradient-text">AI</span>
+            </span> */}
+            {/* <span className="gradient-text">AI</span> */}
           </div>
           <p className="max-w-xs mb-6">
-            Accelerating human potential through scalable, ethical, and secure
-            AI infrastructure.
+            Enterprise AI systems, built for real-world operations.
           </p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-rockship-accent transition">
@@ -39,17 +45,12 @@ export const Footer: React.FC = () => {
             </li>
             <li>
               <a href="#" className="hover:text-rockship-accent transition">
-                Computer Vision
+                AI Agents & Workflow Intelligence
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-rockship-accent transition">
-                Data Annotation
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-rockship-accent transition">
-                Government & Defense
+                Computer Vision & Document AI
               </a>
             </li>
           </ul>
@@ -59,22 +60,26 @@ export const Footer: React.FC = () => {
           <h4 className="font-bold text-white mb-4">Company</h4>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
+              <a
+                href="#about"
+                className="hover:text-rockship-accent transition"
+              >
                 About Us
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
-                Careers
+              <a
+                href="#case-studies"
+                className="hover:text-rockship-accent transition"
+              >
+                Case Studies
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
-                Research
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-rockship-accent transition">
+              <a
+                href="#contact"
+                className="hover:text-rockship-accent transition"
+              >
                 Contact
               </a>
             </li>
@@ -83,7 +88,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-6 border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>&copy; 2024 RockshipAI Solutions. All rights reserved.</div>
+        <div>&copy; 2025 Rockship AI. All rights reserved.</div>
         <div className="flex gap-6">
           <a href="#" className="hover:text-white transition">
             Privacy Policy

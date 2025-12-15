@@ -29,17 +29,16 @@ export const Hero: React.FC = () => {
           <div className="text-left pointer-events-auto">
             <FadeIn delay={100}>
               <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-2xl">
-                From AI Strategy <br />
-                <span className="gradient-text">To AI Operations</span>
+                Turning Enterprise Operations <br />
+                <span className="gradient-text">into AI-Driven Systems </span>
               </h1>
             </FadeIn>
 
             <FadeIn delay={200}>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl mb-10 leading-relaxed drop-shadow-md">
-                We help enterprises <b>design</b>, <b>build</b>, and{" "}
-                <b>deploy AI-driven systems</b>
-                that automate workflows, integrate with existing operations, and
-                deliver measurable business impact.
+                We consult, design, and deploy production-ready AI automation
+                that streamlines operations and delivers measurable business
+                impact.
               </p>
             </FadeIn>
 
@@ -52,7 +51,7 @@ export const Hero: React.FC = () => {
                 aria-label="Explore Rockship AI Platform"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  Book AI Consultation{" "}
+                  Book an AI Discovery Call{" "}
                   <ArrowRight size={20} aria-hidden="true" />
                 </span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
