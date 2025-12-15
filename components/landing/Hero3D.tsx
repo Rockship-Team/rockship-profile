@@ -48,18 +48,28 @@ const NeuralNetwork = ({ count = 100, color = "#6366f1" }) => {
 
   const groupRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  const timeRef = useRef(0);
+
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
+
+    // Limit delta to avoid huge jumps after tab switching
+    const dt = Math.min(delta, 0.1);
+    timeRef.current += dt;
+
     const x = state.pointer.x * 0.5;
     const y = state.pointer.y * 0.5;
+
     groupRef.current.rotation.x = THREE.MathUtils.lerp(
       groupRef.current.rotation.x,
       y * 0.1,
       0.1
     );
+
+    // Use local accumulated time instead of state.clock.elapsedTime
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      x * 0.1 + state.clock.elapsedTime * 0.02,
+      x * 0.1 + timeRef.current * 0.02,
       0.1
     );
   });
@@ -210,10 +220,16 @@ const AISphere = () => {
     });
   }, []);
 
-  useFrame((state) => {
+  const rotationTimeRef = useRef(0);
+
+  useFrame((state, delta) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
     const { pointer } = state;
+
+    // Cap delta to prevent spinning glitch on tab switch
+    const dt = Math.min(delta, 0.1);
+    rotationTimeRef.current += dt;
 
     // Movement intensity
     const moveIntensity = 0.5; // Sensitivity to mouse movement
@@ -254,9 +270,10 @@ const AISphere = () => {
 
     // Dynamic rotation dependent on mouse
     // Base rotation + mouse influence
+    // Use manually accumulated time (rotationTimeRef) to avoid jumps
     meshRef.current.rotation.y = THREE.MathUtils.lerp(
       meshRef.current.rotation.y,
-      time * 0.15 + pointer.x * 0.5,
+      rotationTimeRef.current * 0.15 + pointer.x * 0.5,
       0.05
     );
     meshRef.current.rotation.z = THREE.MathUtils.lerp(
