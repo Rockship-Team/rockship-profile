@@ -1,25 +1,25 @@
 import { platformData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
-  Cpu,
-  Database,
-  Globe,
-  Layers,
+  ClipboardList,
+  Coins,
+  FileStack,
+  Hourglass,
   LucideIcon,
-  Rocket,
-  Settings,
+  ScanEye,
+  Users,
 } from "lucide-react";
 import React from "react";
 import { FadeIn } from "../FadeIn";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
-  Cpu,
-  Database,
-  Globe,
-  Layers,
-  Rocket,
-  Settings,
+  ClipboardList,
+  FileStack,
+  Hourglass,
+  ScanEye,
+  Users,
+  Coins,
 };
 
 const PlatformCard: React.FC<{
@@ -58,24 +58,25 @@ export const Platform: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10">
         <FadeIn className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
-            <Rocket className="text-rockship-accent w-5 h-5" />
+            <ClipboardList className="text-rockship-accent w-5 h-5" />
             <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
               Operational Challenges
             </span>
           </div>
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            The Enterprise Problems We {" "}
+            The Enterprise Problems We{" "}
             <span className="gradient-text">Solve</span>
           </h2>
           <p className="text-xl text-rockship-300 max-w-2xl mx-auto">
-          We focus on the operational bottlenecks that slow enterprises down — and turn them into scalable, automated systems.
+            We focus on the operational bottlenecks that slow enterprises down —
+            and turn them into scalable, automated systems.
           </p>
         </FadeIn>
 
         <FadeIn>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {platformData.features.map((feature, index) => {
-              const Icon = iconMap[feature.icon] || Cpu;
+              const Icon = iconMap[feature.icon] || ClipboardList;
               return (
                 <PlatformCard
                   key={index}

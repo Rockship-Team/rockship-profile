@@ -58,8 +58,11 @@ export function Clients() {
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--color-rockship-800)_0%,_transparent_70%)] opacity-20 pointer-events-none" />
 
-      <FadeIn className="container text-center relative z-10 px-4">
-        <p className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400">
+      <FadeIn className="container text-center relative z-10 px-4 flex flex-col items-center">
+        <span className="text-sm md:text-base font-bold tracking-[0.2em] text-indigo-400 uppercase">
+          Trusted by Enterprise Teams
+        </span>
+        <p className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400 mt-4 max-w-3xl">
           Trusted by Enterprises to Build Real AI Operations
         </p>
       </FadeIn>

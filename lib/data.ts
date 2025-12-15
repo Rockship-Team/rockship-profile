@@ -19,14 +19,12 @@ export const companyData = {
     {
       name: "Ngoc Tran",
       role: "CEO & Founder",
-      image:
-        "Ngoc.png",
+      image: "Ngoc.png",
     },
     {
       name: "Quan Do",
       role: "Head of Engineering",
-      image:
-        "Quan.png",
+      image: "Quan.png",
     },
   ],
 
@@ -51,32 +49,32 @@ export const heroData = {
 export const platformData = {
   features: [
     {
-      icon: "Cpu",
+      icon: "ClipboardList",
       title: "Manual-Heavy Operational Workflows",
       desc: "Core operational processes rely heavily on manual, repetitive tasks, slowing execution and increasing operational risk and cost.",
     },
     {
-      icon: "Database",
+      icon: "FileStack",
       title: "Fragmented Systems & Data Silos",
       desc: "Operational data lives across disconnected systems, preventing end-to-end automation and creating delays in decision-making.",
     },
     {
-      icon: "Globe",
+      icon: "Hourglass",
       title: "Slow Internal Support & Operations Response",
       desc: "Internal support and operations teams struggle with growing request volumes due to manual triage and inefficient handoffs.",
     },
     {
-      icon: "Layers",
+      icon: "ScanEye",
       title: "Limited Real-Time Operational Visibility",
       desc: "Leaders lack real-time visibility into operations, resulting in reactive decisions instead of proactive control.",
     },
     {
-      icon: "Settings",
+      icon: "Coins",
       title: "High Operational Cost with Low Automation",
       desc: "Operations scale by adding headcount rather than systems, driving higher costs without proportional efficiency gains.",
     },
     {
-      icon: "Rocket",
+      icon: "Users",
       title: "Scaling Operations Without Scaling Headcount",
       desc: "Enterprises face difficulty expanding operations while maintaining consistency, quality, and control across teams.",
     },
@@ -87,25 +85,25 @@ export const platformData = {
 export const solutionsData = {
   solutions: [
     {
-      icon: "Brain",
+      icon: "ScanSearch",
       title: "Discover & Prioritize Operational Problems",
       desc: "We work with your stakeholders to understand real workflows, constraints, and operational bottlenecks — and identify where automation can create the highest business impact.",
       size: "large",
     },
     {
-      icon: "Eye",
+      icon: "DraftingCompass",
       title: "Design AI Systems Around Your Operations",
       desc: "We design AI systems that fit your existing processes, data, and governance model — ensuring reliability, compliance, and adoption from day one.",
       size: "standard",
     },
     {
-      icon: "GitBranch",
+      icon: "Network",
       title: "Build, Integrate, and Deploy in Production",
       desc: "We build production-ready systems and integrate them into your enterprise environment — with security, monitoring, and operational ownership clearly defined.",
       size: "standard",
     },
     {
-      icon: "Mic",
+      icon: "Gauge",
       title: "Operate, Optimize, and Scale",
       desc: "After deployment, we continuously monitor performance, expand automation coverage, and support scaling across teams, regions, and use cases.",
       size: "standard",
@@ -220,7 +218,6 @@ export const caseStudiesData = [
   },
 ];
 
-
 export const researchData = [
   {
     icon: "Network",
@@ -302,22 +299,26 @@ export const testimonialsData = [
 export const whyUsData = [
   {
     title: "AI Native",
-    description: "We don't just add AI to existing software. We rebuild workflows from the ground up with AI as the core engine.",
+    description:
+      "We don't just add AI to existing software. We rebuild workflows from the ground up with AI as the core engine.",
     icon: "BrainCircuit",
   },
   {
     title: "Production Ready",
-    description: "Our solutions are not POCs. We build robust, scalable systems designed for high-availability enterprise environments.",
+    description:
+      "Our solutions are not POCs. We build robust, scalable systems designed for high-availability enterprise environments.",
     icon: "Rocket",
   },
   {
     title: "Data Secure",
-    description: "Your data is your IP. We deploy private models within your infrastructure with banking-grade security and compliance.",
+    description:
+      "Your data is your IP. We deploy private models within your infrastructure with banking-grade security and compliance.",
     icon: "ShieldCheck",
   },
   {
     title: "Fast Implementation",
-    description: "We move fast. From discovery to deployment in weeks, not months, delivering immediate ROI.",
+    description:
+      "We move fast. From discovery to deployment in weeks, not months, delivering immediate ROI.",
     icon: "Zap",
   },
 ];

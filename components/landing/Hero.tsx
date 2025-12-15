@@ -28,7 +28,7 @@ export const Hero: React.FC = () => {
           {/* Text Content - Enable pointer events for buttons/text */}
           <div className="text-left pointer-events-auto">
             <FadeIn delay={100}>
-              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight drop-shadow-2xl">
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight drop-shadow-2xl">
                 Turning Enterprise Operations <br />
                 <span className="gradient-text">into AI-Driven Systems </span>
               </h1>

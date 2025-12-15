@@ -17,9 +17,9 @@ export const Company: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn>
-            <div className="inline-block px-3 py-1 bg-white/5 rounded-full border border-white/10 text-xs font-mono text-rockship-accent mb-6">
+            {/* <div className="inline-block px-3 py-1 bg-white/5 rounded-full border border-white/10 text-xs font-mono text-rockship-accent mb-6">
               EST. 2024
-            </div>
+            </div> */}
             <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6 leading-tight">
               We build and operate
               <br />
@@ -28,15 +28,15 @@ export const Company: React.FC = () => {
               </span>
             </h2>
             <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-              - Rockship partners with enterprises to design, deploy, and scale
+              Rockship partners with enterprises to design, deploy, and scale
               AI systems that automate real business workflows.
               <br />
-              - We work end-to-end — from problem definition and system
+              We work end-to-end — from problem definition and system
               architecture, to production deployment and ongoing operations —
               helping organizations turn AI into measurable operational impact.
             </p>
 
-            <div className="grid grid-cols-2 gap-8 mb-10">
+            <div className="grid grid-cols-3 gap-8 mb-10">
               {companyData.companyStats.map((stat, index) => (
                 <div key={index}>
                   <h4 className="text-3xl font-bold text-white mb-1">

@@ -14,11 +14,8 @@ export default function CareerCTA() {
           business impact.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button className="px-8 py-3 bg-white text-rockship-900 font-bold rounded-lg hover:bg-gray-100 transition hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto">
-            Schedule an AI Consultation
-          </button>
           <button className="px-8 py-3 bg-transparent border border-gray-600 text-white font-bold rounded-lg hover:border-white transition hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto">
-            Join Our Team
+            Schedule an AI Consultation
           </button>
         </div>
       </FadeIn>

@@ -1,12 +1,12 @@
 import { solutionsData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import {
-  Brain,
-  Eye,
-  GitBranch,
+  DraftingCompass,
+  Gauge,
   LayoutTemplate,
   LucideIcon,
-  Mic,
+  Network,
+  ScanSearch,
   Server,
   Zap,
 } from "lucide-react";
@@ -15,10 +15,10 @@ import { FadeIn } from "../FadeIn";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
-  Brain,
-  Eye,
-  GitBranch,
-  Mic,
+  ScanSearch,
+  DraftingCompass,
+  Network,
+  Gauge,
 };
 
 const SpotlightCard: React.FC<{
@@ -146,7 +146,7 @@ export const Solutions: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             {/* Solution Cards */}
             {solutionsData.solutions.map((solution, index) => {
-              const Icon = iconMap[solution.icon] || Brain;
+              const Icon = iconMap[solution.icon] || ScanSearch;
               const cardClass = ""; // Use default 1x1 size for regularity, or adapt if needed
 
               return (
