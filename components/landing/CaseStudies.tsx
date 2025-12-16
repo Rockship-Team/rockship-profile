@@ -10,6 +10,8 @@ import Autoplay from "embla-carousel-autoplay";
 import React from "react";
 import { CaseStudyCard } from "../CaseStudyCard";
 import { FadeIn } from "../FadeIn";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 export const CaseStudies: React.FC = () => {
   return (
@@ -75,6 +77,17 @@ export const CaseStudies: React.FC = () => {
             <div className="flex justify-end gap-4 mt-8 md:hidden">
               <CarouselPrevious className="static translate-y-0 translate-x-0 border-white/10 text-white hover:bg-rockship-accent hover:border-rockship-accent hover:text-white transition-all duration-300" />
               <CarouselNext className="static translate-y-0 translate-x-0 border-white/10 text-white hover:bg-rockship-accent hover:border-rockship-accent hover:text-white transition-all duration-300" />
+            </div>
+
+            <div className="flex justify-center mt-12">
+              <Link href="/case-studies">
+                <Button
+                  variant="outline"
+                  className="rounded-full border-white/10 text-rockship-200 hover:bg-white/5 hover:text-white hover:border-white/20 transition-all font-medium py-6 px-8"
+                >
+                  View All Case Studies
+                </Button>
+              </Link>
             </div>
           </Carousel>
         </FadeIn>

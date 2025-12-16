@@ -177,14 +177,185 @@ export const techStackData = {
 
 export const caseStudiesData = [
   {
+    slug: "ai-loan-automation",
     type: "Case Studies",
     title:
       "Automated borrower engagement, document validation, and credit assessment — cutting loan approval time by up to 70%.",
     logoText: "AI Loan Automation for Microfinance",
     partner: "",
     industries: ["AI", "Fintech", "Microfinance", "Lending"],
+    content: {
+      executiveSummary:
+        "Rockship partnered with a FinTech company in Indonesia to revolutionize their loan application process through AI-powered document processing and customer interaction systems. The solution increased loan officer productivity by 150%, reducing processing time from several weeks to just one week while maintaining quality standards.",
+      challenge: {
+        description:
+          "The company faced significant operational inefficiencies in their loan application process:",
+        painPoints: [
+          "Limited Processing Capacity: Each loan officer could only handle 20 applications per week",
+          "Extensive Documentation Requirements: Complex document submission processes",
+          "Communication Bottlenecks: Continuous back-and-forth with applicants for missing information",
+          "Manual Data Extraction: Time-intensive document review and data entry",
+          "Delayed Approvals: Processing times stretched across several weeks",
+        ],
+        businessImpact: [
+          "Reduced customer satisfaction due to lengthy approval times",
+          "Limited growth potential due to processing constraints",
+          "High operational costs relative to loan volume",
+          "Missed opportunities for new product offerings",
+        ],
+      },
+      solution: {
+        description:
+          "Rockship implemented an AI-driven loan processing system featuring:",
+        components: [
+          {
+            title: "Intelligent Document Processing",
+            details: [
+              "Automated extraction and indexing of loan documents",
+              "Data validation and verification systems",
+              "Integration with existing company documentation standards",
+            ],
+          },
+          {
+            title: "AI-Powered Customer Interaction",
+            details: [
+              "Conversational AI agents with pre-configured question sets",
+              "Proactive document collection prompts",
+              "Real-time application status updates",
+              "QR code accessibility for mobile-first experience",
+            ],
+          },
+          {
+            title: "CRM Integration & Product Recommendations",
+            details: [
+              "Seamless connection with the client's existing CRM system",
+              "Intelligent loan product matching based on customer profiles",
+              "Automated cross-selling and upselling opportunities",
+            ],
+          },
+          {
+            title: "Streamlined Officer Portal",
+            details: [
+              "Real-time application streaming to loan officers",
+              "Pre-processed data packages for faster decision-making",
+              "Integrated approval workflows",
+            ],
+          },
+        ],
+      },
+      results:
+        "The 150% increase in processing capacity, combined with dramatic time savings, positions the client for sustained growth while maintaining quality service standards.",
+      implementation: {
+        totalTime: "5 weeks",
+        phases: [
+          {
+            phase: "Phase 1: Foundation (2 weeks)",
+            details: [
+              "Document extraction and indexing system deployment",
+              "Integration with the client's existing loan document repository",
+              "AI model training on company-specific requirements",
+            ],
+          },
+          {
+            phase: "Phase 2: Customer Interface (1 week)",
+            details: [
+              "Chatbot development and testing",
+              "QR code deployment for easy customer access",
+              "User experience optimization",
+            ],
+          },
+          {
+            phase: "Phase 3: System Integration (2 weeks)",
+            details: [
+              "CRM connectivity establishment",
+              "Loan product recommendation engine configuration",
+              "Officer portal integration and testing",
+            ],
+          },
+        ],
+      },
+      outcomes: {
+        quantitative: [
+          "Applications per officer: Increased from 20 to 50+ → 2.5× productivity",
+          "Processing time: Reduced from several weeks to 1 week → 70–85% faster",
+          "Document collection: Shifted from manual follow-ups to automated prompts → 90% automation",
+        ],
+        qualitative: [
+          {
+            category: "Operational Excellence",
+            details: [
+              "Reduced manual workload for loan officers",
+              "Improved data accuracy through automated extraction",
+              "Enhanced compliance through consistent documentation",
+            ],
+          },
+          {
+            category: "Customer Experience",
+            details: [
+              "Faster application processing and approval times",
+              "24/7 availability for document submission",
+              "Transparent application status tracking",
+              "Mobile-optimized interaction through QR codes",
+            ],
+          },
+          {
+            category: "Business Growth",
+            details: [
+              "Increased loan processing capacity",
+              "Enhanced ability to serve new customer segments",
+              "Improved cross-selling capabilities through AI recommendations",
+              "Better resource allocation and staff productivity",
+            ],
+          },
+        ],
+      },
+      successFactors: [
+        {
+          factor: "Technology Integration",
+          points: [
+            "Seamless integration with existing CRM systems",
+            "Robust document processing capabilities",
+            "User-friendly interface design",
+            "Real impact if not resolved: Disjointed systems slow processing and reduce lead conversion.",
+          ],
+        },
+        {
+          factor: "Change Management",
+          points: [
+            "Comprehensive staff training on new systems",
+            "Gradual rollout to ensure smooth transition",
+            "Continuous support and optimization",
+            "Real impact if not resolved: Low staff adoption causes delays, errors, and failed implementation.",
+          ],
+        },
+        {
+          factor: "Customer Adoption",
+          points: [
+            "Simple QR code access method",
+            "Intuitive chatbot interactions",
+            "Clear communication about process improvements",
+            "Real impact if not resolved: Poor engagement leads to missed conversions and weak ROI.",
+          ],
+        },
+      ],
+      conclusion:
+        "The partnership between Rockship and a FinTech company in Indonesia demonstrates the transformative potential of AI in microfinance operations. By automating document processing and customer interactions, the solution not only improved operational efficiency but also enhanced customer experience and business growth potential.",
+      images: {
+        hero: "/images/case-studies/ai-loan-automation/hero-main.png",
+        solutionRender:
+          "/images/case-studies/ai-loan-automation/microfinance-hub.png",
+        architecture:
+          "/images/case-studies/ai-loan-automation/architecture-diagram.png",
+        implementation: [
+          "/images/case-studies/ai-loan-automation/process-before.png",
+          "/images/case-studies/ai-loan-automation/process-after.png",
+        ],
+        results: "/images/case-studies/ai-loan-automation/results-chart.png",
+      },
+    },
   },
   {
+    slug: "ai-conversational-commerce",
     type: "Case Studies",
     title:
       "24/7 AI chatbot enabled product discovery, instant ordering, and automated support — driving 35% revenue growth and 140% ROI within 6 months.",
@@ -193,6 +364,7 @@ export const caseStudiesData = [
     industries: ["AI", "E-commerce", "Food Distribution", "B2B Sales"],
   },
   {
+    slug: "ai-womens-wellness-coach",
     type: "Case Studies",
     title:
       "Culturally-aware AI coaching for female health, fitness, and lifestyle — improving goal achievement by up to 84% with privacy-first, 24/7 support.",
@@ -201,6 +373,7 @@ export const caseStudiesData = [
     industries: ["AI", "HealthTech", "Wellness", "Lifestyle"],
   },
   {
+    slug: "ai-finance-automation",
     type: "Case Studies",
     title:
       "Automated invoice processing, consolidated financial reporting, and settlement workflows — reducing manual operations by over 60% across clinic networks.",
@@ -209,6 +382,7 @@ export const caseStudiesData = [
     industries: ["AI", "HealthTech", "Dental Clinics", "Finance Automation"],
   },
   {
+    slug: "ai-resident-support-automation",
     type: "Case Studies",
     title:
       "Centralized knowledge chatbot handling resident inquiries in real time — reducing manual workload by 92.5% and boosting response accuracy to 98%.",

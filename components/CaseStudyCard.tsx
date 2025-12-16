@@ -1,7 +1,9 @@
 import { ArrowRight, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 interface CaseStudyCardData {
+  slug?: string;
   type: string;
   title: string;
   logoText: string;
@@ -13,8 +15,11 @@ interface CaseStudyCardProps {
   index: number;
 }
 
-export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ item, index }) => {
-  return (
+export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
+  item,
+  index,
+}) => {
+  const CardContent = (
     <div className="group relative h-full flex flex-col glass rounded-2xl p-1 transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-rockship-accent/10">
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none" />
 
@@ -50,4 +55,17 @@ export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ item, index }) => 
       </div>
     </div>
   );
+
+  if (item.slug) {
+    return (
+      <Link
+        href={`/case-studies/${item.slug}`}
+        className="block h-full cursor-pointer"
+      >
+        {CardContent}
+      </Link>
+    );
+  }
+
+  return CardContent;
 };
