@@ -5,22 +5,55 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
+// --- Reusable Layer for the looping effect ---
+const NetworkLayer = ({ points, connections, material }: any) => {
+  return (
+    <group>
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[points, 3]} />
+        </bufferGeometry>
+        <primitive object={material} attach="material" />
+      </points>
+      <lineSegments>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[connections, 3]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color={material.uniforms.uColor.value}
+          transparent
+          opacity={0.35}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </lineSegments>
+    </group>
+  );
+};
+
 // --- Logic for Neural Network Background ---
-const NeuralNetwork = ({ count = 100, color = "#6366f1" }) => {
+const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
+  const { gl } = useThree();
+  const width = 70; // Width of one seamless tile
+
+  // Generate points within the width range for seamless tiling
   const points = useMemo(() => {
     const p = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 35;
-      const y = (Math.random() - 0.5) * 20;
-      // FIX: Push points deeper into background (Z: -20 to -10)
-      // This ensures they definitely render behind the main object (Z ~ 0 + radius)
+      // Spread X across the full width [-width/2, width/2]
+      const x = (Math.random() - 0.5) * width;
+      const y = (Math.random() - 0.5) * 24; // Increased Y height
+      // Deep Z range
       const z = -10 - Math.random() * 15;
       p[i * 3] = x;
       p[i * 3 + 1] = y;
       p[i * 3 + 2] = z;
     }
     return p;
-  }, [count]);
+  }, [count, width]);
 
   const connections = useMemo(() => {
     const linePos = [];
@@ -36,8 +69,8 @@ const NeuralNetwork = ({ count = 100, color = "#6366f1" }) => {
         const dist = Math.sqrt(
           (x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2
         );
-        if (dist < 4.5) {
-          // Increased connection distance for background
+        if (dist < 5.5) {
+          // Slightly increased visual connection distance
           linePos.push(x1, y1, z1);
           linePos.push(x2, y2, z2);
         }
@@ -46,57 +79,120 @@ const NeuralNetwork = ({ count = 100, color = "#6366f1" }) => {
     return new Float32Array(linePos);
   }, [points, count]);
 
-  const groupRef = useRef<THREE.Group>(null);
-
+  const containerRef = useRef<THREE.Group>(null);
+  const group1Ref = useRef<THREE.Group>(null);
+  const group2Ref = useRef<THREE.Group>(null);
   const timeRef = useRef(0);
 
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
+  // Custom Shader for Glowing, Pulsing Dots
+  const dotMaterial = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Color(color) },
+          uTime: { value: 0 },
+          uPixelRatio: { value: gl.getPixelRatio() },
+        },
+        vertexShader: `
+      uniform float uTime;
+      uniform float uPixelRatio;
+      varying vec3 vPosition;
+      
+      void main() {
+        vPosition = position;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+        
+        // Pulse modulation based on position and time
+        float noise = sin(uTime * 2.0 + position.x * 0.5 + position.y * 0.5);
+        float scale = 1.0 + 0.4 * noise;
+        
+        // Size attenuation
+        gl_PointSize = 12.0 * scale * uPixelRatio * (10.0 / -mvPosition.z);
+      }
+    `,
+        fragmentShader: `
+      uniform vec3 uColor;
+      
+      void main() {
+        vec2 center = gl_PointCoord - 0.5;
+        float dist = length(center);
+        if (dist > 0.5) discard;
+        float glow = 1.0 - smoothstep(0.05, 0.5, dist);
+        float alpha = glow * 1.0; 
+        gl_FragColor = vec4(uColor, alpha);
+      }
+    `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    [color, gl]
+  );
 
-    // Limit delta to avoid huge jumps after tab switching
+  // Clean up shader material on unmount to prevent WebGL memory leaks
+  React.useEffect(() => {
+    return () => {
+      dotMaterial.dispose();
+    };
+  }, [dotMaterial]);
+
+  useFrame((state, delta) => {
+    if (!containerRef.current || !group1Ref.current || !group2Ref.current)
+      return;
+
+    // Pulse time
+    dotMaterial.uniforms.uTime.value = state.clock.elapsedTime;
+
     const dt = Math.min(delta, 0.1);
     timeRef.current += dt;
 
-    const x = state.pointer.x * 0.5;
-    const y = state.pointer.y * 0.5;
+    // 1. Mouse Interaction (Tilt/Pan) on the CONTAINER
+    const xMouse = state.pointer.x * 0.5;
+    const yMouse = state.pointer.y * 0.5;
 
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
-      y * 0.1,
+    containerRef.current.rotation.x = THREE.MathUtils.lerp(
+      containerRef.current.rotation.x,
+      yMouse * 0.1,
+      0.1
+    );
+    containerRef.current.rotation.y = THREE.MathUtils.lerp(
+      containerRef.current.rotation.y,
+      xMouse * 0.1, // Reduced Y-rotation range since we have scanning now
       0.1
     );
 
-    // Use local accumulated time instead of state.clock.elapsedTime
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
-      x * 0.1 + timeRef.current * 0.02,
-      0.1
-    );
+    // 2. Infinite Scroll Animation (Right to Left)
+    const speed = 1.0;
+    // Moving Left: decrease X.
+    // Modulo ensures it stays within [0, -width] range relative to loop
+    // We add an offset to center the initial view if needed, but simple scrolling is fine.
+    const scrollPos = (state.clock.elapsedTime * speed) % width;
+
+    // Group 1: Moves left. When it hits -width, it effectively wraps because of how we pair it with Group 2.
+    // Actually, simple standard carousel logic:
+    // Move frame of reference:
+    group1Ref.current.position.x = -scrollPos;
+    group2Ref.current.position.x = -scrollPos + width;
   });
 
   return (
-    <group ref={groupRef}>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[points, 3]} />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.15}
-          color={color}
-          transparent
-          opacity={0.5}
-          sizeAttenuation
+    <group ref={containerRef}>
+      {/* Render two copies for seamless loop */}
+      <group ref={group1Ref}>
+        <NetworkLayer
+          points={points}
+          connections={connections}
+          material={dotMaterial}
         />
-      </points>
-      <lineSegments>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[connections, 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color={color} transparent opacity={0.1} />
-      </lineSegments>
+      </group>
+      <group ref={group2Ref}>
+        <NetworkLayer
+          points={points}
+          connections={connections}
+          material={dotMaterial}
+        />
+      </group>
     </group>
   );
 };
@@ -220,7 +316,17 @@ const AISphere = () => {
     });
   }, []);
 
+  // Dispose material on unmount to prevent GPU memory leak
+  React.useEffect(() => {
+    return () => {
+      shaderMaterial.dispose();
+    };
+  }, [shaderMaterial]);
+
   const rotationTimeRef = useRef(0);
+
+  // Reusable vector to avoid garbage collection churn in useFrame
+  const anchorVec = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
     if (!meshRef.current) return;
@@ -243,9 +349,11 @@ const AISphere = () => {
     );
 
     // Calculate proximity to the object's base position to limit influence
-    const anchor = new THREE.Vector3(positionX, positionY, 0);
-    anchor.project(state.camera); // Project world position to NDC
-    const dist = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y);
+    // Use reusable vector and reset it every frame
+    anchorVec.set(positionX, positionY, 0);
+    anchorVec.project(state.camera); // Project world position to NDC
+
+    const dist = Math.hypot(pointer.x - anchorVec.x, pointer.y - anchorVec.y);
     const proximity = 1.0 - THREE.MathUtils.smoothstep(0.0, 0.8, dist); // Radius approx 0.8 NDC
 
     // Calculate target position combining base position, floating, and mouse sway
