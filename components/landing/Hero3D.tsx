@@ -420,7 +420,7 @@ const SceneContent = () => {
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
       {/* Background (Pushed to Z < -5) */}
-      <NeuralNetwork count={150} color="#818cf8" />
+      {/* <NeuralNetwork count={150} color="#818cf8" /> */}
 
       {/* Foreground Hero Blob */}
       <AISphere />

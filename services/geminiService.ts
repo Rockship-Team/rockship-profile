@@ -27,7 +27,8 @@ IMPORTANT: You MUST populate the JSON fields using the EXACT values found in the
 {
   "type": "case_study",
   "data": {
-    "type": "Partner", 
+    "slug": "Exact slug from context",
+    "type": "Case Studies", 
     "title": "Exact title from context",
     "logoText": "Exact logoText from context",
     "partner": "Exact partner from context"

@@ -7,10 +7,10 @@ import {
 } from "@/components/ui/carousel";
 import { caseStudiesData } from "@/lib/data";
 import Autoplay from "embla-carousel-autoplay";
+import Link from "next/link";
 import React from "react";
 import { CaseStudyCard } from "../CaseStudyCard";
 import { FadeIn } from "../FadeIn";
-import Link from "next/link";
 import { Button } from "../ui/button";
 
 export const CaseStudies: React.FC = () => {
@@ -60,7 +60,7 @@ export const CaseStudies: React.FC = () => {
               {caseStudiesData.map((item, index) => (
                 <CarouselItem
                   key={index}
-                  className="pl-6 md:basis-1/2 lg:basis-1/3"
+                  className="pl-6 md:basis-1/2 lg:basis-1/3 h-full"
                 >
                   <CaseStudyCard item={item} index={index} />
                 </CarouselItem>

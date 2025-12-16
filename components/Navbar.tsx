@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
         <a
-          href="#home"
+          href="/"
           className="text-2xl font-display font-bold text-white tracking-tight"
         >
           <Image src="/rockship.svg" alt="Rockship" width={150} height={150} />
