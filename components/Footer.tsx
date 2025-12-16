@@ -92,9 +92,11 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>&copy; 2025 Rockship AI. All rights reserved.</div>
-        <div className="flex gap-6">
+      <div className="container mx-auto px-6 border-t border-white/5 pt-8 grid md:grid-cols-4 gap-12">
+        <div className="col-span-2">
+          &copy; 2025 Rockship AI. All rights reserved.
+        </div>
+        <div className="col-span-2 flex md:flex-col md:flex-row gap-6 lg:gap-[13%]">
           <a href="#" className="hover:text-white transition">
             Privacy Policy
           </a>

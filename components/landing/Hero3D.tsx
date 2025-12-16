@@ -430,7 +430,7 @@ const SceneContent = () => {
         radius={100}
         depth={50}
         count={3000}
-        factor={4}
+        factor={12}
         saturation={0}
         fade
         speed={1}
