@@ -39,6 +39,7 @@ jobs:
       env:
         # Application environment variables
         NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
+        NEXT_PUBLIC_RESEND_API_KEY: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY }}
 
   # Deploy to Production (main branch only)
   deploy_production:
@@ -63,4 +64,5 @@ jobs:
       env:
         # Application environment variables
         NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
+        NEXT_PUBLIC_RESEND_API_KEY: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY }}
 

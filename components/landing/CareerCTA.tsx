@@ -1,4 +1,5 @@
 import { FadeIn } from "../FadeIn";
+import Link from "next/link";
 
 export default function CareerCTA() {
   return (
@@ -14,9 +15,12 @@ export default function CareerCTA() {
           business impact.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button className="px-8 py-3 bg-transparent border border-gray-600 text-white font-bold rounded-lg hover:border-white transition hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto">
+          <Link
+            href="/contact"
+            className="px-8 py-3 bg-transparent border border-gray-600 text-white font-bold rounded-lg hover:border-white transition hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto"
+          >
             Schedule an AI Consultation
-          </button>
+          </Link>
         </div>
       </FadeIn>
     </section>

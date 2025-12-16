@@ -1,5 +1,6 @@
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 export const Navbar: React.FC = () => {
@@ -53,9 +54,12 @@ export const Navbar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <button className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white text-sm font-bold transition">
+          <Link
+            href="/contact"
+            className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white text-sm font-bold transition"
+          >
             Start an AI Pilot
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Toggle */}
@@ -80,9 +84,13 @@ export const Navbar: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <button className="w-full py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2">
+          <Link
+            href="/contact"
+            className="w-full block text-center py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Start an AI Pilot
-          </button>
+          </Link>
         </div>
       )}
     </nav>

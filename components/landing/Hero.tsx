@@ -1,5 +1,6 @@
 import { heroData } from "@/lib/data";
 import { ArrowRight, Play } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 import { FadeIn } from "../FadeIn";
 import { Hero3D } from "./Hero3D";
@@ -28,7 +29,7 @@ export const Hero: React.FC = () => {
           {/* Text Content - Enable pointer events for buttons/text */}
           <div className="text-left pointer-events-auto">
             <FadeIn delay={100}>
-              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight drop-shadow-2xl">
+              <h1 className="mt-6 font-display text-3xl md:text-4xl lg:text-6xl lg:whitespace-nowrap font-bold mb-8 leading-tight drop-shadow-2xl">
                 Turning Enterprise Operations <br />
                 <span className="gradient-text">into AI-Driven Systems </span>
               </h1>
@@ -50,10 +51,13 @@ export const Hero: React.FC = () => {
                 className="relative px-8 py-4 bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white rounded-lg font-bold hover:brightness-110 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] border border-white/20 overflow-hidden group"
                 aria-label="Explore Rockship AI Platform"
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <Link
+                  href="/contact"
+                  className="relative z-10 flex items-center gap-2"
+                >
                   Book an AI Discovery Call{" "}
                   <ArrowRight size={20} aria-hidden="true" />
-                </span>
+                </Link>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
 
@@ -69,21 +73,30 @@ export const Hero: React.FC = () => {
             {/* Stats Strip */}
             <FadeIn delay={400} className="pt-8">
               {heroData.title && (
-                <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-6">
+                <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-2">
                   {heroData.title}
                 </h3>
               )}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8">
-                {heroData.stats.map((stat, i) => (
-                  <div key={i} className="flex flex-col text-left">
-                    <span className="text-2xl font-display font-bold text-white">
-                      {stat.val}
-                    </span>
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">
-                      {stat.label}
-                    </span>
-                  </div>
-                ))}
+                {heroData.stats.map((stat, i) => {
+                  const isCenter = i === 1;
+                  return (
+                    <div
+                      key={i}
+                      className={
+                        "flex flex-col text-left " +
+                        (isCenter && "lg:ml-6")
+                      }
+                    >
+                      <span className="text-2xl font-display font-bold text-white">
+                        {stat.val}
+                      </span>
+                      <span className="text-xs text-gray-500 uppercase tracking-wider">
+                        {stat.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </FadeIn>
           </div>
