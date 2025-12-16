@@ -1,11 +1,11 @@
-import { Bot, Send, Sparkles, X } from "lucide-react";
+import { Send, Sparkles, X } from "lucide-react";
+import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getChatResponse, initGemini } from "../services/geminiService";
 import { ChatMessage, ChatRole } from "../types";
 import { CaseStudyCard } from "./CaseStudyCard";
-import Image from "next/image";
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -265,20 +265,14 @@ export const GeminiAssistant: React.FC = () => {
       )}
 
       {/* Floating Action Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`group flex items-center gap-2 p-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-300 border border-white/20 ${
-          isOpen
-            ? "bg-rockship-800 text-white"
-            : "bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white hover:scale-110"
-        }`}
-      >
-        {isOpen ? (
-          <X size={21} />
-        ) : (
+      {isOpen ? null : (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`group flex items-center gap-2 p-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-300 border border-white/20 ${"bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white hover:scale-110"}`}
+        >
           <Image src="/chatbot.png" alt="AI" width={50} height={50} />
-        )}
-      </button>
+        </button>
+      )}
     </div>
   );
 };

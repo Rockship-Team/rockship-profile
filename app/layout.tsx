@@ -62,6 +62,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: "/rockship-symbol.svg",
+    shortcut: "/rockship-symbol.svg",
+    apple: "/rockship-symbol.svg",
+  },
 };
 
 export const viewport: Viewport = {

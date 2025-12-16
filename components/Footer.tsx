@@ -1,4 +1,4 @@
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Facebook, Linkedin } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -23,14 +23,19 @@ export const Footer: React.FC = () => {
             Enterprise AI systems, built for real-world operations.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-rockship-accent transition">
-              <Twitter size={20} />
+            <a
+              href="https://www.facebook.com/rockship.co/"
+              className="hover:text-rockship-accent transition"
+              target="_blank"
+            >
+              <Facebook size={20} />
             </a>
-            <a href="#" className="hover:text-rockship-accent transition">
+            <a
+              href="https://www.linkedin.com/company/rockship"
+              className="hover:text-rockship-accent transition"
+              target="_blank"
+            >
               <Linkedin size={20} />
-            </a>
-            <a href="#" className="hover:text-rockship-accent transition">
-              <Github size={20} />
             </a>
           </div>
         </div>

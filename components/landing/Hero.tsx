@@ -29,7 +29,7 @@ export const Hero: React.FC = () => {
           {/* Text Content - Enable pointer events for buttons/text */}
           <div className="text-left pointer-events-auto">
             <FadeIn delay={100}>
-              <h1 className="mt-6 font-display text-3xl md:text-4xl lg:text-6xl lg:whitespace-nowrap font-bold mb-8 leading-tight drop-shadow-2xl">
+              <h1 className="font-display text-3xl md:text-4xl lg:text-[3.45rem] lg:whitespace-nowrap font-bold mb-8 leading-tight drop-shadow-2xl">
                 Turning Enterprise Operations <br />
                 <span className="gradient-text">into AI-Driven Systems </span>
               </h1>
@@ -71,7 +71,7 @@ export const Hero: React.FC = () => {
             </FadeIn>
 
             {/* Stats Strip */}
-            <FadeIn delay={400} className="pt-8">
+            <FadeIn delay={400} className="pt-6 md:pt-[5.25rem]">
               {heroData.title && (
                 <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-2">
                   {heroData.title}
@@ -84,8 +84,7 @@ export const Hero: React.FC = () => {
                     <div
                       key={i}
                       className={
-                        "flex flex-col text-left " +
-                        (isCenter && "lg:ml-6")
+                        "flex flex-col text-left " + (isCenter && "lg:ml-6")
                       }
                     >
                       <span className="text-2xl font-display font-bold text-white">
