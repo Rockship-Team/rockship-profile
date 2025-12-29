@@ -1,11 +1,13 @@
 import { heroData } from "@/lib/data";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { FadeIn } from "../FadeIn";
 import { Hero3D } from "./Hero3D";
+import { VideoModal } from "../VideoModal";
 
 export const Hero: React.FC = () => {
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   return (
     <section
       id="home"
@@ -62,6 +64,7 @@ export const Hero: React.FC = () => {
               </button>
 
               <button
+                onClick={() => setIsVideoModalOpen(true)}
                 className="px-8 py-4 bg-rockship-900/50 backdrop-blur-sm border border-white/20 text-white rounded-lg font-bold hover:bg-white/10 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center"
                 aria-label="Watch Rockship AI Showreel"
               >
@@ -106,6 +109,12 @@ export const Hero: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        videoSrc="/Rockship-overview.mp4"
+      />
     </section>
   );
 };
