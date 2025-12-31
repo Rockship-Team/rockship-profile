@@ -1,4 +1,4 @@
-import CaseStudiesPage from "./CaseStudiesClient";
+import CaseStudiesPage from "../../components/case-studies/CaseStudiesClient";
 
 export const metadata = {
   title: "Case Studies | RockshipAI",
