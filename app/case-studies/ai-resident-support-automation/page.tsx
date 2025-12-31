@@ -2,15 +2,8 @@ import { caseStudiesData } from "@/lib/data";
 import { notFound } from "next/navigation";
 
 // Sub-components
-import { CaseStudyConclusion } from "@/components/case-studies/CaseStudyConclusion";
-import { CaseStudyHero } from "@/components/case-studies/CaseStudyHero";
-import { CaseStudyNav } from "@/components/case-studies/CaseStudyNav";
+import { CaseStudyLayout } from "@/components/case-studies/CaseStudyLayout";
 import { CaseStudyNotFound } from "@/components/case-studies/CaseStudyNotFound";
-import {
-  CaseStudySidebarCTAs,
-  CaseStudySuccessFactors,
-} from "@/components/case-studies/CaseStudySidebar";
-import { CaseStudyStats } from "@/components/case-studies/CaseStudyStats";
 
 // Sections
 import { CaseStudyChallenge } from "@/components/case-studies/sections/CaseStudyChallenge";
@@ -33,91 +26,72 @@ export default function AiResidentSupportAutomationPage() {
     return <CaseStudyNotFound logoText={study.logoText} />;
   }
 
+  const stats = {
+    mainValue: "92.5%",
+    mainLabel: "Workload Reduction",
+    mainDesc:
+      "Property staff time handling resident inquiries was slashed from 620 hours to 148 hours monthly through AI centralization.",
+    secondaryStats: [
+      {
+        icon: "zap" as const,
+        value: "560h",
+        label: "Monthly Staff Time Saved",
+      },
+      { icon: "target" as const, value: "98%", label: "Response Accuracy" },
+    ],
+  };
+
+  const layoutStudy = {
+    ...study,
+    heroImage:
+      "/images/case-studies/ai-resident-support-automation/hero-main.png",
+    content: {
+      ...content,
+      successFactors: content.successFactors || [],
+      conclusion: content.conclusion || "",
+    },
+  };
+
   return (
-    <main className="min-h-screen bg-rockship-950 text-white selection:bg-rockship-accent/30 overflow-x-hidden">
-      <CaseStudyNav logoText={study.logoText} />
+    <CaseStudyLayout study={layoutStudy} stats={stats}>
+      <div className="space-y-32">
+        <CaseStudyExecutiveSummary content={content.executiveSummary} />
 
-      <CaseStudyHero
-        logoText={study.logoText}
-        title={study.title}
-        industries={study.industries}
-        heroImage="/images/case-studies/ai-resident-support-automation/hero-main.png"
-      />
-
-      <CaseStudyStats
-        stats={{
-          mainValue: "92.5%",
-          mainLabel: "Workload Reduction",
-          mainDesc:
-            "Property staff time handling resident inquiries was slashed from 620 hours to 148 hours monthly through AI centralization.",
-          secondaryStats: [
-            { icon: "zap", value: "560h", label: "Monthly Staff Time Saved" },
-            { icon: "target", value: "98%", label: "Response Accuracy" },
-          ],
-        }}
-      />
-
-      <section className="pb-32">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-24">
-            {/* Left Content Column */}
-            <div className="lg:col-span-8 space-y-32">
-              <CaseStudyExecutiveSummary content={content.executiveSummary} />
-
-              <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group mb-12 -mt-16">
-                <img
-                  src="/images/case-studies/ai-resident-support-automation/hero-main.png"
-                  alt="Executive Summary"
-                  className="w-full h-auto"
-                />
-              </div>
-
-              <CaseStudyChallenge challenge={content.challenge} />
-
-              <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group mb-12 -mt-16">
-                <img
-                  src="/images/case-studies/ai-resident-support-automation/challenge.png"
-                  alt="PropTech Challenges"
-                  className="w-full h-auto"
-                />
-              </div>
-
-              <CaseStudySolution
-                solution={content.solution}
-                solutionRender="/images/case-studies/ai-resident-support-automation/solution-overview.png"
-              />
-
-              {content.implementation && (
-                <CaseStudyImplementation
-                  implementation={content.implementation}
-                />
-              )}
-
-              <CaseStudyOutcomes
-                outcomes={content.outcomes!}
-                resultsImage={[
-                  "/images/case-studies/ai-resident-support-automation/resident-savings.png",
-                  "/images/case-studies/ai-resident-support-automation/accuracy.png",
-                ]}
-              />
-            </div>
-
-            {/* Sidebar Column */}
-            <div className="lg:col-span-4 space-y-8">
-              <div className="sticky top-32 space-y-8">
-                <CaseStudySidebarCTAs />
-                {content.successFactors && (
-                  <CaseStudySuccessFactors factors={content.successFactors} />
-                )}
-              </div>
-            </div>
-          </div>
+        <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group -mt-16 ring-1 ring-white/20">
+          <img
+            src="/images/case-studies/ai-resident-support-automation/hero-main.png"
+            alt="Executive Summary"
+            className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
+          />
         </div>
-      </section>
 
-      {content.conclusion && (
-        <CaseStudyConclusion conclusion={content.conclusion} />
-      )}
-    </main>
+        <CaseStudyChallenge challenge={content.challenge} />
+
+        <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group -mt-16 ring-1 ring-white/20">
+          <img
+            src="/images/case-studies/ai-resident-support-automation/challenge.png"
+            alt="PropTech Challenges"
+            className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
+          />
+        </div>
+
+        <CaseStudySolution
+          solution={content.solution}
+          solutionRender="/images/case-studies/ai-resident-support-automation/solution-overview.png"
+        />
+
+        {content.implementation && (
+          <CaseStudyImplementation implementation={content.implementation} />
+        )}
+
+        <CaseStudyOutcomes
+          outcomes={content.outcomes!}
+          resultsImage={[
+            "/images/case-studies/ai-resident-support-automation/resident-savings.png",
+            "/images/case-studies/ai-resident-support-automation/accuracy.png",
+          ]}
+        />
+      </div>
+    </CaseStudyLayout>
   );
 }
