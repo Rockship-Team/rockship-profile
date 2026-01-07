@@ -1,11 +1,80 @@
 import { Send, Sparkles, X } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getChatResponse, initGemini } from "../services/geminiService";
 import { ChatMessage, ChatRole } from "../types";
 import { CaseStudyCard } from "./CaseStudyCard";
+
+// Memoized markdown component definitions - moved outside component to prevent recreation
+const markdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="mb-2 last:mb-0">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li className="text-gray-200">{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-bold text-white">{children}</strong>
+  ),
+  em: ({ children }: { children?: React.ReactNode }) => (
+    <em className="italic">{children}</em>
+  ),
+  code: ({ children }: { children?: React.ReactNode }) => (
+    <code className="bg-rockship-900/50 px-1.5 py-0.5 rounded text-xs font-mono text-cyan-300">
+      {children}
+    </code>
+  ),
+  pre: ({ children }: { children?: React.ReactNode }) => (
+    <pre className="bg-rockship-900/80 p-2 rounded-lg overflow-x-auto mb-2 text-xs font-mono">
+      {children}
+    </pre>
+  ),
+  a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-rockship-accent hover:text-cyan-300 underline"
+    >
+      {children}
+    </a>
+  ),
+  blockquote: ({ children }: { children?: React.ReactNode }) => (
+    <blockquote className="border-l-2 border-rockship-accent/50 pl-3 italic text-gray-300 mb-2">
+      {children}
+    </blockquote>
+  ),
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <h1 className="text-lg font-bold text-white mb-2">{children}</h1>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <h2 className="text-base font-bold text-white mb-2">{children}</h2>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="text-sm font-bold text-white mb-1">{children}</h3>
+  ),
+};
+
+// Memoized Markdown renderer component
+const MarkdownRenderer = React.memo(({ content }: { content: string }) => (
+  <div className="markdown-content">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={markdownComponents}
+    >
+      {content}
+    </ReactMarkdown>
+  </div>
+));
+MarkdownRenderer.displayName = "MarkdownRenderer";
 
 export const GeminiAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,15 +93,15 @@ export const GeminiAssistant: React.FC = () => {
     initGemini();
   }, []);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isOpen]);
+  }, [messages, isOpen, scrollToBottom]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!input.trim()) return;
 
     const userMsg: ChatMessage = {
@@ -53,11 +122,15 @@ export const GeminiAssistant: React.FC = () => {
     };
     setMessages((prev) => [...prev, botMsg]);
     setIsLoading(false);
-  };
+  }, [input]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSend();
-  };
+  }, [handleSend]);
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -83,6 +156,7 @@ export const GeminiAssistant: React.FC = () => {
             <button
               onClick={() => setIsOpen(false)}
               className="text-gray-400 hover:text-white transition"
+              aria-label="Close chat"
             >
               <X size={20} />
             </button>
@@ -142,81 +216,8 @@ export const GeminiAssistant: React.FC = () => {
                           }
                         } catch (e) {}
 
-                        return (
-                          <div className="markdown-content">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                p: ({ children }) => (
-                                  <p className="mb-2 last:mb-0">{children}</p>
-                                ),
-                                ul: ({ children }) => (
-                                  <ul className="list-disc list-inside mb-2 space-y-1">
-                                    {children}
-                                  </ul>
-                                ),
-                                ol: ({ children }) => (
-                                  <ol className="list-decimal list-inside mb-2 space-y-1">
-                                    {children}
-                                  </ol>
-                                ),
-                                li: ({ children }) => (
-                                  <li className="text-gray-200">{children}</li>
-                                ),
-                                strong: ({ children }) => (
-                                  <strong className="font-bold text-white">
-                                    {children}
-                                  </strong>
-                                ),
-                                em: ({ children }) => (
-                                  <em className="italic">{children}</em>
-                                ),
-                                code: ({ children }) => (
-                                  <code className="bg-rockship-900/50 px-1.5 py-0.5 rounded text-xs font-mono text-cyan-300">
-                                    {children}
-                                  </code>
-                                ),
-                                pre: ({ children }) => (
-                                  <pre className="bg-rockship-900/80 p-2 rounded-lg overflow-x-auto mb-2 text-xs font-mono">
-                                    {children}
-                                  </pre>
-                                ),
-                                a: ({ children, href }) => (
-                                  <a
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-rockship-accent hover:text-cyan-300 underline"
-                                  >
-                                    {children}
-                                  </a>
-                                ),
-                                blockquote: ({ children }) => (
-                                  <blockquote className="border-l-2 border-rockship-accent/50 pl-3 italic text-gray-300 mb-2">
-                                    {children}
-                                  </blockquote>
-                                ),
-                                h1: ({ children }) => (
-                                  <h1 className="text-lg font-bold text-white mb-2">
-                                    {children}
-                                  </h1>
-                                ),
-                                h2: ({ children }) => (
-                                  <h2 className="text-base font-bold text-white mb-2">
-                                    {children}
-                                  </h2>
-                                ),
-                                h3: ({ children }) => (
-                                  <h3 className="text-sm font-bold text-white mb-1">
-                                    {children}
-                                  </h3>
-                                ),
-                              }}
-                            >
-                              {msg.text}
-                            </ReactMarkdown>
-                          </div>
-                        );
+                        // Use memoized MarkdownRenderer
+                        return <MarkdownRenderer content={msg.text} />;
                       })()
                     : msg.text}
                 </div>
@@ -267,8 +268,9 @@ export const GeminiAssistant: React.FC = () => {
       {/* Floating Action Button */}
       {isOpen ? null : (
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className={`group flex items-center gap-2 p-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-300 border border-white/20 ${"bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white hover:scale-110"}`}
+          aria-label="Open AI chat"
         >
           <Image src="/chatbot.png" alt="AI" width={50} height={50} />
         </button>

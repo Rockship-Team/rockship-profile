@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { FadeIn } from "../FadeIn";
+import React from "react";
 
 import {
   Briefcase,
@@ -80,7 +81,7 @@ const IndustryItem = ({
   );
 };
 
-export function Clients() {
+export const Clients = React.memo(function Clients() {
   // Split industries into two rows and duplicate for smooth scrolling loop
   const midPoint = Math.ceil(industries.length / 2);
   const firstHalf = industries.slice(0, midPoint);
@@ -134,4 +135,4 @@ export function Clients() {
       </div>
     </section>
   );
-}
+});

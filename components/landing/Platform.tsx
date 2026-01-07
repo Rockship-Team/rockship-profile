@@ -45,7 +45,7 @@ const PlatformCard: React.FC<{
   );
 };
 
-export const Platform: React.FC = () => {
+export const Platform: React.FC = React.memo(() => {
   return (
     <section
       id="platform"
@@ -91,4 +91,5 @@ export const Platform: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+Platform.displayName = "Platform";

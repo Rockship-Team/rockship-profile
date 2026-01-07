@@ -1,5 +1,5 @@
-import { FadeIn } from "../FadeIn";
 import Link from "next/link";
+import { FadeIn } from "../FadeIn";
 
 export default function CareerCTA() {
   return (
@@ -17,9 +17,11 @@ export default function CareerCTA() {
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Link
             href="/contact"
-            className="px-8 py-3 bg-transparent border border-gray-600 text-white font-bold rounded-lg hover:border-white transition hover:scale-105 active:scale-95 duration-200 w-full sm:w-auto"
+            className="animated-border-btn group relative inline-flex items-center justify-center rounded-lg transition-all duration-200"
           >
-            Schedule an AI Consultation
+            <span className="px-8 py-3 text-white text-sm font-bold flex items-center justify-center">
+              Schedule an AI Consultation
+            </span>
           </Link>
         </div>
       </FadeIn>

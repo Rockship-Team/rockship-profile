@@ -112,7 +112,7 @@ const PlatformFeatureCard: React.FC<{
   </SpotlightCard>
 );
 
-export const Solutions: React.FC = () => {
+export const Solutions: React.FC = React.memo(() => {
   return (
     <section
       id="solutions"
@@ -246,4 +246,5 @@ export const Solutions: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+Solutions.displayName = "Solutions";

@@ -6,7 +6,7 @@ import { caseStudiesData } from "@/lib/data";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export const DefaultMetadata = {
   title: "Case Studies | RockshipAI",
@@ -43,6 +43,11 @@ export default function CaseStudiesPage() {
       return study.industries.includes(selectedCategory);
     });
   }, [selectedCategory]);
+
+  // Memoize category selection handler
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+  }, []);
 
   return (
     <main className="min-h-screen bg-rockship-950 text-white selection:bg-rockship-accent/30">
@@ -100,7 +105,7 @@ export default function CaseStudiesPage() {
             return (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => handleCategoryChange(cat)}
                 className={`relative text-sm font-medium whitespace-nowrap transition-colors pb-4 px-2
                   ${
                     isActive

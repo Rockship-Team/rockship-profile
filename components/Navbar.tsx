@@ -11,7 +11,8 @@ export const Navbar: React.FC = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener("scroll", handleScroll);
+    // Add passive option for better scroll performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -56,9 +57,11 @@ export const Navbar: React.FC = () => {
           ))}
           <Link
             href="/contact"
-            className="px-5 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white text-sm font-bold transition"
+            className="animated-border-btn group relative inline-flex items-center justify-center rounded-full transition-all duration-500"
           >
-            Start an AI Pilot
+            <span className="px-5 py-2 text-white text-sm font-bold flex items-center justify-center">
+              Start an AI Pilot
+            </span>
           </Link>
         </div>
 

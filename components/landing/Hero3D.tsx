@@ -2,8 +2,94 @@
 
 import { Stars } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import React, { useMemo, useRef, useState } from "react";
+import React, { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+
+// Performance quality settings
+type QualityLevel = 'low' | 'medium' | 'high';
+
+interface PerformanceConfig {
+  sphereSegments: number;
+  neuralCount: number;
+  connectionDistance: number;
+  starCount: number;
+  pixelRatioCap: number;
+  frameThrottle: number;
+}
+
+const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
+  low: {
+    sphereSegments: 32,
+    neuralCount: 40,
+    connectionDistance: 4.5,
+    starCount: 1000,
+    pixelRatioCap: 1.5,
+    frameThrottle: 3
+  },
+  medium: {
+    sphereSegments: 64,
+    neuralCount: 80,
+    connectionDistance: 5.0,
+    starCount: 2000,
+    pixelRatioCap: 2,
+    frameThrottle: 2
+  },
+  high: {
+    sphereSegments: 128,
+    neuralCount: 120,
+    connectionDistance: 5.5,
+    starCount: 3000,
+    pixelRatioCap: 2,
+    frameThrottle: 1
+  }
+};
+
+// Detect device capabilities and viewport
+const usePerformanceConfig = (): PerformanceConfig => {
+  const [config, setConfig] = useState<PerformanceConfig>(QUALITY_SETTINGS.high);
+  const [quality, setQuality] = useState<QualityLevel>('high');
+
+  React.useEffect(() => {
+    // Detect viewport width
+    const isMobile = window.innerWidth < 768;
+    const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+
+    // Auto-select quality based on device
+    let autoQuality: QualityLevel = 'high';
+    if (isMobile || isLowEnd) {
+      autoQuality = 'low';
+    } else if (window.innerWidth >= 1920 && !isLowEnd) {
+      autoQuality = 'high';
+    }
+
+    setQuality(autoQuality);
+    setConfig(QUALITY_SETTINGS[autoQuality]);
+
+    // Listen for quality toggle from keyboard (Shift+Q)
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'Q') {
+        const qualities: QualityLevel[] = ['low', 'medium', 'high'];
+        const currentIndex = qualities.indexOf(quality);
+        const nextQuality = qualities[(currentIndex + 1) % 3];
+        setQuality(nextQuality);
+        setConfig(QUALITY_SETTINGS[nextQuality]);
+        console.log(`Quality changed to: ${nextQuality}`);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [quality]);
+
+  return config;
+};
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="w-full h-full flex items-center justify-center bg-[#02040a]">
+    <div className="text-white/50 text-sm">Loading 3D scene...</div>
+  </div>
+);
 
 // --- Reusable Layer for the looping effect ---
 const NetworkLayer = ({ points, connections, material }: any) => {
@@ -35,7 +121,7 @@ const NetworkLayer = ({ points, connections, material }: any) => {
 };
 
 // --- Logic for Neural Network Background ---
-const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
+const NeuralNetwork = ({ count = 80, color = "#6366f1", connectionDistance = 5.0 }) => {
   const { gl } = useThree();
   const width = 70; // Width of one seamless tile
 
@@ -58,31 +144,37 @@ const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
   const connections = useMemo(() => {
     const linePos = [];
     const positions = points;
+    const maxDistSq = connectionDistance * connectionDistance; // Compare squared distances for performance
+
     for (let i = 0; i < count; i++) {
+      const ix = i * 3;
+      const x1 = positions[ix];
+      const y1 = positions[ix + 1];
+      const z1 = positions[ix + 2];
+
       for (let j = i + 1; j < count; j++) {
-        const x1 = positions[i * 3];
-        const y1 = positions[i * 3 + 1];
-        const z1 = positions[i * 3 + 2];
-        const x2 = positions[j * 3];
-        const y2 = positions[j * 3 + 1];
-        const z2 = positions[j * 3 + 2];
-        const dist = Math.sqrt(
-          (x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2
-        );
-        if (dist < 5.5) {
-          // Slightly increased visual connection distance
+        const jx = j * 3;
+        const dx = x1 - positions[jx];
+        const dy = y1 - positions[jx + 1];
+        const dz = z1 - positions[jx + 2];
+
+        // Use squared distance to avoid expensive sqrt
+        const distSq = dx * dx + dy * dy + dz * dz;
+
+        if (distSq < maxDistSq) {
           linePos.push(x1, y1, z1);
-          linePos.push(x2, y2, z2);
+          linePos.push(positions[jx], positions[jx + 1], positions[jx + 2]);
         }
       }
     }
     return new Float32Array(linePos);
-  }, [points, count]);
+  }, [points, count, connectionDistance]);
 
   const containerRef = useRef<THREE.Group>(null);
   const group1Ref = useRef<THREE.Group>(null);
   const group2Ref = useRef<THREE.Group>(null);
   const timeRef = useRef(0);
+  const frameCountRef = useRef(0);
 
   // Custom Shader for Glowing, Pulsing Dots
   const dotMaterial = useMemo(
@@ -97,29 +189,29 @@ const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
       uniform float uTime;
       uniform float uPixelRatio;
       varying vec3 vPosition;
-      
+
       void main() {
         vPosition = position;
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mvPosition;
-        
+
         // Pulse modulation based on position and time
         float noise = sin(uTime * 2.0 + position.x * 0.5 + position.y * 0.5);
         float scale = 1.0 + 0.4 * noise;
-        
+
         // Size attenuation
         gl_PointSize = 12.0 * scale * uPixelRatio * (10.0 / -mvPosition.z);
       }
     `,
         fragmentShader: `
       uniform vec3 uColor;
-      
+
       void main() {
         vec2 center = gl_PointCoord - 0.5;
         float dist = length(center);
         if (dist > 0.5) discard;
         float glow = 1.0 - smoothstep(0.05, 0.5, dist);
-        float alpha = glow * 1.0; 
+        float alpha = glow * 1.0;
         gl_FragColor = vec4(uColor, alpha);
       }
     `,
@@ -140,6 +232,15 @@ const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
   useFrame((state, delta) => {
     if (!containerRef.current || !group1Ref.current || !group2Ref.current)
       return;
+
+    // Frame throttling for mobile
+    frameCountRef.current += 1;
+    const isMobile = window.innerWidth < 768;
+    const throttleAmount = isMobile ? 2 : 1;
+
+    if (frameCountRef.current % throttleAmount !== 0) {
+      return; // Skip frame for throttling
+    }
 
     // Pulse time
     dotMaterial.uniforms.uTime.value = state.clock.elapsedTime;
@@ -198,7 +299,7 @@ const NeuralNetwork = ({ count = 120, color = "#6366f1" }) => {
 };
 
 // --- AI Core Sphere Object (Refined Liquid Blob) ---
-const AISphere = () => {
+const AISphere = ({ config }: { config: PerformanceConfig }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHover] = useState(false);
   const { viewport } = useThree();
@@ -207,6 +308,9 @@ const AISphere = () => {
   const positionX = isDesktop ? 3.5 : 0;
   const positionY = isDesktop ? 0 : -2.5; // Move deeply down on mobile so it's below text
   const scale = isDesktop ? 1 : 0.55; // Much smaller on mobile to be subtle
+
+  // Dynamic sphere segments based on quality setting
+  const sphereSegments = config.sphereSegments;
 
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
@@ -404,13 +508,13 @@ const AISphere = () => {
         setHover(false);
       }}
     >
-      <sphereGeometry args={[2.5, 128, 128]} />
+      <sphereGeometry args={[2.5, sphereSegments, sphereSegments]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
   );
 };
 
-const SceneContent = () => {
+const SceneContent = ({ config }: { config: PerformanceConfig }) => {
   const { scene } = useThree();
 
   return (
@@ -420,16 +524,20 @@ const SceneContent = () => {
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
       {/* Background (Pushed to Z < -5) */}
-      {/* <NeuralNetwork count={150} color="#818cf8" /> */}
+      <NeuralNetwork
+        count={config.neuralCount}
+        color="#818cf8"
+        connectionDistance={config.connectionDistance}
+      />
 
       {/* Foreground Hero Blob */}
-      <AISphere />
+      <AISphere config={config} />
 
       {/* Environment */}
       <Stars
         radius={100}
         depth={50}
-        count={3000}
+        count={config.starCount}
         factor={8}
         saturation={0}
         fade
@@ -441,14 +549,22 @@ const SceneContent = () => {
 };
 
 export const Hero3D: React.FC = () => {
+  const config = usePerformanceConfig();
+
   return (
     <div className="w-full h-full">
       <Canvas
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, config.pixelRatioCap]}
+        gl={{
+          antialias: config.pixelRatioCap > 1,
+          alpha: true,
+          powerPreference: "high-performance"
+        }}
         camera={{ position: [0, 0, 12], fov: 45 }}
       >
-        <SceneContent />
+        <Suspense fallback={<LoadingFallback />}>
+          <SceneContent config={config} />
+        </Suspense>
       </Canvas>
     </div>
   );

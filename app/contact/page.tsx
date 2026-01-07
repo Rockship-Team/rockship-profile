@@ -75,7 +75,7 @@ export default function ContactPage() {
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Left Column: Value Prop & Info */}
           <div className="space-y-8">
-            <div className="glass p-8 rounded-2xl border border-white/10">
+            <div className="bg-rockship-900/60 backdrop-blur-md border border-white/8 shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] p-8 rounded-2xl border-white/10">
               <h3 className="text-2xl font-bold mb-6">Why Partner With Us?</h3>
               <ul className="space-y-4">
                 {[
@@ -124,7 +124,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right Column: Contact Form */}
-          <div className="glass p-8 rounded-2xl border border-white/10 glow">
+          <div className="bg-rockship-900/60 backdrop-blur-md border border-white/8 shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] p-8 rounded-2xl border-white/10 glow">
             {status === "success" ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
                 <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">

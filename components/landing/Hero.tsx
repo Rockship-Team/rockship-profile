@@ -1,12 +1,31 @@
 import { heroData } from "@/lib/data";
+import { cn } from "@/lib/utils";
 import { ArrowRight, Play } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useState } from "react";
 import { FadeIn } from "../FadeIn";
-import { Hero3D } from "./Hero3D";
-import { VideoModal } from "../VideoModal";
 
-export const Hero: React.FC = () => {
+// Dynamically import heavy 3D component to improve initial load performance
+const Hero3D = dynamic(
+  () => import("./Hero3D").then((mod) => ({ default: mod.Hero3D })),
+  {
+    loading: () => (
+      <div className="absolute inset-0 bg-rockship-950 animate-pulse" />
+    ),
+    ssr: false,
+  }
+);
+
+// Dynamically import video modal to reduce initial bundle size
+const VideoModal = dynamic(
+  () => import("../VideoModal").then((mod) => ({ default: mod.VideoModal })),
+  {
+    ssr: false,
+  }
+);
+
+export const Hero: React.FC = React.memo(() => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   return (
     <section
@@ -62,14 +81,19 @@ export const Hero: React.FC = () => {
                 </Link>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
-
               <button
-                onClick={() => setIsVideoModalOpen(true)}
-                className="px-8 py-4 bg-rockship-900/50 backdrop-blur-sm border border-white/20 text-white rounded-lg font-bold hover:bg-white/10 transition hover:scale-105 active:scale-95 duration-200 flex items-center gap-2 justify-center"
                 aria-label="Watch Rockship AI Showreel"
+                onClick={() => setIsVideoModalOpen(true)}
+                className="animated-border-btn group relative inline-flex items-center justify-center rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 duration-400"
               >
-                <Play size={20} className="fill-current" aria-hidden="true" />{" "}
-                Watch Overview Video
+                <span className="px-5 py-2 text-white font-bold flex items-center justify-center">
+                  <Play
+                    size={20}
+                    className="fill-current mr-4"
+                    aria-hidden="true"
+                  />{" "}
+                  Watch Overview Video
+                </span>
               </button>
             </FadeIn>
 
@@ -86,9 +110,10 @@ export const Hero: React.FC = () => {
                   return (
                     <div
                       key={i}
-                      className={
-                        "flex flex-col text-left " + (isCenter && "lg:ml-6")
-                      }
+                      className={cn(
+                        "flex flex-col text-left",
+                        isCenter && "lg:ml-6"
+                      )}
                     >
                       <span className="text-2xl font-display font-bold text-white">
                         {stat.val}
@@ -117,4 +142,5 @@ export const Hero: React.FC = () => {
       />
     </section>
   );
-};
+});
+Hero.displayName = "Hero";

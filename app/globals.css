@@ -16,36 +16,37 @@
   --color-rockship-200: #cbd5e1;
   --color-rockship-100: #e2e8f0;
   --color-rockship-50: #f8fafc;
-  
+
   /* Vibrant Accent - Electric Indigo/Cyan gradient start */
-  --color-rockship-accent: #6366f1; 
+  --color-rockship-accent: #6366f1;
   --color-rockship-accent-secondary: #0ea5e9;
+  --color-rockship-purple: #a855f7;
 
   /* Shadcn Semantic Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -111,7 +112,7 @@
   --border: var(--color-rockship-800);
   --input: var(--color-rockship-800);
   --ring: var(--color-rockship-accent);
-  
+
   --radius: 0.5rem;
 
   --chart-1: var(--color-rockship-accent);
@@ -139,27 +140,18 @@
 @layer utilities {
   .bg-grid-pattern {
     background-size: 40px 40px;
-    background-image: 
+    background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
     -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
   }
 
-  /* Glass morphism effect */
-  .glass {
-    background: rgba(11, 16, 27, 0.6);
-    backdrop-filter: blur(12px);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.08); /* Fallback or manual override if needed */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-  }
-
   /* Glow Effect */
   .glow {
     box-shadow: 0 0 20px -5px var(--color-rockship-accent);
   }
-  
+
   /* Gradient text utility */
   .gradient-text {
     background: linear-gradient(135deg, var(--color-rockship-accent), var(--color-rockship-accent-secondary), #a855f7);
@@ -184,6 +176,31 @@
     mask-image: linear-gradient(to bottom, transparent, black 5%, black 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 100%);
   }
+
+  /* Glass panel utility */
+  .glass-panel {
+    background: rgba(11, 16, 27, 0.6);
+    backdrop-filter: blur(12px);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Fade in up animation */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out;
+  }
 }
 
 @keyframes gradient-move {
@@ -196,20 +213,149 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+
+  .gradient-text {
+    animation: none !important;
+    background-size: 100% 100%;
+  }
+}
+
+/* GPU acceleration for better animation performance */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
 /* Custom Scrollbar for a premium feel */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-rockship-950); 
+  background: var(--color-rockship-950);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-rockship-700); 
+  background: var(--color-rockship-700);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-rockship-600); 
+  background: var(--color-rockship-600);
+}
+
+/* Optimize animations with GPU acceleration */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Use contains property for layout optimization */
+.gradient-text,
+.glass-panel {
+  contain: layout style paint;
+}
+
+/* Optimize pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: opacity;
+}
+
+.animated-border-btn {
+  position: relative;
+  isolation: isolate;
+  background: rgba(255, 255, 255, 0.05); 
+  overflow: hidden; /* CRITICAL: Prevent the large rotating gradient from leaking out */
+}
+
+.animated-border-btn::before {
+  content: '';
+  position: absolute;
+  inset: -245%; /* Adjusted for better coverage */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 30deg,
+    var(--color-rockship-accent) 90deg,
+    var(--color-rockship-accent-secondary) 180deg,
+    var(--color-rockship-purple) 270deg,
+    transparent 330deg,
+    transparent 360deg
+  );
+  animation: borderRotate 3s linear infinite;
+  z-index: -1; /* Place behind content */
+}
+
+.animated-border-btn::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: var(--color-rockship-900);
+  border-radius: inherit;
+  z-index: 0;
+  transition: background 0.3s ease;
+}
+
+.animated-border-btn:hover::after {
+  background: var(--color-rockship-800);
+}
+
+.animated-border-btn span {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes borderRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
