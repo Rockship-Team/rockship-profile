@@ -1,4 +1,5 @@
-import { FadeIn } from "@/components/FadeIn";
+import { FadeIn, FadeInStagger } from "@/components/FadeIn";
+
 import { Clock } from "lucide-react";
 
 interface CaseStudyImplementationProps {
@@ -63,29 +64,31 @@ export function CaseStudyImplementation({
           </span>
         </div>
 
-        <div className="relative border-l border-white/10 ml-3 space-y-12">
+        <FadeInStagger className="relative border-l border-white/10 ml-3 space-y-12">
           {implementation.phases.map((phase, i) => (
-            <div key={i} className="relative pl-12 group">
-              {/* Timeline Dot */}
-              <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-rockship-800 ring-2 ring-white/20 group-hover:bg-rockship-accent group-hover:ring-rockship-accent/50 transition-all" />
+            <FadeIn key={i} delay={i * 200} direction="right" distance={20}>
+              <div className="relative pl-12 group">
+                {/* Timeline Dot */}
+                <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-rockship-800 ring-2 ring-white/20 group-hover:bg-rockship-accent group-hover:ring-rockship-accent/50 transition-all" />
 
-              <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-rockship-accent transition-colors">
-                {phase.phase}
-              </h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-1 gap-3">
-                {phase.details.map((detail, j) => (
-                  <div
-                    key={j}
-                    className="flex items-center gap-3 text-rockship-300 text-sm bg-black/20 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-                    <span>{detail}</span>
-                  </div>
-                ))}
+                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-rockship-accent transition-colors">
+                  {phase.phase}
+                </h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-1 gap-3">
+                  {phase.details.map((detail, j) => (
+                    <div
+                      key={j}
+                      className="flex items-center gap-3 text-rockship-300 text-sm bg-black/20 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                      <span>{detail}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </FadeIn>
           ))}
-        </div>
+        </FadeInStagger>
       </div>
     </FadeIn>
   );

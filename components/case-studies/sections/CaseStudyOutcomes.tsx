@@ -1,4 +1,5 @@
-import { FadeIn } from "@/components/FadeIn";
+import { FadeIn, FadeInStagger } from "@/components/FadeIn";
+
 import { Target } from "lucide-react";
 
 interface CaseStudyOutcomesProps {
@@ -36,19 +37,18 @@ export function CaseStudyOutcomes({
 
       <div className="space-y-12">
         {/* Quantitative Stats Grid */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <FadeInStagger className="grid sm:grid-cols-3 gap-4">
           {(outcomes.quantitative || []).map((item, i) => (
-            <div
-              key={i}
-              className="flex flex-col justify-between p-6 bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 rounded-2xl hover:border-rockship-accent/20 transition-colors"
-            >
-              <Target className="w-8 h-8 text-rockship-accent mb-4 opacity-80" />
-              <span className="text-lg md:text-xl font-medium text-white leading-snug">
-                {item}
-              </span>
-            </div>
+            <FadeIn key={i} delay={i * 100} direction="up" distance={20}>
+              <div className="flex flex-col justify-between p-6 bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 rounded-2xl hover:border-rockship-accent/20 transition-colors h-full">
+                <Target className="w-8 h-8 text-rockship-accent mb-4 opacity-80" />
+                <span className="text-lg md:text-xl font-medium text-white leading-snug">
+                  {item}
+                </span>
+              </div>
+            </FadeIn>
           ))}
-        </div>
+        </FadeInStagger>
 
         {images.map((img, idx) => (
           <div
@@ -64,28 +64,27 @@ export function CaseStudyOutcomes({
         ))}
 
         {/* Qualitative Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <FadeInStagger className="grid md:grid-cols-3 gap-6">
           {outcomes.qualitative.map((item, i) => (
-            <div
-              key={i}
-              className="p-6 md:p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all duration-300"
-            >
-              <h3 className="text-lg font-semibold text-white mb-6 pb-4 border-b border-white/5 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-px after:bg-rockship-accent">
-                {item.category}
-              </h3>
-              <ul className="space-y-4">
-                {item.details.map((detail, j) => (
-                  <li
-                    key={j}
-                    className="text-sm text-rockship-300 leading-relaxed pl-2 border-l border-white/10 hover:border-rockship-accent/50 hover:text-rockship-100 transition-colors"
-                  >
-                    {detail}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <FadeIn key={i} delay={i * 150} direction="up" distance={20}>
+              <div className="p-6 md:p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all duration-300 h-full">
+                <h3 className="text-lg font-semibold text-white mb-6 pb-4 border-b border-white/5 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-px after:bg-rockship-accent">
+                  {item.category}
+                </h3>
+                <ul className="space-y-4">
+                  {item.details.map((detail, j) => (
+                    <li
+                      key={j}
+                      className="text-sm text-rockship-300 leading-relaxed pl-2 border-l border-white/10 hover:border-rockship-accent/50 hover:text-rockship-100 transition-colors"
+                    >
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeIn>
           ))}
-        </div>
+        </FadeInStagger>
       </div>
     </FadeIn>
   );

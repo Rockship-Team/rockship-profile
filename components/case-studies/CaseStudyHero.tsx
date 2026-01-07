@@ -1,4 +1,4 @@
-import { FadeIn } from "@/components/FadeIn";
+import { FadeIn, FadeInStagger } from "@/components/FadeIn";
 
 interface CaseStudyHeroProps {
   logoText: string;
@@ -33,26 +33,32 @@ export function CaseStudyHero({
       )}
 
       <div className="container mx-auto px-6 relative z-10">
-        <FadeIn>
-          <div className="flex flex-col gap-8 max-w-5xl mx-auto text-center items-center">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {industries.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/5 text-rockship-100 border border-white/10 uppercase tracking-wider backdrop-blur-sm shadow-sm hover:border-rockship-accent/50 transition-colors cursor-default"
-                >
+        <FadeInStagger
+          delay={0.1}
+          className="flex flex-col gap-8 max-w-5xl mx-auto text-center items-center"
+        >
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {industries.map((tag, i) => (
+              <FadeIn key={tag} delay={i * 50} direction="up" distance={10}>
+                <span className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/5 text-rockship-100 border border-white/10 uppercase tracking-wider backdrop-blur-sm shadow-sm hover:border-rockship-accent/50 transition-colors cursor-default">
                   {tag}
                 </span>
-              ))}
-            </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn direction="up" delay={200} distance={20}>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.1] tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-rockship-300 drop-shadow-sm">
               {logoText}
             </h1>
+          </FadeIn>
+
+          <FadeIn direction="up" delay={400} distance={20}>
             <p className="text-xl md:text-2xl text-rockship-200 leading-relaxed max-w-3xl border-t border-white/10 pt-8">
               {title}
             </p>
-          </div>
-        </FadeIn>
+          </FadeIn>
+        </FadeInStagger>
       </div>
     </section>
   );

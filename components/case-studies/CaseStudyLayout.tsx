@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import { motion } from "framer-motion";
 import { CaseStudyConclusion } from "./CaseStudyConclusion";
 import { CaseStudyHero } from "./CaseStudyHero";
 import { CaseStudyNav } from "./CaseStudyNav";
@@ -69,7 +72,13 @@ export function CaseStudyLayout({
             <div className="lg:col-span-8">
               <div className="relative">
                 {/* Vertical Decorative Line */}
-                <div className="absolute left-[-40px] top-0 bottom-0 w-px bg-gradient-to-b from-rockship-accent/50 via-rockship-accent/10 to-transparent hidden xl:block" />
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  whileInView={{ height: "100%", opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.5, ease: "circOut" }}
+                  className="absolute left-[-40px] top-0 w-px bg-gradient-to-b from-rockship-accent/50 via-rockship-accent/10 to-transparent hidden xl:block origin-top"
+                />
 
                 <div className="space-y-40">{children}</div>
               </div>

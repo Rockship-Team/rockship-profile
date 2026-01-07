@@ -1,4 +1,4 @@
-import { FadeIn } from "@/components/FadeIn";
+import { FadeIn, FadeInStagger } from "@/components/FadeIn";
 
 interface CaseStudyChallengeProps {
   challenge: {
@@ -33,17 +33,16 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
               Operational Pain Points
             </h3>
-            <ul className="space-y-4">
+            <FadeInStagger className="space-y-4">
               {challenge.painPoints.map((point, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed"
-                >
-                  <span className="mt-1.5 w-1 h-1 rounded-full bg-red-400 shrink-0" />
-                  <span>{point}</span>
-                </li>
+                <FadeIn key={i} delay={i * 100} direction="right" distance={10}>
+                  <li className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed">
+                    <span className="mt-1.5 w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                    <span>{point}</span>
+                  </li>
+                </FadeIn>
               ))}
-            </ul>
+            </FadeInStagger>
           </div>
 
           {/* Business Impact */}
@@ -52,17 +51,16 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
               <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
               Business Impact
             </h3>
-            <ul className="space-y-4">
+            <FadeInStagger className="space-y-4">
               {challenge.businessImpact.map((point, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed"
-                >
-                  <span className="mt-1.5 w-1 h-1 rounded-full bg-orange-400 shrink-0" />
-                  <span>{point}</span>
-                </li>
+                <FadeIn key={i} delay={i * 100} direction="right" distance={10}>
+                  <li className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed">
+                    <span className="mt-1.5 w-1 h-1 rounded-full bg-orange-400 shrink-0" />
+                    <span>{point}</span>
+                  </li>
+                </FadeIn>
               ))}
-            </ul>
+            </FadeInStagger>
           </div>
         </div>
       </div>

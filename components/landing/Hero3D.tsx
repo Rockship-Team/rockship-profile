@@ -6,7 +6,7 @@ import React, { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 // Performance quality settings
-type QualityLevel = 'low' | 'medium' | 'high';
+type QualityLevel = "low" | "medium" | "high";
 
 interface PerformanceConfig {
   sphereSegments: number;
@@ -20,46 +20,49 @@ interface PerformanceConfig {
 const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
   low: {
     sphereSegments: 32,
-    neuralCount: 40,
-    connectionDistance: 4.5,
-    starCount: 1000,
-    pixelRatioCap: 1.5,
-    frameThrottle: 3
+    neuralCount: 30,
+    connectionDistance: 6.0,
+    starCount: 800,
+    pixelRatioCap: 1.2,
+    frameThrottle: 3,
   },
   medium: {
     sphereSegments: 64,
-    neuralCount: 80,
-    connectionDistance: 5.0,
-    starCount: 2000,
-    pixelRatioCap: 2,
-    frameThrottle: 2
+    neuralCount: 60,
+    connectionDistance: 7.5,
+    starCount: 1500,
+    pixelRatioCap: 1.5,
+    frameThrottle: 2,
   },
   high: {
     sphereSegments: 128,
-    neuralCount: 120,
-    connectionDistance: 5.5,
-    starCount: 3000,
+    neuralCount: 90,
+    connectionDistance: 9.0,
+    starCount: 2000,
     pixelRatioCap: 2,
-    frameThrottle: 1
-  }
+    frameThrottle: 1,
+  },
 };
 
 // Detect device capabilities and viewport
 const usePerformanceConfig = (): PerformanceConfig => {
-  const [config, setConfig] = useState<PerformanceConfig>(QUALITY_SETTINGS.high);
-  const [quality, setQuality] = useState<QualityLevel>('high');
+  const [config, setConfig] = useState<PerformanceConfig>(
+    QUALITY_SETTINGS.high
+  );
+  const [quality, setQuality] = useState<QualityLevel>("high");
 
   React.useEffect(() => {
     // Detect viewport width
     const isMobile = window.innerWidth < 768;
-    const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const isLowEnd =
+      navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
 
     // Auto-select quality based on device
-    let autoQuality: QualityLevel = 'high';
+    let autoQuality: QualityLevel = "high";
     if (isMobile || isLowEnd) {
-      autoQuality = 'low';
+      autoQuality = "low";
     } else if (window.innerWidth >= 1920 && !isLowEnd) {
-      autoQuality = 'high';
+      autoQuality = "high";
     }
 
     setQuality(autoQuality);
@@ -67,8 +70,8 @@ const usePerformanceConfig = (): PerformanceConfig => {
 
     // Listen for quality toggle from keyboard (Shift+Q)
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === 'Q') {
-        const qualities: QualityLevel[] = ['low', 'medium', 'high'];
+      if (e.shiftKey && e.key === "Q") {
+        const qualities: QualityLevel[] = ["low", "medium", "high"];
         const currentIndex = qualities.indexOf(quality);
         const nextQuality = qualities[(currentIndex + 1) % 3];
         setQuality(nextQuality);
@@ -77,8 +80,8 @@ const usePerformanceConfig = (): PerformanceConfig => {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [quality]);
 
   return config;
@@ -121,7 +124,11 @@ const NetworkLayer = ({ points, connections, material }: any) => {
 };
 
 // --- Logic for Neural Network Background ---
-const NeuralNetwork = ({ count = 80, color = "#6366f1", connectionDistance = 5.0 }) => {
+const NeuralNetwork = ({
+  count = 80,
+  color = "#6366f1",
+  connectionDistance = 5.0,
+}) => {
   const { gl } = useThree();
   const width = 70; // Width of one seamless tile
 
@@ -144,7 +151,7 @@ const NeuralNetwork = ({ count = 80, color = "#6366f1", connectionDistance = 5.0
   const connections = useMemo(() => {
     const linePos = [];
     const positions = points;
-    const maxDistSq = connectionDistance * connectionDistance; // Compare squared distances for performance
+    const maxDistSq = connectionDistance * connectionDistance;
 
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
@@ -154,21 +161,37 @@ const NeuralNetwork = ({ count = 80, color = "#6366f1", connectionDistance = 5.0
 
       for (let j = i + 1; j < count; j++) {
         const jx = j * 3;
-        const dx = x1 - positions[jx];
-        const dy = y1 - positions[jx + 1];
-        const dz = z1 - positions[jx + 2];
+        const x2 = positions[jx];
+        const y2 = positions[jx + 1];
+        const z2 = positions[jx + 2];
 
-        // Use squared distance to avoid expensive sqrt
+        const dy = y1 - y2;
+        const dz = z1 - z2;
+
+        // 1. Direct connection
+        const dx = x1 - x2;
         const distSq = dx * dx + dy * dy + dz * dz;
-
         if (distSq < maxDistSq) {
-          linePos.push(x1, y1, z1);
-          linePos.push(positions[jx], positions[jx + 1], positions[jx + 2]);
+          linePos.push(x1, y1, z1, x2, y2, z2);
+        }
+
+        // 2. Wrap right connection (p1 connects to p2 shifted right)
+        const dxRight = x1 - (x2 + width);
+        const distSqRight = dxRight * dxRight + dy * dy + dz * dz;
+        if (distSqRight < maxDistSq) {
+          linePos.push(x1, y1, z1, x2 + width, y2, z2);
+        }
+
+        // 3. Wrap left connection (p1 connects to p2 shifted left)
+        const dxLeft = x1 - (x2 - width);
+        const distSqLeft = dxLeft * dxLeft + dy * dy + dz * dz;
+        if (distSqLeft < maxDistSq) {
+          linePos.push(x1, y1, z1, x2 - width, y2, z2);
         }
       }
     }
     return new Float32Array(linePos);
-  }, [points, count, connectionDistance]);
+  }, [points, count, connectionDistance, width]);
 
   const containerRef = useRef<THREE.Group>(null);
   const group1Ref = useRef<THREE.Group>(null);
@@ -200,7 +223,7 @@ const NeuralNetwork = ({ count = 80, color = "#6366f1", connectionDistance = 5.0
         float scale = 1.0 + 0.4 * noise;
 
         // Size attenuation
-        gl_PointSize = 12.0 * scale * uPixelRatio * (10.0 / -mvPosition.z);
+        gl_PointSize = 8.0 * scale * uPixelRatio * (10.0 / -mvPosition.z);
       }
     `,
         fragmentShader: `
@@ -319,6 +342,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         colorRight: { value: new THREE.Color("#67e8f9") },
         time: { value: 0 },
         hoverStrength: { value: 0 },
+        mousePos: { value: new THREE.Vector2(0, 0) },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -326,6 +350,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         varying vec3 vPosition;
         uniform float time;
         uniform float hoverStrength;
+        uniform vec2 mousePos;
 
         // Simplex Noise
         vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -380,11 +405,32 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
           vUv = uv;
           vNormal = normalize(normalMatrix * normal);
           
-          float moveSpeed = time * 0.2; // Slower organic move
-          float noise = snoise(position * 0.7 + vec3(moveSpeed));
+          // Zero-Gravity Liquid movement logic
+          float slowTime = time * 0.15;
+          float flowTime = time * 0.4;
           
-          float displacement = noise * 0.4;
-          displacement += hoverStrength * 0.15;
+          // Layer 1: Large-scale global morphing (The "body" moving)
+          float baseNoise = snoise(position * 0.15 + vec3(slowTime));
+          
+          // Layer 2: Medium-scale billowy undulations (Zero-G "blobs")
+          float blobNoise = snoise(position * 0.45 + vec3(flowTime + baseNoise * 0.5));
+          
+          // Layer 3: Subtle surface tension ripples
+          float surfaceNoise = snoise(position * 0.8 + vec3(flowTime * 1.5));
+          
+          // Combine layers for a complex, non-repeating organic feel
+          float liquidBase = baseNoise * 0.6 + blobNoise * 0.3;
+          float liquidRipples = surfaceNoise * 0.15;
+          
+          // Displacement calculation
+          // The base movement is always thick and viscous
+          float displacement = liquidBase;
+          
+          // Hovering intensifies the surface tension and adds a bit of "energy"
+          displacement += (liquidRipples + blobNoise * 0.2) * hoverStrength;
+          
+          // Subtly expand and soften the core on hover
+          displacement += hoverStrength * 0.12;
           
           vec3 newPos = position + normal * displacement;
           vPosition = newPos;
@@ -396,6 +442,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         uniform vec3 colorLeft;
         uniform vec3 colorRight;
         uniform float time;
+        uniform float hoverStrength;
         varying vec2 vUv;
         varying vec3 vNormal;
         varying vec3 vPosition;
@@ -407,16 +454,18 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
           vec3 viewDir = vec3(0.0, 0.0, 1.0);
           float facingRatio = dot(vNormal, viewDir);
           
-          // Whitish glowing center
-          float centerGlow = smoothstep(0.4, 1.0, facingRatio);
-          vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), centerGlow * 0.9);
+          // Deep, soft glowing center (Viscous feel)
+          float centerGlow = smoothstep(0.3, 1.0, facingRatio);
           
-          finalColor *= 1.1; // Boost brightness
+          // Soften the color transitions on hover
+          float hoverGlow = hoverStrength * 0.12;
+          vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), (centerGlow + hoverGlow) * 0.8);
+          
+          finalColor *= (1.05 + hoverStrength * 0.08); // Very subtle brightness boost
 
           gl_FragColor = vec4(finalColor, 1.0);
         }
       `,
-      // Removed transparent: true to ensure depth occlusion hides background stars/dots
     });
   }, []);
 
@@ -446,6 +495,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
     const floatIntensity = 0.15; // Vertical floating amplitude
 
     shaderMaterial.uniforms.time.value = time;
+    shaderMaterial.uniforms.mousePos.value.set(pointer.x, pointer.y);
     shaderMaterial.uniforms.hoverStrength.value = THREE.MathUtils.lerp(
       shaderMaterial.uniforms.hoverStrength.value,
       hovered ? 1.0 : 0.0,
@@ -558,7 +608,7 @@ export const Hero3D: React.FC = () => {
         gl={{
           antialias: config.pixelRatioCap > 1,
           alpha: true,
-          powerPreference: "high-performance"
+          powerPreference: "high-performance",
         }}
         camera={{ position: [0, 0, 12], fov: 45 }}
       >
