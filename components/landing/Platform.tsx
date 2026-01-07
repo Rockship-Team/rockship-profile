@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "../FadeIn";
+import { FadeIn, FadeInStagger } from "../FadeIn";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -32,15 +32,19 @@ const PlatformCard: React.FC<{
   return (
     <div
       className={cn(
-        "relative rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group",
+        "relative rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group transform-gpu backface-hidden",
         className
       )}
     >
-      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-rockship-accent/20 to-rockship-accent/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-rockship-accent/20 to-rockship-accent/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform transform-gpu">
         <div className="text-rockship-accent">{icon}</div>
       </div>
-      <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-      <p className="text-rockship-300 leading-relaxed">{desc}</p>
+      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+        {title}
+      </h3>
+      <p className="text-rockship-300 leading-relaxed text-sm md:text-base">
+        {desc}
+      </p>
     </div>
   );
 };
@@ -73,21 +77,27 @@ export const Platform: React.FC = React.memo(() => {
           </p>
         </FadeIn>
 
-        <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {platformData.features.map((feature, index) => {
-              const Icon = iconMap[feature.icon] || ClipboardList;
-              return (
+        <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {platformData.features.map((feature, index) => {
+            const Icon = iconMap[feature.icon] || ClipboardList;
+            return (
+              <FadeIn
+                key={index}
+                direction="up"
+                distance={20}
+                delay={index * 50}
+                className="h-full"
+              >
                 <PlatformCard
-                  key={index}
+                  className="h-full"
                   icon={<Icon size={28} />}
                   title={feature.title}
                   desc={feature.desc}
                 />
-              );
-            })}
-          </div>
-        </FadeIn>
+              </FadeIn>
+            );
+          })}
+        </FadeInStagger>
       </div>
     </section>
   );

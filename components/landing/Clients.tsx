@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { FadeIn } from "../FadeIn";
 import React from "react";
+import { FadeIn } from "../FadeIn";
 
 import {
   Briefcase,
@@ -98,41 +98,52 @@ export const Clients = React.memo(function Clients() {
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--color-rockship-800)_0%,_transparent_70%)] opacity-20 pointer-events-none" />
 
-      <FadeIn className="container text-center relative z-10 px-4 flex flex-col items-center">
+      <FadeIn
+        className="container text-center relative z-10 px-4 flex flex-col items-center"
+        direction="up"
+        distance={50}
+        duration={0.8}
+      >
         <span className="text-sm md:text-base font-bold tracking-[0.2em] text-indigo-400 uppercase">
           Trusted by Enterprise Teams
         </span>
-        <p className="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400 mt-4 max-w-3xl">
-          Trusted by Enterprises to Build Real AI Operations
+        <p className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-rockship-400 mt-4 max-w-4xl font-display leading-tight">
+          Trusted by Enterprises to Build <br /> Real AI Operations
         </p>
       </FadeIn>
 
-      <div
+      <FadeIn
         className="relative w-full overflow-hidden mt-8"
-        style={{
-          maskImage:
-            "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-          WebkitMaskImage:
-            "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-        }}
+        delay={400}
+        direction="none"
+        duration={1}
       >
-        {/* Row 1: Left to Right (Standard) */}
-        <div className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4">
-          {row1.map((industry, index) => (
-            <IndustryItem key={`${industry}-1-${index}`} name={industry} />
-          ))}
-        </div>
-
-        {/* Row 2: Right to Left (Reverse) */}
         <div
-          className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4 mt-2 md:mt-6"
-          style={{ animationDirection: "reverse" }}
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+          }}
         >
-          {row2.map((industry, index) => (
-            <IndustryItem key={`${industry}-2-${index}`} name={industry} />
-          ))}
+          {/* Row 1: Left to Right (Standard) */}
+          <div className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4">
+            {row1.map((industry, index) => (
+              <IndustryItem key={`${industry}-1-${index}`} name={industry} />
+            ))}
+          </div>
+
+          {/* Row 2: Right to Left (Reverse) */}
+          <div
+            className="flex w-max animate-scroll hover:[animation-play-state:paused] py-4 mt-2 md:mt-6"
+            style={{ animationDirection: "reverse" }}
+          >
+            {row2.map((industry, index) => (
+              <IndustryItem key={`${industry}-2-${index}`} name={industry} />
+            ))}
+          </div>
         </div>
-      </div>
+      </FadeIn>
     </section>
   );
 });

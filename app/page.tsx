@@ -1,7 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Clients } from "@/components/landing/Clients";
+import dynamic from "next/dynamic";
 import { Footer } from "../components/Footer";
 import CareerCTA from "../components/landing/CareerCTA";
 import { CaseStudies } from "../components/landing/CaseStudies";
@@ -13,14 +13,20 @@ import { WhyUs } from "../components/landing/WhyUs";
 import { Navbar } from "../components/Navbar";
 
 // Dynamically import heavy components to improve initial load performance
-const GeminiAssistant = dynamic(() => import("../components/GeminiAssistant").then(mod => ({ default: mod.GeminiAssistant })), {
-  loading: () => (
-    <div className="fixed bottom-6 right-6 z-50">
-      <div className="animate-pulse bg-rockship-900/50 w-16 h-16 rounded-full shadow-lg" />
-    </div>
-  ),
-  ssr: false,
-});
+const GeminiAssistant = dynamic(
+  () =>
+    import("../components/GeminiAssistant").then((mod) => ({
+      default: mod.GeminiAssistant,
+    })),
+  {
+    loading: () => (
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="animate-pulse bg-rockship-900/50 w-16 h-16 rounded-full shadow-lg" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 export default function Home() {
   return (

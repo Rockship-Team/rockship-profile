@@ -1,104 +1,110 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { type ReactNode } from "react";
 
 interface FadeInProps {
   children: ReactNode;
   className?: string;
-  delay?: string | number; // Support number (ms) or string
-  duration?: number; // ms
-  disableAnimation?: boolean; // Optional override
+  delay?: number; // ms
+  duration?: number; // seconds
+  direction?: "up" | "down" | "left" | "right" | "none";
+  distance?: number;
+  viewTrigger?: boolean;
+  staggerChildren?: number;
 }
 
 export function FadeIn({
   children,
   className,
   delay = 0,
-  duration = 700,
-  disableAnimation,
+  duration = 0.5,
+  direction = "up",
+  distance = 30,
+  viewTrigger = true,
+  staggerChildren = 0,
 }: FadeInProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const domRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handleMotionChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleMotionChange);
-
-    let rafId: number | null = null;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Throttle state updates with requestAnimationFrame
-            if (rafId !== null) {
-              cancelAnimationFrame(rafId);
-            }
-            rafId = requestAnimationFrame(() => {
-              setIsVisible(true);
-              observer.unobserve(entry.target);
-            });
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-      } // Trigger slightly before full view
-    );
-
-    const match = domRef.current;
-    if (match) {
-      observer.observe(match);
+  const getVariants = () => {
+    if (shouldReduceMotion) {
+      return {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1 },
+      };
     }
 
-    return () => {
-      mediaQuery.removeEventListener("change", handleMotionChange);
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-      if (match) {
-        observer.unobserve(match);
-      }
+    const offsets = {
+      up: { y: distance },
+      down: { y: -distance },
+      left: { x: distance },
+      right: { x: -distance },
+      none: { x: 0, y: 0 },
     };
-  }, []);
 
-  // Skip animation if user prefers reduced motion or explicitly disabled
-  const shouldAnimate = !disableAnimation && !prefersReducedMotion;
-
-  // Handle delay normalization
-  const delayMs = typeof delay === "number" ? delay : parseFloat(delay) || 0;
-  const transitionDelay = shouldAnimate ? `${delayMs}ms` : "0ms";
-  const transitionDuration = shouldAnimate ? `${duration}ms` : "0ms";
+    return {
+      hidden: {
+        opacity: 0,
+        ...offsets[direction],
+        filter: "blur(4px)",
+      },
+      visible: {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        filter: "blur(0px)",
+        transition: {
+          duration,
+          delay: delay / 1000,
+          ease: [0.21, 0.45, 0.32, 0.9] as any,
+          staggerChildren: staggerChildren / 1000,
+        },
+      },
+    };
+  };
 
   return (
-    <div
-      ref={domRef}
-      className={cn(
-        "transform-gpu transition-all ease-[cubic-bezier(0.25,0.4,0.25,1)]",
-        // Only add will-change if animation is enabled
-        shouldAnimate && "will-change-[transform,opacity,filter]",
-        (isVisible || !shouldAnimate)
-          ? "opacity-100 translate-y-0 blur-0"
-          : "opacity-0 translate-y-8 blur-sm",
-        className
-      )}
-      style={{
-        transitionDelay,
-        transitionDuration,
-      }}
+    <motion.div
+      initial="hidden"
+      whileInView={viewTrigger ? "visible" : undefined}
+      animate={!viewTrigger ? "visible" : undefined}
+      viewport={{ once: true, margin: "-50px" }}
+      variants={getVariants()}
+      className={cn(className)}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
+export function FadeInStagger({
+  children,
+  className,
+  delay = 0,
+  stagger = 0.1,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  stagger?: number;
+}) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      variants={{
+        visible: {
+          transition: {
+            delayChildren: delay,
+            staggerChildren: stagger,
+          },
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}

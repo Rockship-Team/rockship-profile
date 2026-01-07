@@ -8,7 +8,7 @@ import {
   Zap,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "../FadeIn";
+import { FadeIn, FadeInStagger } from "../FadeIn";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -28,15 +28,19 @@ const FeatureCard: React.FC<{
   return (
     <div
       className={cn(
-        "relative p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group",
+        "relative p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group transform-gpu backface-hidden",
         className
       )}
     >
-      <div className="w-12 h-12 rounded-lg bg-rockship-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <div className="w-12 h-12 rounded-lg bg-rockship-accent/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform transform-gpu">
         <div className="text-rockship-accent">{icon}</div>
       </div>
-      <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-      <p className="text-rockship-300 leading-relaxed">{desc}</p>
+      <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
+        {title}
+      </h3>
+      <p className="text-rockship-300 leading-relaxed text-sm md:text-base">
+        {desc}
+      </p>
     </div>
   );
 };
@@ -68,21 +72,27 @@ export const WhyUs: React.FC = () => {
           </p>
         </FadeIn>
 
-        <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whyUsData.map((feature, index) => {
-              const Icon = iconMap[feature.icon] || Rocket;
-              return (
+        <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {whyUsData.map((feature, index) => {
+            const Icon = iconMap[feature.icon] || Rocket;
+            return (
+              <FadeIn
+                key={index}
+                direction="up"
+                distance={20}
+                delay={index * 50}
+                className="h-full"
+              >
                 <FeatureCard
-                  key={index}
+                  className="h-full"
                   icon={<Icon size={24} />}
                   title={feature.title}
                   desc={feature.description}
                 />
-              );
-            })}
-          </div>
-        </FadeIn>
+              </FadeIn>
+            );
+          })}
+        </FadeInStagger>
       </div>
     </section>
   );

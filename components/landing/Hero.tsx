@@ -49,14 +49,14 @@ export const Hero: React.FC = React.memo(() => {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Text Content - Enable pointer events for buttons/text */}
           <div className="text-left pointer-events-auto">
-            <FadeIn delay={100}>
+            <FadeIn delay={100} direction="up" distance={20}>
               <h1 className="font-display text-3xl md:text-4xl lg:text-[3.45rem] lg:whitespace-nowrap font-bold mb-8 leading-tight drop-shadow-2xl">
                 Turning Enterprise Operations <br />
                 <span className="gradient-text">into AI-Driven Systems </span>
               </h1>
             </FadeIn>
 
-            <FadeIn delay={200}>
+            <FadeIn delay={250} direction="up" distance={20}>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl mb-10 leading-relaxed drop-shadow-md">
                 We consult, design, and deploy production-ready AI automation
                 that streamlines operations and delivers measurable business
@@ -65,7 +65,9 @@ export const Hero: React.FC = React.memo(() => {
             </FadeIn>
 
             <FadeIn
-              delay={300}
+              delay={400}
+              direction="up"
+              distance={20}
               className="flex flex-col sm:flex-row gap-4 mb-12"
             >
               <button
@@ -84,7 +86,7 @@ export const Hero: React.FC = React.memo(() => {
               <button
                 aria-label="Watch Rockship AI Showreel"
                 onClick={() => setIsVideoModalOpen(true)}
-                className="animated-border-btn group relative inline-flex items-center justify-center rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 duration-400"
+                className="animated-border-btn group relative inline-flex items-center justify-center rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
               >
                 <span className="px-5 py-2 text-white font-bold flex items-center justify-center">
                   <Play
@@ -98,7 +100,12 @@ export const Hero: React.FC = React.memo(() => {
             </FadeIn>
 
             {/* Stats Strip */}
-            <FadeIn delay={400} className="pt-6 md:pt-[5.25rem]">
+            <FadeIn
+              delay={600}
+              direction="up"
+              distance={20}
+              className="pt-6 md:pt-[5.25rem]"
+            >
               {heroData.title && (
                 <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider mb-2">
                   {heroData.title}

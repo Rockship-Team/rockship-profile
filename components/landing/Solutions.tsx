@@ -11,7 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import React from "react";
-import { FadeIn } from "../FadeIn";
+import { FadeIn, FadeInStagger } from "../FadeIn";
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -50,20 +50,20 @@ const SpotlightCard: React.FC<{
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-rockship-accent/5",
+        "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-rockship-accent/5 transform-gpu backface-hidden",
         className
       )}
     >
       {/* Dynamic Cursor Spotlight */}
       <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 transform-gpu"
         style={{
           opacity,
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
         }}
       />
       {/* Content wrapper */}
-      <div className="relative z-20 h-full">{children}</div>
+      <div className="relative z-20 h-full transform-gpu">{children}</div>
     </div>
   );
 };
@@ -142,26 +142,34 @@ export const Solutions: React.FC = React.memo(() => {
         </FadeIn>
 
         {/* Bento Grid */}
-        <FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-            {/* Solution Cards */}
-            {solutionsData.solutions.map((solution, index) => {
-              const Icon = iconMap[solution.icon] || ScanSearch;
-              const cardClass = ""; // Use default 1x1 size for regularity, or adapt if needed
-
-              return (
+        <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+          {solutionsData.solutions.map((solution, index) => {
+            const Icon = iconMap[solution.icon] || ScanSearch;
+            return (
+              <FadeIn
+                key={index}
+                direction="up"
+                distance={20}
+                delay={index * 50}
+                className="h-full"
+              >
                 <PlatformFeatureCard
-                  key={index}
-                  className={cardClass}
+                  className="h-full"
                   icon={<Icon size={32} />}
                   title={solution.title}
                   desc={solution.desc}
                 />
-              );
-            })}
+              </FadeIn>
+            );
+          })}
 
-            {/* Enterprise - Large Card */}
-            <SpotlightCard className="md:col-span-2 lg:col-span-2 p-6 md:p-10 relative overflow-hidden group">
+          <FadeIn
+            className="md:col-span-2 lg:col-span-2 h-full"
+            direction="up"
+            distance={20}
+            delay={200}
+          >
+            <SpotlightCard className="h-full p-6 md:p-10 relative overflow-hidden group">
               {/* Background Elements */}
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-105 duration-700 pointer-events-none">
                 <LayoutTemplate size={180} strokeWidth={0.5} />
@@ -241,8 +249,8 @@ export const Solutions: React.FC = React.memo(() => {
                 </div>
               </div>
             </SpotlightCard> */}
-          </div>
-        </FadeIn>
+          </FadeIn>
+        </FadeInStagger>
       </div>
     </section>
   );

@@ -2,7 +2,7 @@ import { techStackData } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Cloud, Cpu, Database, Layers, Layout, Smartphone } from "lucide-react";
 import React from "react";
-import { FadeIn } from "../FadeIn";
+import { FadeIn, FadeInStagger } from "../FadeIn";
 
 const TechCard = ({
   title,
@@ -121,8 +121,8 @@ export const TechStack: React.FC = () => {
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
-          <FadeIn delay="100ms" className="sm:col-span-1 lg:col-span-2">
+        <FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+          <FadeIn delay={100} className="sm:col-span-1 lg:col-span-2">
             <TechCard
               title="Models & AI"
               icon={Cpu}
@@ -131,7 +131,7 @@ export const TechStack: React.FC = () => {
             />
           </FadeIn>
 
-          <FadeIn delay="200ms" className="sm:col-span-1 lg:col-span-2">
+          <FadeIn delay={200} className="sm:col-span-1 lg:col-span-2">
             <TechCard
               title="Data & Backend"
               icon={Database}
@@ -140,7 +140,7 @@ export const TechStack: React.FC = () => {
             />
           </FadeIn>
 
-          <FadeIn delay="300ms" className="lg:col-span-2">
+          <FadeIn delay={300} className="lg:col-span-2">
             <TechCard
               title="Infra & Ops"
               icon={Cloud}
@@ -149,7 +149,7 @@ export const TechStack: React.FC = () => {
             />
           </FadeIn>
 
-          <FadeIn delay="400ms" className="lg:col-span-3">
+          <FadeIn delay={400} className="lg:col-span-3">
             <TechCard
               title="Frontend Experience"
               icon={Layout}
@@ -158,7 +158,7 @@ export const TechStack: React.FC = () => {
             />
           </FadeIn>
 
-          <FadeIn delay="500ms" className="lg:col-span-3">
+          <FadeIn delay={500} className="lg:col-span-3">
             <TechCard
               title="Mobile & Cross-Platform"
               icon={Smartphone}
@@ -166,7 +166,7 @@ export const TechStack: React.FC = () => {
               colorClass="from-orange-500 to-yellow-500"
             />
           </FadeIn>
-        </div>
+        </FadeInStagger>
       </div>
     </section>
   );

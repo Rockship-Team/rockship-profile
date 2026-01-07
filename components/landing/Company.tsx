@@ -16,7 +16,7 @@ export const Company: React.FC = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <FadeIn>
+          <FadeIn direction="right" distance={40}>
             {/* <div className="inline-block px-3 py-1 bg-white/5 rounded-full border border-white/10 text-xs font-mono text-rockship-accent mb-6">
               EST. 2024
             </div> */}
@@ -28,8 +28,8 @@ export const Company: React.FC = () => {
               </span>
             </h2>
             <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-              Rockship partners with enterprises to design, deploy, and scale
-              AI systems that automate real business workflows.
+              Rockship partners with enterprises to design, deploy, and scale AI
+              systems that automate real business workflows.
               <br />
               We work end-to-end — from problem definition and system
               architecture, to production deployment and ongoing operations —
@@ -56,7 +56,12 @@ export const Company: React.FC = () => {
             </button>
           </FadeIn>
 
-          <FadeIn className="relative" delay={200}>
+          <FadeIn
+            className="relative"
+            delay={300}
+            direction="left"
+            distance={40}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-4 sm:translate-y-8">
                 {/* First team member */}
@@ -76,7 +81,7 @@ export const Company: React.FC = () => {
                   </div>
                 </div>
                 {/* Office */}
-                <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition">
+                <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition shadow-lg">
                   <Globe
                     className="text-rockship-accent mb-4"
                     size={32}
@@ -91,7 +96,7 @@ export const Company: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition">
+                <div className="aspect-square bg-rockship-800 rounded-2xl p-6 flex flex-col justify-center items-center text-center border border-white/5 hover:bg-rockship-800/80 transition shadow-lg">
                   <Users
                     className="text-purple-400 mb-4"
                     size={32}
