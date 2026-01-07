@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useId, useState } from 'react';
-import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/slim';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import { useEffect, useId, useState } from "react";
 
 interface SparklesProps {
   className?: string;
@@ -30,13 +30,13 @@ export function Sparkles({
   speed = 1.5,
   minSpeed = null,
   opacity = 1,
-  direction = '',
+  direction = "",
   opacitySpeed = 3,
   minOpacity = null,
-  color = '#ffffff',
+  color = "#ffffff",
   mousemove = false,
   hover = false,
-  background = 'transparent',
+  background = "transparent",
   options = {},
 }: SparklesProps) {
   const [isReady, setIsReady] = useState(false);
@@ -66,18 +66,20 @@ export function Sparkles({
       events: {
         onClick: {
           enable: true,
-          mode: 'push',
+          mode: "push" as const,
         },
         onHover: {
           enable: hover,
-          mode: 'grab',
+          mode: "grab" as const,
           parallax: {
             enable: mousemove,
             force: 60,
             smooth: 10,
           },
         },
-        resize: true as any,
+        resize: {
+          enable: true,
+        },
       },
       modes: {
         push: {
@@ -95,7 +97,7 @@ export function Sparkles({
       },
       move: {
         enable: true,
-        direction,
+        direction: direction as any,
         speed: {
           min: minSpeed || speed / 130,
           max: speed,
@@ -116,7 +118,7 @@ export function Sparkles({
         },
         enable: false,
         maxSpeed: 50,
-        mode: 'bounce',
+        mode: "bounce" as const,
         overlap: {
           enable: true,
           retries: 0,
@@ -147,9 +149,7 @@ export function Sparkles({
   };
   return (
     isReady && (
-      <Particles id={id} 
-      // @ts-nocheck @ts-ignore @ts-expect-error @ts-ignore
-      options={defaultOptions} className={className} />
+      <Particles id={id} options={defaultOptions} className={className} />
     )
   );
 }
