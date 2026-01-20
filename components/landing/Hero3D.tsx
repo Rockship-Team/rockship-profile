@@ -47,7 +47,7 @@ const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
 // Detect device capabilities and viewport
 const usePerformanceConfig = (): PerformanceConfig => {
   const [config, setConfig] = useState<PerformanceConfig>(
-    QUALITY_SETTINGS.high
+    QUALITY_SETTINGS.high,
   );
   const [quality, setQuality] = useState<QualityLevel>("high");
 
@@ -242,7 +242,7 @@ const NeuralNetwork = ({
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
-    [color, gl]
+    [color, gl],
   );
 
   // Clean up shader material on unmount to prevent WebGL memory leaks
@@ -278,12 +278,12 @@ const NeuralNetwork = ({
     containerRef.current.rotation.x = THREE.MathUtils.lerp(
       containerRef.current.rotation.x,
       yMouse * 0.1,
-      0.1
+      0.1,
     );
     containerRef.current.rotation.y = THREE.MathUtils.lerp(
       containerRef.current.rotation.y,
       xMouse * 0.1, // Reduced Y-rotation range since we have scanning now
-      0.1
+      0.1,
     );
 
     // 2. Infinite Scroll Animation (Right to Left)
@@ -499,7 +499,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
     shaderMaterial.uniforms.hoverStrength.value = THREE.MathUtils.lerp(
       shaderMaterial.uniforms.hoverStrength.value,
       hovered ? 1.0 : 0.0,
-      0.1
+      0.1,
     );
 
     // Calculate proximity to the object's base position to limit influence
@@ -522,12 +522,12 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
     meshRef.current.position.x = THREE.MathUtils.lerp(
       meshRef.current.position.x,
       targetX,
-      0.05
+      0.05,
     );
     meshRef.current.position.y = THREE.MathUtils.lerp(
       meshRef.current.position.y,
       targetY,
-      0.05
+      0.05,
     );
 
     // Dynamic rotation dependent on mouse
@@ -536,12 +536,12 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
     meshRef.current.rotation.y = THREE.MathUtils.lerp(
       meshRef.current.rotation.y,
       rotationTimeRef.current * 0.15 + pointer.x * 0.5,
-      0.05
+      0.05,
     );
     meshRef.current.rotation.z = THREE.MathUtils.lerp(
       meshRef.current.rotation.z,
       Math.sin(time * 0.2) * 0.1 - pointer.y * 0.3,
-      0.05
+      0.05,
     );
   });
 
@@ -603,6 +603,7 @@ export const Hero3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   // Visibility-based rendering - pause when not in viewport
   useEffect(() => {
@@ -613,7 +614,7 @@ export const Hero3D: React.FC = () => {
           setHasLoaded(true);
         }
       },
-      { threshold: 0.05, rootMargin: "100px" }
+      { threshold: 0.05, rootMargin: "100px" },
     );
 
     if (containerRef.current) {
@@ -621,6 +622,15 @@ export const Hero3D: React.FC = () => {
     }
 
     return () => observer.disconnect();
+  }, [hasLoaded]);
+
+  // Delay canvas ready state for smoother transition
+  useEffect(() => {
+    if (hasLoaded) {
+      // Small delay to let WebGL context initialize properly
+      const timer = setTimeout(() => setCanvasReady(true), 100);
+      return () => clearTimeout(timer);
+    }
   }, [hasLoaded]);
 
   // Don't render heavy 3D content until first visible
@@ -631,7 +641,7 @@ export const Hero3D: React.FC = () => {
       {shouldRender && (
         <Canvas
           dpr={[1, config.pixelRatioCap]}
-          frameloop={isVisible ? "always" : "demand"} // Pause animation when not visible
+          frameloop={isVisible && canvasReady ? "always" : "demand"} // Start with demand, then always
           gl={{
             antialias: config.pixelRatioCap > 1,
             alpha: true,
@@ -639,14 +649,19 @@ export const Hero3D: React.FC = () => {
             // Additional GPU optimizations
             stencil: false,
             depth: true,
+            // Reduce context attributes for faster initialization
+            preserveDrawingBuffer: false,
+            failIfMajorPerformanceCaveat: false,
           }}
           camera={{ position: [0, 0, 12], fov: 45 }}
           onCreated={({ gl }) => {
             // Optimize WebGL context
             gl.setClearColor(0x000000, 0);
+            // Mark canvas as ready after WebGL context is created
+            requestAnimationFrame(() => setCanvasReady(true));
           }}
         >
-          <Suspense fallback={<LoadingFallback />}>
+          <Suspense fallback={null}>
             <SceneContent config={config} />
           </Suspense>
         </Canvas>

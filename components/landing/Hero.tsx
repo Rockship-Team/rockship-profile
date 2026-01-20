@@ -7,14 +7,26 @@ import React, { useState } from "react";
 import { FadeIn } from "../FadeIn";
 
 // Dynamically import heavy 3D component to improve initial load performance
+// Priority low vì đây là background decoration, không block main content
 const Hero3D = dynamic(
-  () => import("./Hero3D").then((mod) => ({ default: mod.Hero3D })),
+  () =>
+    import("./Hero3D").then((mod) => {
+      // Mark as loaded for performance tracking
+      if (typeof window !== "undefined") {
+        (window as any).__hero3d_loaded__ = true;
+      }
+      return { default: mod.Hero3D };
+    }),
   {
     loading: () => (
-      <div className="absolute inset-0 bg-rockship-950 animate-pulse" />
+      <div className="absolute inset-0 bg-rockship-950">
+        {/* Progressive loading skeleton with gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-rockship-purple/5 via-transparent to-rockship-accent/5 animate-pulse" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,_var(--color-rockship-800)_0%,_transparent_50%)] opacity-20" />
+      </div>
     ),
     ssr: false,
-  }
+  },
 );
 
 // Dynamically import video modal to reduce initial bundle size
@@ -22,7 +34,7 @@ const VideoModal = dynamic(
   () => import("../VideoModal").then((mod) => ({ default: mod.VideoModal })),
   {
     ssr: false,
-  }
+  },
 );
 
 export const Hero: React.FC = React.memo(() => {
@@ -119,7 +131,7 @@ export const Hero: React.FC = React.memo(() => {
                       key={i}
                       className={cn(
                         "flex flex-col text-left",
-                        isCenter && "lg:ml-6"
+                        isCenter && "lg:ml-6",
                       )}
                     >
                       <span className="text-2xl font-display font-bold text-white">

@@ -84,11 +84,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to CDN for faster resource fetching */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        {/* DNS prefetch for potential external resources */}
+        <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+      </head>
       <body
         className={cn(
           dmSans.className,
           dmSans.variable,
-          "bg-rockship-950 text-white"
+          "bg-rockship-950 text-white",
         )}
         suppressHydrationWarning={true}
       >

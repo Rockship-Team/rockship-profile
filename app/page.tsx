@@ -1,53 +1,18 @@
-"use client";
+import HomePage from "@/components/pages/HomePage";
+import { Metadata } from "next";
 
-import { Clients } from "@/components/landing/Clients";
-import dynamic from "next/dynamic";
-import { Footer } from "../components/Footer";
-import CareerCTA from "../components/landing/CareerCTA";
-import { CaseStudies } from "../components/landing/CaseStudies";
-import { Company } from "../components/landing/Company";
-import { Hero } from "../components/landing/Hero";
-import { Platform } from "../components/landing/Platform";
-import { Solutions } from "../components/landing/Solutions";
-import { WhyUs } from "../components/landing/WhyUs";
-import { Navbar } from "../components/Navbar";
+// ISR: Tái tạo page mỗi 60 giây
+export const revalidate = 60;
 
-// Dynamically import heavy components to improve initial load performance
-const GeminiAssistant = dynamic(
-  () =>
-    import("../components/GeminiAssistant").then((mod) => ({
-      default: mod.GeminiAssistant,
-    })),
-  {
-    loading: () => (
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="animate-pulse bg-rockship-900/50 w-16 h-16 rounded-full shadow-lg" />
-      </div>
-    ),
-    ssr: false,
-  }
-);
+// Force static generation for better caching
+export const dynamic = "force-static";
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-rockship-950 text-white font-sans selection:bg-rockship-accent selection:text-rockship-900">
-      <Navbar />
-      <main>
-        <Hero />
-        <Platform />
-        <Solutions />
-        <Clients />
-        {/* <TechStack /> */}
-        <CaseStudies />
-        {/* <Research /> */}
-        {/* <BuildAISection /> */}
-        <WhyUs />
-        <Company />
-        {/* <Testimonials /> */}
-        <CareerCTA />
-      </main>
-      <Footer />
-      <GeminiAssistant />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "Rockship AI - Enterprise AI Solutions",
+  description:
+    "We consult, design, and deploy production-ready AI automation that streamlines operations and delivers measurable business impact.",
+};
+
+export default function Page() {
+  return <HomePage />;
 }
