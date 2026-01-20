@@ -2,7 +2,7 @@
 
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 interface SparklesProps {
   className?: string;
@@ -26,7 +26,7 @@ export function Sparkles({
   className,
   size = 1.2,
   minSize = null,
-  density = 800,
+  density = 400, // Reduced from 800 for better performance
   speed = 1.5,
   minSpeed = null,
   opacity = 1,
@@ -40,14 +40,35 @@ export function Sparkles({
   options = {},
 }: SparklesProps) {
   const [isReady, setIsReady] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Visibility-based rendering - only initialize when visible
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1, rootMargin: "50px" }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Only initialize particles engine when visible
+  useEffect(() => {
+    if (!isVisible || isReady) return;
+
     initParticlesEngine(async (engine) => {
       await loadSlim(engine);
     }).then(() => {
       setIsReady(true);
     });
-  }, []);
+  }, [isVisible, isReady]);
 
   const id = useId();
   const defaultOptions = {
@@ -60,7 +81,7 @@ export function Sparkles({
       enable: false,
       zIndex: 1,
     },
-    fpsLimit: 300,
+    fpsLimit: 60, // Reduced from 300 for better performance
 
     interactivity: {
       events: {
@@ -148,8 +169,14 @@ export function Sparkles({
     detectRetina: true,
   };
   return (
-    isReady && (
-      <Particles id={id} options={defaultOptions} className={className} />
-    )
+    <div
+      ref={containerRef}
+      className={className}
+      style={{ width: "100%", height: "100%" }}
+    >
+      {isReady && isVisible && (
+        <Particles id={id} options={defaultOptions} className="w-full h-full" />
+      )}
+    </div>
   );
 }

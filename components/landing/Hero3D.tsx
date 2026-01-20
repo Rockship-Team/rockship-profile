@@ -2,7 +2,7 @@
 
 import { Stars } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import React, { Suspense, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 // Performance quality settings
@@ -600,22 +600,57 @@ const SceneContent = ({ config }: { config: PerformanceConfig }) => {
 
 export const Hero3D: React.FC = () => {
   const config = usePerformanceConfig();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  // Visibility-based rendering - pause when not in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting && !hasLoaded) {
+          setHasLoaded(true);
+        }
+      },
+      { threshold: 0.05, rootMargin: "100px" }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasLoaded]);
+
+  // Don't render heavy 3D content until first visible
+  const shouldRender = hasLoaded;
 
   return (
-    <div className="w-full h-full">
-      <Canvas
-        dpr={[1, config.pixelRatioCap]}
-        gl={{
-          antialias: config.pixelRatioCap > 1,
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
-        camera={{ position: [0, 0, 12], fov: 45 }}
-      >
-        <Suspense fallback={<LoadingFallback />}>
-          <SceneContent config={config} />
-        </Suspense>
-      </Canvas>
+    <div ref={containerRef} className="w-full h-full">
+      {shouldRender && (
+        <Canvas
+          dpr={[1, config.pixelRatioCap]}
+          frameloop={isVisible ? "always" : "demand"} // Pause animation when not visible
+          gl={{
+            antialias: config.pixelRatioCap > 1,
+            alpha: true,
+            powerPreference: "high-performance",
+            // Additional GPU optimizations
+            stencil: false,
+            depth: true,
+          }}
+          camera={{ position: [0, 0, 12], fov: 45 }}
+          onCreated={({ gl }) => {
+            // Optimize WebGL context
+            gl.setClearColor(0x000000, 0);
+          }}
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <SceneContent config={config} />
+          </Suspense>
+        </Canvas>
+      )}
     </div>
   );
 };
