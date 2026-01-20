@@ -10,7 +10,7 @@ import {
   Server,
   Zap,
 } from "lucide-react";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FadeIn, FadeInStagger } from "../FadeIn";
 
 // Icon mapping
@@ -19,6 +19,22 @@ const iconMap: Record<string, LucideIcon> = {
   DraftingCompass,
   Network,
   Gauge,
+};
+
+// Hook to detect mobile devices
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 0);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  return isMobile;
 };
 
 const SpotlightCard: React.FC<{
@@ -33,12 +49,20 @@ const SpotlightCard: React.FC<{
   const divRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = React.useState(0);
+  const isMobile = useIsMobile();
+  const lastUpdateRef = React.useRef(0);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Throttled mouse move handler - only update every 30ms
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!divRef.current) return;
+
+    const now = Date.now();
+    if (now - lastUpdateRef.current < 30) return; // Throttle to ~33fps
+    lastUpdateRef.current = now;
+
     const rect = divRef.current.getBoundingClientRect();
     setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
+  }, []);
 
   const handleMouseEnter = () => setOpacity(1);
   const handleMouseLeave = () => setOpacity(0);
@@ -46,22 +70,24 @@ const SpotlightCard: React.FC<{
   return (
     <div
       ref={divRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={!isMobile ? handleMouseMove : undefined}
+      onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+      onMouseLeave={!isMobile ? handleMouseLeave : undefined}
       className={cn(
         "relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-sm group hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-rockship-accent/5 transform-gpu backface-hidden",
         className
       )}
     >
-      {/* Dynamic Cursor Spotlight */}
-      <div
-        className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 transform-gpu"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
-        }}
-      />
+      {/* Dynamic Cursor Spotlight - Disabled on mobile */}
+      {!isMobile && (
+        <div
+          className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 transform-gpu"
+          style={{
+            opacity,
+            background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
+          }}
+        />
+      )}
       {/* Content wrapper */}
       <div className="relative z-20 h-full transform-gpu">{children}</div>
     </div>
@@ -118,9 +144,9 @@ export const Solutions: React.FC = React.memo(() => {
       id="solutions"
       className="py-16 md:py-32 bg-rockship-950 relative overflow-hidden"
     >
-      {/* Background Atmosphere */}
+      {/* Background Atmosphere - Reduced blur on mobile for performance */}
       <div className="absolute inset-0 bg-grid-pattern opacity-25 pointer-events-none" />
-      <div className="absolute right-0 top-1/4 w-[600px] h-[600px] bg-rockship-accent/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3" />
+      <div className="absolute right-0 top-1/4 w-[600px] h-[600px] bg-rockship-accent/10 rounded-full blur-[60px] md:blur-[120px] pointer-events-none translate-x-1/3" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-6 relative z-10">

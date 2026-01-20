@@ -19,82 +19,88 @@ interface PerformanceConfig {
 }
 
 const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
+  // Mobile - heavily optimized for phone GPUs
   low: {
     level: "low",
-    sphereSegments: 24,
-    neuralCount: 20,
-    connectionDistance: 5.0,
-    starCount: 200, // Drastically reduced
+    sphereSegments: 16, // Very low poly for mobile
+    neuralCount: 0, // Disabled on mobile
+    connectionDistance: 0,
+    starCount: 0, // Disabled on mobile
     pixelRatioCap: 1.0, // Strict 1x scale
-    frameThrottle: 2,
+    frameThrottle: 3, // Aggressive throttling (~20fps)
   },
+  // Tablet / low-end desktop
   medium: {
     level: "medium",
     sphereSegments: 48,
-    neuralCount: 35, // Reduced from 50 for better performance
-    connectionDistance: 6.0, // Reduced from 7.0
-    starCount: 500, // Reduced from 1000
+    neuralCount: 35,
+    connectionDistance: 6.0,
+    starCount: 500,
     pixelRatioCap: 1.5,
-    frameThrottle: 1, // Full speed if possible
+    frameThrottle: 1,
   },
+  // Desktop - full quality
   high: {
     level: "high",
-    sphereSegments: 64, // Reduced from 96 - still smooth but less vertices
-    neuralCount: 60, // Reduced from 80
-    connectionDistance: 8.0, // Reduced from 9.0
-    starCount: 1200, // Reduced from 2000
+    sphereSegments: 64,
+    neuralCount: 60,
+    connectionDistance: 8.0,
+    starCount: 1200,
     pixelRatioCap: 2,
     frameThrottle: 1,
   },
 };
 
 // Detect device capabilities and viewport
+// Only use screen width to determine mobile vs desktop
 const usePerformanceConfig = (): PerformanceConfig => {
-  const [config, setConfig] = useState<PerformanceConfig>(() => {
-    if (typeof window !== "undefined") {
-      const isMobile = window.innerWidth < 768;
-      const isLowEnd =
-        navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-      if (isMobile || isLowEnd) return QUALITY_SETTINGS.low;
-    }
-    return QUALITY_SETTINGS.high;
-  });
-  const [quality, setQuality] = useState<QualityLevel>(() =>
-    config.level === "low" ? "low" : "high",
-  );
+  const [config, setConfig] = useState<PerformanceConfig>(QUALITY_SETTINGS.high);
+  const [quality, setQuality] = useState<QualityLevel>("high");
 
   React.useEffect(() => {
-    // Detect viewport width
-    const isMobile = window.innerWidth < 768;
-    const isLowEnd =
-      navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const detectQuality = () => {
+      const width = window.innerWidth;
 
-    // Auto-select quality based on device
-    let autoQuality: QualityLevel = "high";
-    if (isMobile || isLowEnd) {
-      autoQuality = "low";
-    } else if (window.innerWidth >= 1920 && !isLowEnd) {
-      autoQuality = "high";
-    }
+      // Simple detection: only screen width matters
+      // Mobile: < 768px → low quality
+      // Tablet: 768-1024px → medium quality
+      // Desktop: > 1024px → high quality
+      let autoQuality: QualityLevel;
+      if (width < 768) {
+        autoQuality = "low";
+      } else if (width < 1024) {
+        autoQuality = "medium";
+      } else {
+        autoQuality = "high";
+      }
 
-    setQuality(autoQuality);
-    setConfig(QUALITY_SETTINGS[autoQuality]);
+      setQuality(autoQuality);
+      setConfig(QUALITY_SETTINGS[autoQuality]);
+    };
+
+    detectQuality();
+    window.addEventListener("resize", detectQuality);
 
     // Listen for quality toggle from keyboard (Shift+Q)
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === "Q") {
         const qualities: QualityLevel[] = ["low", "medium", "high"];
-        const currentIndex = qualities.indexOf(quality);
-        const nextQuality = qualities[(currentIndex + 1) % 3];
-        setQuality(nextQuality);
-        setConfig(QUALITY_SETTINGS[nextQuality]);
-        console.log(`Quality changed to: ${nextQuality}`);
+        setQuality((prev) => {
+          const currentIndex = qualities.indexOf(prev);
+          const nextQuality = qualities[(currentIndex + 1) % 3];
+          setConfig(QUALITY_SETTINGS[nextQuality]);
+          console.log(`Quality changed to: ${nextQuality}`);
+          return nextQuality;
+        });
       }
     };
 
     window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [quality]);
+    return () => {
+      window.removeEventListener("resize", detectQuality);
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
 
   return config;
 };
@@ -339,47 +345,43 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
   const [hovered, setHover] = useState(false);
   const { viewport } = useThree();
 
+  const isMobile = config.level === "low";
   const isDesktop = viewport.width > 8;
+
+  // Mobile: center position, moderate scale
   const positionX = isDesktop ? 3.5 : 0;
-  const positionY = isDesktop ? 0 : -2.5; // Move deeply down on mobile so it's below text
-  const scale = isDesktop ? 1 : 0.55; // Much smaller on mobile to be subtle
+  const positionY = isDesktop ? 0 : (isMobile ? -1.5 : -2.5);
+  const scale = isMobile ? 0.55 : (isDesktop ? 1 : 0.55); // Larger on mobile for visibility
 
   // Dynamic sphere segments based on quality setting
   const sphereSegments = config.sphereSegments;
 
+  // Sphere radius
+  const sphereRadius = isMobile ? 2.2 : 2.5;
+
   const shaderMaterial = useMemo(() => {
-    // Optimized simpler shader for low-end devices
+    // Ultra-optimized shader for mobile - minimal calculations
     if (config.level === "low") {
       return new THREE.ShaderMaterial({
         uniforms: {
           colorLeft: { value: new THREE.Color("#d8b4fe") },
           colorRight: { value: new THREE.Color("#67e8f9") },
           time: { value: 0 },
+          // Keep these for compatibility with useFrame (not used in shader)
           hoverStrength: { value: 0 },
           mousePos: { value: new THREE.Vector2(0, 0) },
         },
         vertexShader: `
-          varying vec2 vUv;
           varying vec3 vNormal;
-          varying vec3 vPosition;
           uniform float time;
-          uniform float hoverStrength;
-          uniform vec2 mousePos;
 
           void main() {
-            vUv = uv;
             vNormal = normalize(normalMatrix * normal);
-            
-            // Simple sine wave displacement - MUCH cheaper than Simplex Noise
-            float displacement = sin(position.y * 3.0 + time * 0.5) * 0.15;
-            displacement += cos(position.x * 3.0 + time * 0.4) * 0.15;
-            
-            // Add slight hover effect
-            displacement += hoverStrength * 0.1;
-            
+
+            // Ultra simple displacement - single sine wave
+            float displacement = sin(position.y * 2.5 + time * 0.3) * 0.1;
+
             vec3 newPos = position + normal * displacement;
-            vPosition = newPos;
-            
             gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
           }
         `,
@@ -389,17 +391,10 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
           varying vec3 vNormal;
 
           void main() {
-            // Simple gradient lighting
-            float mixFactor = smoothstep(-0.8, 0.8, vNormal.x);
-            vec3 baseColor = mix(colorLeft, colorRight, mixFactor);
-            
-            // Basic rim light approximation
-            vec3 viewDir = vec3(0.0, 0.0, 1.0);
-            float facingRatio = dot(vNormal, viewDir);
-            float centerGlow = smoothstep(0.4, 1.0, facingRatio);
-            
-            vec3 finalColor = mix(baseColor, vec3(1.0), centerGlow * 0.5);
-            gl_FragColor = vec4(finalColor, 1.0);
+            // Simple gradient - no complex calculations
+            float mixFactor = vNormal.x * 0.5 + 0.5;
+            vec3 color = mix(colorLeft, colorRight, mixFactor);
+            gl_FragColor = vec4(color, 1.0);
           }
         `,
       });
@@ -628,14 +623,14 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         setHover(false);
       }}
     >
-      <sphereGeometry args={[2.5, sphereSegments, sphereSegments]} />
+      <sphereGeometry args={[sphereRadius, sphereSegments, sphereSegments]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
   );
 };
 
 const SceneContent = ({ config }: { config: PerformanceConfig }) => {
-  const { scene } = useThree();
+  const isMobile = config.level === "low";
 
   return (
     <>
@@ -643,26 +638,30 @@ const SceneContent = ({ config }: { config: PerformanceConfig }) => {
       <ambientLight intensity={0.8} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
 
-      {/* Background (Pushed to Z < -5) */}
-      <NeuralNetwork
-        count={config.neuralCount}
-        color="#818cf8"
-        connectionDistance={config.connectionDistance}
-      />
+      {/* Background - Skip on mobile for performance */}
+      {!isMobile && (
+        <NeuralNetwork
+          count={config.neuralCount}
+          color="#818cf8"
+          connectionDistance={config.connectionDistance}
+        />
+      )}
 
-      {/* Foreground Hero Blob */}
+      {/* Foreground Hero Blob - Always show */}
       <AISphere config={config} />
 
-      {/* Environment */}
-      <Stars
-        radius={100}
-        depth={50}
-        count={config.starCount}
-        factor={8}
-        saturation={0}
-        fade
-        speed={1}
-      />
+      {/* Environment - Skip Stars on mobile for performance */}
+      {!isMobile && (
+        <Stars
+          radius={100}
+          depth={50}
+          count={config.starCount}
+          factor={8}
+          saturation={0}
+          fade
+          speed={1}
+        />
+      )}
       <fog attach="fog" args={["#02040a", 10, 50]} />
     </>
   );

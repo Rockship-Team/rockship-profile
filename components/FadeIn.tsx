@@ -43,17 +43,16 @@ export function FadeIn({
       none: { x: 0, y: 0 },
     };
 
+    // Remove blur filter entirely - it causes performance issues and hydration mismatch
     return {
       hidden: {
         opacity: 0,
         ...offsets[direction],
-        filter: "blur(4px)",
       },
       visible: {
         opacity: 1,
         x: 0,
         y: 0,
-        filter: "blur(0px)",
         transition: {
           duration,
           delay: delay / 1000,

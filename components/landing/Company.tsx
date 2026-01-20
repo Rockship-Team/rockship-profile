@@ -1,5 +1,6 @@
 import { companyData } from "@/lib/data";
 import { ArrowUpRight, Globe, Users } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 import { FadeIn } from "../FadeIn";
 
@@ -66,10 +67,14 @@ export const Company: React.FC = () => {
               <div className="space-y-4 sm:translate-y-8">
                 {/* First team member */}
                 <div className="aspect-[4/5] bg-gray-800 rounded-2xl overflow-hidden relative group">
-                  <img
-                    src={companyData.teamMembers[0].image}
-                    className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
+                  <Image
+                    src={`/${companyData.teamMembers[0].image}`}
                     alt={`${companyData.teamMembers[0].name} - ${companyData.teamMembers[0].role} at Rockship AI`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
+                    loading="lazy"
+                    quality={75}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
                     <span className="text-white font-bold">
@@ -111,10 +116,14 @@ export const Company: React.FC = () => {
                 </div>
                 {/* Second team member */}
                 <div className="aspect-[4/5] bg-gray-800 rounded-2xl overflow-hidden relative group">
-                  <img
-                    src={companyData.teamMembers[1].image}
-                    className="object-cover w-full h-full opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
+                  <Image
+                    src={`/${companyData.teamMembers[1].image}`}
                     alt={`${companyData.teamMembers[1].name} - ${companyData.teamMembers[1].role} of Rockship AI`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-500"
+                    loading="lazy"
+                    quality={75}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end">
                     <span className="text-white font-bold">

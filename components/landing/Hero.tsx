@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { ArrowRight, Play } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FadeIn } from "../FadeIn";
 
 // Dynamically import heavy 3D component to improve initial load performance
@@ -29,6 +29,23 @@ const Hero3D = dynamic(
   },
 );
 
+// Hook to detect mobile devices - skip 3D entirely on mobile for performance
+// Returns null initially until we can detect, then true/false
+const useIsMobile = (): boolean | null => {
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 0);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  return isMobile;
+};
+
 // Dynamically import video modal to reduce initial bundle size
 const VideoModal = dynamic(
   () => import("../VideoModal").then((mod) => ({ default: mod.VideoModal })),
@@ -39,19 +56,31 @@ const VideoModal = dynamic(
 
 export const Hero: React.FC = React.memo(() => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const isMobile = useIsMobile();
+
   return (
     <section
       id="home"
       className="relative min-h-screen flex items-center overflow-hidden bg-rockship-950"
     >
-      {/* 3D Background Layer - Full Screen */}
-      <div className="absolute inset-0 z-0">
-        <Hero3D />
-      </div>
+      {/* 3D Background Layer - render after device detection */}
+      {isMobile !== null && (
+        <div className="absolute inset-0 z-0">
+          <Hero3D />
+        </div>
+      )}
 
-      {/* Static Background Decor (Behind 3D) */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-rockship-purple/10 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rockship-accent/5 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
+      {/* Static background fallback - show only during initial detection */}
+      {isMobile === null && (
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-rockship-purple/10 via-rockship-950 to-rockship-accent/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,_var(--color-rockship-800)_0%,_transparent_50%)] opacity-30" />
+        </div>
+      )}
+
+      {/* Static Background Decor - Reduced blur on mobile */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-rockship-purple/10 rounded-full blur-[60px] md:blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rockship-accent/5 rounded-full blur-[60px] md:blur-[120px] -z-10 pointer-events-none animate-pulse-slow" />
 
       {/* Mobile Overlay for Readability */}
       <div className="absolute inset-0 z-5 md:hidden bg-gradient-to-b from-rockship-950 via-rockship-950/80 to-rockship-950 pointer-events-none" />

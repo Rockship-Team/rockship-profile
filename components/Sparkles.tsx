@@ -2,7 +2,7 @@
 
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 interface SparklesProps {
   className?: string;
@@ -21,6 +21,22 @@ interface SparklesProps {
   background?: string;
   options?: Record<string, any>; // Adjust type as needed based on `options` structure
 }
+
+// Hook to detect mobile devices
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  return isMobile;
+};
 
 export function Sparkles({
   className,
@@ -42,6 +58,15 @@ export function Sparkles({
   const [isReady, setIsReady] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  // Reduce density significantly on mobile for better performance
+  const effectiveDensity = useMemo(() => {
+    if (isMobile) {
+      return Math.min(density * 0.15, 100); // Max 100 particles on mobile
+    }
+    return density;
+  }, [density, isMobile]);
 
   // Visibility-based rendering - only initialize when visible
   useEffect(() => {
@@ -81,7 +106,7 @@ export function Sparkles({
       enable: false,
       zIndex: 1,
     },
-    fpsLimit: 60, // Reduced from 300 for better performance
+    fpsLimit: isMobile ? 30 : 60, // Lower FPS on mobile for better performance
 
     interactivity: {
       events: {
@@ -121,7 +146,7 @@ export function Sparkles({
         direction: direction as any,
         speed: {
           min: minSpeed || speed / 130,
-          max: speed,
+          max: isMobile ? speed * 0.7 : speed, // Slower on mobile
         },
         straight: true,
       },
@@ -146,7 +171,7 @@ export function Sparkles({
         },
       },
       number: {
-        value: density,
+        value: effectiveDensity, // Use reduced density on mobile
       },
       opacity: {
         value: {

@@ -1,11 +1,31 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Footer } from "../Footer";
 import { Hero } from "../landing/Hero";
 import { Platform } from "../landing/Platform";
 import { Navbar } from "../Navbar";
+
+// Hook to detect mobile and delay non-critical components
+const useDelayedRender = (delay: number = 3000) => {
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    // Check if mobile
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      setShouldRender(true);
+      return;
+    }
+
+    // Delay render on mobile to prioritize initial page load
+    const timer = setTimeout(() => setShouldRender(true), delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  return shouldRender;
+};
 
 // Section loading skeleton
 const SectionSkeleton = ({ height = "h-96" }: { height?: string }) => (
@@ -90,6 +110,9 @@ export default function HomePage() {
     preload3DModule();
   }, []);
 
+  // Delay loading GeminiAssistant on mobile for better initial performance
+  const shouldRenderChatbot = useDelayedRender(3000);
+
   return (
     <div className="min-h-screen bg-rockship-950 text-white font-sans selection:bg-rockship-accent selection:text-rockship-900">
       <Navbar />
@@ -108,7 +131,7 @@ export default function HomePage() {
         <CareerCTA />
       </main>
       <Footer />
-      <GeminiAssistant />
+      {shouldRenderChatbot && <GeminiAssistant />}
     </div>
   );
 }
