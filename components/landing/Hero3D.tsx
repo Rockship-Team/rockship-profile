@@ -9,6 +9,7 @@ import * as THREE from "three";
 type QualityLevel = "low" | "medium" | "high";
 
 interface PerformanceConfig {
+  level: QualityLevel;
   sphereSegments: number;
   neuralCount: number;
   connectionDistance: number;
@@ -19,26 +20,29 @@ interface PerformanceConfig {
 
 const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
   low: {
-    sphereSegments: 32,
-    neuralCount: 30,
-    connectionDistance: 6.0,
-    starCount: 800,
-    pixelRatioCap: 1.2,
-    frameThrottle: 3,
-  },
-  medium: {
-    sphereSegments: 64,
-    neuralCount: 60,
-    connectionDistance: 7.5,
-    starCount: 1500,
-    pixelRatioCap: 1.5,
+    level: "low",
+    sphereSegments: 24,
+    neuralCount: 20,
+    connectionDistance: 5.0,
+    starCount: 200, // Drastically reduced
+    pixelRatioCap: 1.0, // Strict 1x scale
     frameThrottle: 2,
   },
+  medium: {
+    level: "medium",
+    sphereSegments: 48,
+    neuralCount: 35, // Reduced from 50 for better performance
+    connectionDistance: 6.0, // Reduced from 7.0
+    starCount: 500, // Reduced from 1000
+    pixelRatioCap: 1.5,
+    frameThrottle: 1, // Full speed if possible
+  },
   high: {
-    sphereSegments: 128,
-    neuralCount: 90,
-    connectionDistance: 9.0,
-    starCount: 2000,
+    level: "high",
+    sphereSegments: 64, // Reduced from 96 - still smooth but less vertices
+    neuralCount: 60, // Reduced from 80
+    connectionDistance: 8.0, // Reduced from 9.0
+    starCount: 1200, // Reduced from 2000
     pixelRatioCap: 2,
     frameThrottle: 1,
   },
@@ -46,10 +50,18 @@ const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
 
 // Detect device capabilities and viewport
 const usePerformanceConfig = (): PerformanceConfig => {
-  const [config, setConfig] = useState<PerformanceConfig>(
-    QUALITY_SETTINGS.high,
+  const [config, setConfig] = useState<PerformanceConfig>(() => {
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 768;
+      const isLowEnd =
+        navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+      if (isMobile || isLowEnd) return QUALITY_SETTINGS.low;
+    }
+    return QUALITY_SETTINGS.high;
+  });
+  const [quality, setQuality] = useState<QualityLevel>(() =>
+    config.level === "low" ? "low" : "high",
   );
-  const [quality, setQuality] = useState<QualityLevel>("high");
 
   React.useEffect(() => {
     // Detect viewport width
@@ -336,6 +348,64 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
   const sphereSegments = config.sphereSegments;
 
   const shaderMaterial = useMemo(() => {
+    // Optimized simpler shader for low-end devices
+    if (config.level === "low") {
+      return new THREE.ShaderMaterial({
+        uniforms: {
+          colorLeft: { value: new THREE.Color("#d8b4fe") },
+          colorRight: { value: new THREE.Color("#67e8f9") },
+          time: { value: 0 },
+          hoverStrength: { value: 0 },
+          mousePos: { value: new THREE.Vector2(0, 0) },
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          uniform float time;
+          uniform float hoverStrength;
+          uniform vec2 mousePos;
+
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            
+            // Simple sine wave displacement - MUCH cheaper than Simplex Noise
+            float displacement = sin(position.y * 3.0 + time * 0.5) * 0.15;
+            displacement += cos(position.x * 3.0 + time * 0.4) * 0.15;
+            
+            // Add slight hover effect
+            displacement += hoverStrength * 0.1;
+            
+            vec3 newPos = position + normal * displacement;
+            vPosition = newPos;
+            
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 colorLeft;
+          uniform vec3 colorRight;
+          varying vec3 vNormal;
+
+          void main() {
+            // Simple gradient lighting
+            float mixFactor = smoothstep(-0.8, 0.8, vNormal.x);
+            vec3 baseColor = mix(colorLeft, colorRight, mixFactor);
+            
+            // Basic rim light approximation
+            vec3 viewDir = vec3(0.0, 0.0, 1.0);
+            float facingRatio = dot(vNormal, viewDir);
+            float centerGlow = smoothstep(0.4, 1.0, facingRatio);
+            
+            vec3 finalColor = mix(baseColor, vec3(1.0), centerGlow * 0.5);
+            gl_FragColor = vec4(finalColor, 1.0);
+          }
+        `,
+      });
+    }
+
+    // High quality shader with noise
     return new THREE.ShaderMaterial({
       uniforms: {
         colorLeft: { value: new THREE.Color("#d8b4fe") },
@@ -467,7 +537,7 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         }
       `,
     });
-  }, []);
+  }, [config.level]);
 
   // Dispose material on unmount to prevent GPU memory leak
   React.useEffect(() => {

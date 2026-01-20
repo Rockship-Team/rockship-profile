@@ -1,17 +1,55 @@
 "use client";
 
-import { Clients } from "@/components/landing/Clients";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { Footer } from "../Footer";
-import CareerCTA from "../landing/CareerCTA";
-import { CaseStudies } from "../landing/CaseStudies";
-import { Company } from "../landing/Company";
 import { Hero } from "../landing/Hero";
 import { Platform } from "../landing/Platform";
-import { Solutions } from "../landing/Solutions";
-import { WhyUs } from "../landing/WhyUs";
 import { Navbar } from "../Navbar";
+
+// Section loading skeleton
+const SectionSkeleton = ({ height = "h-96" }: { height?: string }) => (
+  <div className={`${height} w-full animate-pulse bg-rockship-900/30`}>
+    <div className="container mx-auto px-6 py-16">
+      <div className="h-8 w-48 bg-rockship-800/50 rounded mb-8" />
+      <div className="space-y-4">
+        <div className="h-4 w-3/4 bg-rockship-800/30 rounded" />
+        <div className="h-4 w-1/2 bg-rockship-800/30 rounded" />
+      </div>
+    </div>
+  </div>
+);
+
+// Dynamic import các sections below-the-fold để giảm initial bundle size
+const Solutions = dynamic(
+  () => import("../landing/Solutions").then((mod) => ({ default: mod.Solutions })),
+  { loading: () => <SectionSkeleton height="h-[600px]" /> }
+);
+
+const Clients = dynamic(
+  () => import("@/components/landing/Clients").then((mod) => ({ default: mod.Clients })),
+  { loading: () => <SectionSkeleton height="h-80" /> }
+);
+
+const CaseStudies = dynamic(
+  () => import("../landing/CaseStudies").then((mod) => ({ default: mod.CaseStudies })),
+  { loading: () => <SectionSkeleton height="h-[700px]" /> }
+);
+
+const WhyUs = dynamic(
+  () => import("../landing/WhyUs").then((mod) => ({ default: mod.WhyUs })),
+  { loading: () => <SectionSkeleton height="h-[500px]" /> }
+);
+
+const Company = dynamic(
+  () => import("../landing/Company").then((mod) => ({ default: mod.Company })),
+  { loading: () => <SectionSkeleton height="h-96" /> }
+);
+
+const CareerCTA = dynamic(
+  () => import("../landing/CareerCTA"),
+  { loading: () => <SectionSkeleton height="h-64" /> }
+);
 
 // Dynamically import heavy components to improve initial load performance
 const GeminiAssistant = dynamic(
@@ -32,6 +70,9 @@ const GeminiAssistant = dynamic(
 // Preload 3D module khi browser idle
 const preload3DModule = () => {
   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    // Avoid preloading on mobile/low-end devices to prioritize main thread
+    if (window.innerWidth < 768) return;
+
     window.requestIdleCallback(
       () => {
         import("../landing/Hero3D").catch(() => {
