@@ -1,3 +1,5 @@
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,6 +8,7 @@ import React, { useEffect, useState } from "react";
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { handleAnchorClick } = useSmoothScroll();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +53,8 @@ export const Navbar: React.FC = () => {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-gray-300 hover:text-white transition"
+              onClick={handleAnchorClick}
+              className="text-sm font-medium text-gray-300 link-hover"
             >
               {link.label}
             </a>
@@ -74,28 +78,48 @@ export const Navbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-lg text-gray-300 hover:text-white"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
-          <Link
-            href="/contact"
-            className="w-full block text-center py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2"
-            onClick={() => setMobileMenuOpen(false)}
+      {/* Mobile Menu with Animation */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: [0.21, 0.45, 0.32, 0.9] }}
+            className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl"
           >
-            Start an AI Pilot
-          </Link>
-        </div>
-      )}
+            {navLinks.map((link, index) => (
+              <motion.a
+                key={link.label}
+                href={link.href}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.2 }}
+                className="text-lg text-gray-300 link-hover"
+                onClick={(e) => {
+                  handleAnchorClick(e);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                {link.label}
+              </motion.a>
+            ))}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.2 }}
+            >
+              <Link
+                href="/contact"
+                className="w-full block text-center py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2 btn-hover"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Start an AI Pilot
+              </Link>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

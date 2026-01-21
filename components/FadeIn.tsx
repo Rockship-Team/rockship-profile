@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { animationConfig } from "@/lib/animation-config";
 import { motion, useReducedMotion } from "framer-motion";
 import { type ReactNode } from "react";
 
@@ -11,7 +12,10 @@ interface FadeInProps {
   duration?: number; // seconds
   direction?: "up" | "down" | "left" | "right" | "none";
   distance?: number;
+  scale?: number; // starting scale for zoom-in effect (e.g., 0.95)
   viewTrigger?: boolean;
+  viewportMargin?: string; // viewport margin for trigger
+  once?: boolean; // animate once or every time element enters viewport
   staggerChildren?: number;
 }
 
@@ -19,10 +23,13 @@ export function FadeIn({
   children,
   className,
   delay = 0,
-  duration = 0.5,
+  duration = animationConfig.duration.slow,
   direction = "up",
-  distance = 30,
+  distance = animationConfig.distance.medium,
+  scale,
   viewTrigger = true,
+  viewportMargin = "-50px",
+  once = true,
   staggerChildren = 0,
 }: FadeInProps) {
   const shouldReduceMotion = useReducedMotion();
@@ -43,20 +50,33 @@ export function FadeIn({
       none: { x: 0, y: 0 },
     };
 
-    // Remove blur filter entirely - it causes performance issues and hydration mismatch
+    // Build hidden state with optional scale
+    const hiddenState: Record<string, number> = {
+      opacity: 0,
+      ...offsets[direction],
+    };
+    if (scale !== undefined) {
+      hiddenState.scale = scale;
+    }
+
+    // Build visible state
+    const visibleState: Record<string, number> = {
+      opacity: 1,
+      x: 0,
+      y: 0,
+    };
+    if (scale !== undefined) {
+      visibleState.scale = 1;
+    }
+
     return {
-      hidden: {
-        opacity: 0,
-        ...offsets[direction],
-      },
+      hidden: hiddenState,
       visible: {
-        opacity: 1,
-        x: 0,
-        y: 0,
+        ...visibleState,
         transition: {
           duration,
           delay: delay / 1000,
-          ease: [0.21, 0.45, 0.32, 0.9] as any,
+          ease: animationConfig.easing.smooth as [number, number, number, number],
           staggerChildren: staggerChildren / 1000,
         },
       },
@@ -68,7 +88,7 @@ export function FadeIn({
       initial="hidden"
       whileInView={viewTrigger ? "visible" : undefined}
       animate={!viewTrigger ? "visible" : undefined}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once, margin: viewportMargin }}
       variants={getVariants()}
       className={cn(className)}
     >

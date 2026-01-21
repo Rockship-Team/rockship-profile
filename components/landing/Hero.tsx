@@ -1,10 +1,11 @@
 import { heroData } from "@/lib/data";
+import { animationConfig } from "@/lib/animation-config";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Play } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { FadeIn } from "../FadeIn";
+import { FadeIn, FadeInStagger } from "../FadeIn";
 
 // Dynamically import heavy 3D component to improve initial load performance
 // Priority low vì đây là background decoration, không block main content
@@ -89,15 +90,15 @@ export const Hero: React.FC = React.memo(() => {
       <div className="container mx-auto px-6 pt-20 md:pt-0 relative z-10 pointer-events-none">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Text Content - Enable pointer events for buttons/text */}
-          <div className="text-left pointer-events-auto">
-            <FadeIn delay={100} direction="up" distance={20}>
+          <FadeInStagger className="text-left pointer-events-auto" stagger={animationConfig.stagger.slow}>
+            <FadeIn delay={0} direction="up" distance={animationConfig.distance.small} duration={animationConfig.duration.slow}>
               <h1 className="font-display text-3xl md:text-4xl lg:text-[3.45rem] lg:whitespace-nowrap font-bold mb-8 leading-tight drop-shadow-2xl">
                 Turning Enterprise Operations <br />
                 <span className="gradient-text">into AI-Driven Systems </span>
               </h1>
             </FadeIn>
 
-            <FadeIn delay={250} direction="up" distance={20}>
+            <FadeIn delay={150} direction="up" distance={animationConfig.distance.small} duration={animationConfig.duration.slow}>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl mb-10 leading-relaxed drop-shadow-md">
                 We consult, design, and deploy production-ready AI automation
                 that streamlines operations and delivers measurable business
@@ -106,9 +107,10 @@ export const Hero: React.FC = React.memo(() => {
             </FadeIn>
 
             <FadeIn
-              delay={400}
+              delay={300}
               direction="up"
-              distance={20}
+              distance={animationConfig.distance.small}
+              duration={animationConfig.duration.slow}
               className="flex flex-col sm:flex-row gap-4 mb-12"
             >
               <button
@@ -142,9 +144,10 @@ export const Hero: React.FC = React.memo(() => {
 
             {/* Stats Strip */}
             <FadeIn
-              delay={600}
+              delay={450}
               direction="up"
-              distance={20}
+              distance={animationConfig.distance.small}
+              duration={animationConfig.duration.slow}
               className="pt-6 md:pt-[5.25rem]"
             >
               {heroData.title && (
@@ -174,7 +177,7 @@ export const Hero: React.FC = React.memo(() => {
                 })}
               </div>
             </FadeIn>
-          </div>
+          </FadeInStagger>
 
           {/* Empty column to maintain grid layout, but 3D is behind everything now */}
           <div className="hidden md:block h-[600px] w-full pointer-events-none">

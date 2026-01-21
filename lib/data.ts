@@ -22,9 +22,9 @@ export const companyData = {
       image: "Ngoc.png",
     },
     {
-      name: "Quan Do",
-      role: "Head of Engineering",
-      image: "Quan.png",
+      name: "Son Vo",
+      role: "Chief Operating Officer",
+      image: "Son.png",
     },
   ],
 
@@ -1065,7 +1065,7 @@ export const whyUsData = [
     icon: "Rocket",
   },
   {
-    title: "Data Secure",
+    title: "Data Security",
     description:
       "Your data is your IP. We deploy private models within your infrastructure with banking-grade security and compliance.",
     icon: "ShieldCheck",
