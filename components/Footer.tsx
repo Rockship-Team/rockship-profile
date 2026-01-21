@@ -25,14 +25,14 @@ export const Footer: React.FC = () => {
           <div className="flex gap-4">
             <a
               href="https://www.facebook.com/rockship.co/"
-              className="hover:text-rockship-accent transition"
+              className="link-hover"
               target="_blank"
             >
               <Facebook size={20} />
             </a>
             <a
               href="https://www.linkedin.com/company/rockship"
-              className="hover:text-rockship-accent transition"
+              className="link-hover"
               target="_blank"
             >
               <Linkedin size={20} />
@@ -44,17 +44,17 @@ export const Footer: React.FC = () => {
           <h4 className="font-bold text-white mb-4">Solutions</h4>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
+              <a href="#" className="link-hover">
                 Generative AI
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
+              <a href="#" className="link-hover">
                 AI Agents & Workflow Intelligence
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-rockship-accent transition">
+              <a href="#" className="link-hover">
                 Computer Vision & Document AI
               </a>
             </li>
@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
             <li>
               <a
                 href="#about"
-                className="hover:text-rockship-accent transition"
+                className="link-hover"
               >
                 About Us
               </a>
@@ -75,7 +75,7 @@ export const Footer: React.FC = () => {
             <li>
               <a
                 href="#case-studies"
-                className="hover:text-rockship-accent transition"
+                className="link-hover"
               >
                 Case Studies
               </a>
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
             <li>
               <a
                 href="#contact"
-                className="hover:text-rockship-accent transition"
+                className="link-hover"
               >
                 Contact
               </a>
@@ -97,13 +97,13 @@ export const Footer: React.FC = () => {
           &copy; 2025 Rockship AI. All rights reserved.
         </div>
         <div className="col-span-2 flex md:flex-col md:flex-row gap-6 lg:gap-[13%]">
-          <a href="#" className="hover:text-white transition">
+          <a href="#" className="link-hover">
             Privacy Policy
           </a>
-          <a href="#" className="hover:text-white transition">
+          <a href="#" className="link-hover">
             Terms of Service
           </a>
-          <a href="#" className="hover:text-white transition">
+          <a href="#" className="link-hover">
             Cookie Policy
           </a>
         </div>

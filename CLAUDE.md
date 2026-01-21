@@ -36,3 +36,10 @@
 | Documentation | @documentation-specialist | Core agent for technical docs |
 | TypeScript development | @frontend-developer | Universal agent for TS tasks when no specialist available |
 | General frontend tasks | @frontend-developer | Universal agent for non-specialized UI work |
+
+## Active Technologies
+- TypeScript 5.x với React 19, Next.js 16 (001-optimize-landing-ux)
+- N/A (không có data persistence) (001-optimize-landing-ux)
+
+## Recent Changes
+- 001-optimize-landing-ux: Added TypeScript 5.x với React 19, Next.js 16

@@ -211,6 +211,35 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.3s ease-out;
   }
+
+  /* Hover effect utilities - GPU accelerated */
+  .btn-hover {
+    @apply transition-all duration-200;
+  }
+  .btn-hover:hover {
+    @apply scale-[1.02] shadow-lg;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+  .card-hover:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+
+  .link-hover {
+    @apply transition-colors duration-200;
+  }
+  .link-hover:hover {
+    @apply text-rockship-accent;
+  }
+
+  .glow-hover {
+    @apply transition-shadow duration-200;
+  }
+  .glow-hover:hover {
+    box-shadow: 0 0 20px -5px var(--color-rockship-accent);
+  }
 }
 
 @keyframes gradient-move {
@@ -220,7 +249,7 @@
 }
 
 html {
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
 }
 
 /* Performance optimizations */
