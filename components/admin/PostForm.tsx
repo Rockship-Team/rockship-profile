@@ -6,15 +6,17 @@ import { Save, Eye, EyeOff, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createPost, updatePost } from "@/actions/blog"
 import type { CreatePostInput, UpdatePostInput } from "@/actions/blog"
-import type { BlogPostWithTags } from "@/lib/supabase/types"
+import type { BlogPostWithTags, BlogTagRow } from "@/lib/supabase/types"
+import { TagMultiSelect } from "./TagMultiSelect"
 import ReactMarkdown from "react-markdown"
 
 interface PostFormProps {
   post?: BlogPostWithTags
   mode: "create" | "edit"
+  availableTags: BlogTagRow[]
 }
 
-export function PostForm({ post, mode }: PostFormProps) {
+export function PostForm({ post, mode, availableTags }: PostFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [showPreview, setShowPreview] = useState(false)
@@ -27,7 +29,7 @@ export function PostForm({ post, mode }: PostFormProps) {
   const [content, setContent] = useState(post?.content || "")
   const [author, setAuthor] = useState(post?.author || "Rockship Team")
   const [isPublished, setIsPublished] = useState(post?.is_published ?? false)
-  const [tagsInput, setTagsInput] = useState(post?.tags?.join(", ") || "")
+  const [selectedTags, setSelectedTags] = useState<string[]>(post?.tags || [])
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -47,12 +49,6 @@ export function PostForm({ post, mode }: PostFormProps) {
     e.preventDefault()
     setError(null)
 
-    // Parse tags
-    const tags = tagsInput
-      .split(",")
-      .map((t) => t.trim().toLowerCase().replace(/\s+/g, "-"))
-      .filter(Boolean)
-
     startTransition(async () => {
       if (mode === "create") {
         const input: CreatePostInput = {
@@ -62,13 +58,13 @@ export function PostForm({ post, mode }: PostFormProps) {
           content,
           author,
           isPublished,
-          tags,
+          tags: selectedTags,
         }
 
         const result = await createPost(input)
 
         if (result.success) {
-          router.push("/admin/post")
+          router.push("/admin")
           router.refresh()
         } else {
           setError(result.error || "Failed to create post")
@@ -82,13 +78,13 @@ export function PostForm({ post, mode }: PostFormProps) {
           content,
           author,
           isPublished,
-          tags,
+          tags: selectedTags,
         }
 
         const result = await updatePost(input)
 
         if (result.success) {
-          router.push("/admin/post")
+          router.push("/admin")
           router.refresh()
         } else {
           setError(result.error || "Failed to update post")
@@ -171,21 +167,13 @@ export function PostForm({ post, mode }: PostFormProps) {
         </div>
 
         <div>
-          <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-2">
-            Tags (comma-separated)
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Tags
           </label>
-          <input
-            type="text"
-            id="tags"
-            value={tagsInput}
-            onChange={(e) => setTagsInput(e.target.value)}
-            className={cn(
-              "w-full px-4 py-3 rounded-lg",
-              "bg-rockship-900/50 border border-white/10",
-              "text-white placeholder-gray-500",
-              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
-            )}
-            placeholder="ai, cloud, infrastructure"
+          <TagMultiSelect
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onChange={setSelectedTags}
           />
         </div>
       </div>

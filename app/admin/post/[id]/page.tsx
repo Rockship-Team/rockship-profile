@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
-import { getPostById } from "@/lib/supabase/queries"
+import { getPostById, getAllTagsForAdmin } from "@/lib/supabase/queries"
 import { PostForm } from "@/components/admin/PostForm"
 import { cn } from "@/lib/utils"
 
@@ -13,7 +13,10 @@ interface EditPostPageProps {
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
   const { id } = await params
-  const post = await getPostById(id)
+  const [post, tags] = await Promise.all([
+    getPostById(id),
+    getAllTagsForAdmin(),
+  ])
 
   if (!post) {
     notFound()
@@ -24,7 +27,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
       {/* Header */}
       <div className="mb-8">
         <a
-          href="/admin/post"
+          href="/admin"
           className={cn(
             "inline-flex items-center gap-2 text-gray-400 hover:text-white",
             "transition-colors mb-4"
@@ -41,7 +44,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
       {/* Form */}
       <div className="bg-rockship-900/60 backdrop-blur-md border border-white/8 rounded-xl p-6">
-        <PostForm post={post} mode="edit" />
+        <PostForm post={post} mode="edit" availableTags={tags} />
       </div>
     </div>
   )

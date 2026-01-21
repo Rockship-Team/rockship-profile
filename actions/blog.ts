@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { createClient } from "@supabase/supabase-js"
 import { searchPosts, getPostsByTag, getPublishedPosts } from "@/lib/supabase/queries"
 import type { BlogPost } from "@/types/blog"
-import type { BlogSection, Database, BlogPostInsert, BlogPostUpdate } from "@/lib/supabase/types"
+import type { BlogSection, Database } from "@/lib/supabase/types"
 
 // Admin client with service role for CRUD operations
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -353,5 +353,148 @@ async function handlePostTags(
         tag_id: tag.id,
       })
     }
+  }
+}
+
+// ============================================
+// Tag Management Actions
+// ============================================
+
+export interface CreateTagInput {
+  name: string
+  slug: string
+}
+
+export interface UpdateTagInput extends CreateTagInput {
+  id: string
+}
+
+/**
+ * Create a new tag
+ */
+export async function createTag(input: CreateTagInput): Promise<ActionResult> {
+  const supabase = getAdminClient()
+
+  try {
+    // Validate required fields
+    if (!input.name || !input.slug) {
+      return { success: false, error: "Name and slug are required" }
+    }
+
+    // Check for duplicate slug
+    const { data: existing } = await supabase
+      .from("blog_tags")
+      .select("id")
+      .eq("slug", input.slug)
+      .single()
+
+    if (existing) {
+      return { success: false, error: "A tag with this slug already exists" }
+    }
+
+    // Insert the tag
+    const { data: tag, error: tagError } = await supabase
+      .from("blog_tags")
+      .insert({
+        name: input.name,
+        slug: input.slug,
+      })
+      .select("id")
+      .single()
+
+    if (tagError || !tag) {
+      console.error("Error creating tag:", tagError)
+      return { success: false, error: "Failed to create tag" }
+    }
+
+    // Revalidate blog pages
+    revalidatePath("/blog")
+    revalidatePath("/admin")
+
+    return { success: true, id: tag.id }
+  } catch (error) {
+    console.error("Create tag error:", error)
+    return { success: false, error: "An unexpected error occurred" }
+  }
+}
+
+/**
+ * Update an existing tag
+ */
+export async function updateTag(input: UpdateTagInput): Promise<ActionResult> {
+  const supabase = getAdminClient()
+
+  try {
+    // Validate required fields
+    if (!input.id || !input.name || !input.slug) {
+      return { success: false, error: "ID, name, and slug are required" }
+    }
+
+    // Check for duplicate slug (excluding current tag)
+    const { data: existing } = await supabase
+      .from("blog_tags")
+      .select("id")
+      .eq("slug", input.slug)
+      .neq("id", input.id)
+      .single()
+
+    if (existing) {
+      return { success: false, error: "A tag with this slug already exists" }
+    }
+
+    // Update the tag
+    const { error: updateError } = await supabase
+      .from("blog_tags")
+      .update({
+        name: input.name,
+        slug: input.slug,
+      })
+      .eq("id", input.id)
+
+    if (updateError) {
+      console.error("Error updating tag:", updateError)
+      return { success: false, error: "Failed to update tag" }
+    }
+
+    // Revalidate blog pages
+    revalidatePath("/blog")
+    revalidatePath("/admin")
+
+    return { success: true, id: input.id }
+  } catch (error) {
+    console.error("Update tag error:", error)
+    return { success: false, error: "An unexpected error occurred" }
+  }
+}
+
+/**
+ * Delete a tag
+ */
+export async function deleteTag(id: string): Promise<ActionResult> {
+  const supabase = getAdminClient()
+
+  try {
+    // Delete post-tag associations first (foreign key constraint)
+    await supabase.from("blog_post_tags").delete().eq("tag_id", id)
+
+    // Delete the tag
+    const { error } = await supabase
+      .from("blog_tags")
+      .delete()
+      .eq("id", id)
+
+    if (error) {
+      console.error("Error deleting tag:", error)
+      return { success: false, error: "Failed to delete tag" }
+    }
+
+    // Revalidate blog pages
+    revalidatePath("/blog")
+    revalidatePath("/admin")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Delete tag error:", error)
+    return { success: false, error: "An unexpected error occurred" }
   }
 }

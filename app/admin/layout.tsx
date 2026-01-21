@@ -22,19 +22,13 @@ export default function AdminLayout({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <a
-                href="/admin/post"
+                href="/admin"
                 className="text-xl font-bold text-white hover:text-rockship-accent transition-colors"
               >
-                Blog Admin
+                Admin
               </a>
             </div>
             <nav className="flex items-center gap-4">
-              <a
-                href="/admin/post"
-                className="text-gray-300 hover:text-white transition-colors text-sm"
-              >
-                Posts
-              </a>
               <a
                 href="/blog"
                 className="text-gray-300 hover:text-white transition-colors text-sm"

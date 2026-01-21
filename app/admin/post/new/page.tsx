@@ -1,17 +1,20 @@
 import { ArrowLeft } from "lucide-react"
+import { getAllTagsForAdmin } from "@/lib/supabase/queries"
 import { PostForm } from "@/components/admin/PostForm"
 import { cn } from "@/lib/utils"
 
 // Force dynamic rendering (no pre-rendering at build time)
 export const dynamic = "force-dynamic"
 
-export default function NewPostPage() {
+export default async function NewPostPage() {
+  const tags = await getAllTagsForAdmin()
+
   return (
     <div className="container mx-auto px-6 py-8">
       {/* Header */}
       <div className="mb-8">
         <a
-          href="/admin/post"
+          href="/admin"
           className={cn(
             "inline-flex items-center gap-2 text-gray-400 hover:text-white",
             "transition-colors mb-4"
@@ -28,7 +31,7 @@ export default function NewPostPage() {
 
       {/* Form */}
       <div className="bg-rockship-900/60 backdrop-blur-md border border-white/8 rounded-xl p-6">
-        <PostForm mode="create" />
+        <PostForm mode="create" availableTags={tags} />
       </div>
     </div>
   )
