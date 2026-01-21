@@ -1,3 +1,5 @@
+"use client"
+
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -25,6 +27,7 @@ export const Navbar: React.FC = () => {
     { label: "Case Studies", href: "#case-studies" },
     { label: "Why Us", href: "#why-us" },
     { label: "About", href: "#company" },
+    { label: "Blog", href: "/blog", isExternal: true },
   ];
 
   return (
@@ -49,16 +52,26 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={handleAnchorClick}
-              className="text-sm font-medium text-gray-300 link-hover"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            "isExternal" in link && link.isExternal ? (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-sm font-medium text-gray-300 link-hover"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={handleAnchorClick}
+                className="text-sm font-medium text-gray-300 link-hover"
+              >
+                {link.label}
+              </a>
+            )
+          )}
           <Link
             href="/contact"
             className="animated-border-btn group relative inline-flex items-center justify-center rounded-full transition-all duration-500"
@@ -88,22 +101,39 @@ export const Navbar: React.FC = () => {
             transition={{ duration: 0.2, ease: [0.21, 0.45, 0.32, 0.9] }}
             className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl"
           >
-            {navLinks.map((link, index) => (
-              <motion.a
-                key={link.label}
-                href={link.href}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05, duration: 0.2 }}
-                className="text-lg text-gray-300 link-hover"
-                onClick={(e) => {
-                  handleAnchorClick(e);
-                  setMobileMenuOpen(false);
-                }}
-              >
-                {link.label}
-              </motion.a>
-            ))}
+            {navLinks.map((link, index) =>
+              "isExternal" in link && link.isExternal ? (
+                <motion.div
+                  key={link.label}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.2 }}
+                >
+                  <Link
+                    href={link.href}
+                    className="text-lg text-gray-300 link-hover block"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ) : (
+                <motion.a
+                  key={link.label}
+                  href={link.href}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.2 }}
+                  className="text-lg text-gray-300 link-hover"
+                  onClick={(e) => {
+                    handleAnchorClick(e);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  {link.label}
+                </motion.a>
+              )
+            )}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

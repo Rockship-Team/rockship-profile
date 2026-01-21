@@ -1,0 +1,383 @@
+openapi: 3.0.3
+info:
+  title: Blog API - Supabase Integration
+  description: |
+    Server Actions and data fetching contracts for the blog feature.
+    Note: This uses Next.js Server Actions, not traditional REST endpoints.
+    The OpenAPI format is used for documentation purposes.
+  version: 1.0.0
+  contact:
+    name: Rockship AI Team
+
+servers:
+  - url: /
+    description: Next.js Server Actions
+
+tags:
+  - name: Public Blog
+    description: Public-facing blog read operations
+  - name: Admin Blog
+    description: Admin CRUD operations (requires basic auth)
+
+paths:
+  # Public Operations (Server Components / Client fetch)
+  /blog:
+    get:
+      tags: [Public Blog]
+      operationId: getPublishedPosts
+      summary: Get all published blog posts
+      description: Fetches published posts sorted by date, with optional search and tag filter
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Full-text search query
+        - name: tag
+          in: query
+          schema:
+            type: string
+          description: Filter by tag slug
+      responses:
+        '200':
+          description: List of published blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogPostSummary'
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /blog/{slug}:
+    get:
+      tags: [Public Blog]
+      operationId: getPostBySlug
+      summary: Get a single blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly post identifier
+      responses:
+        '200':
+          description: Full blog post content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPost'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /blog/tags:
+    get:
+      tags: [Public Blog]
+      operationId: getAllTags
+      summary: Get all available tags with post counts
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagWithCount'
+
+  # Admin Operations (Server Actions)
+  /actions/blog/create:
+    post:
+      tags: [Admin Blog]
+      operationId: createPost
+      summary: Create a new blog post
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostInput'
+      responses:
+        '200':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /actions/blog/update:
+    post:
+      tags: [Admin Blog]
+      operationId: updatePost
+      summary: Update an existing blog post
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostInput'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+
+  /actions/blog/delete:
+    post:
+      tags: [Admin Blog]
+      operationId: deletePost
+      summary: Delete a blog post
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+
+  /actions/blog/list-all:
+    post:
+      tags: [Admin Blog]
+      operationId: listAllPosts
+      summary: List all posts (including drafts) for admin
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: List of all blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlogPostAdmin'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic Auth with credentials from environment variables
+
+  schemas:
+    BlogPostSummary:
+      type: object
+      required: [slug, title, excerpt, publishedAt, tags]
+      properties:
+        slug:
+          type: string
+          example: "2025-year-in-review"
+        title:
+          type: string
+          example: "2025 Year In Review"
+        excerpt:
+          type: string
+          example: "As 2025 comes to an end..."
+        author:
+          type: string
+          example: "Rockship Team"
+        readingTime:
+          type: integer
+          example: 5
+        publishedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["milestones", "workshops"]
+
+    BlogPost:
+      allOf:
+        - $ref: '#/components/schemas/BlogPostSummary'
+        - type: object
+          required: [content]
+          properties:
+            content:
+              type: string
+              description: Markdown content
+            sections:
+              type: array
+              items:
+                $ref: '#/components/schemas/BlogSection'
+
+    BlogPostAdmin:
+      allOf:
+        - $ref: '#/components/schemas/BlogPost'
+        - type: object
+          required: [id, isPublished, createdAt, updatedAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            isPublished:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    BlogSection:
+      type: object
+      required: [id, title, level]
+      properties:
+        id:
+          type: string
+          example: "q1-foundation-building"
+        title:
+          type: string
+          example: "Q1: Foundation Building"
+        level:
+          type: integer
+          enum: [1, 2, 3]
+
+    TagWithCount:
+      type: object
+      required: [name, slug, count]
+      properties:
+        name:
+          type: string
+          example: "TypeScript"
+        slug:
+          type: string
+          example: "typescript"
+        count:
+          type: integer
+          example: 3
+
+    CreatePostInput:
+      type: object
+      required: [slug, title, content]
+      properties:
+        slug:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          example: "new-post-slug"
+        title:
+          type: string
+          maxLength: 200
+          example: "My New Post"
+        excerpt:
+          type: string
+        content:
+          type: string
+          description: Markdown content
+        author:
+          type: string
+          default: "Rockship Team"
+        readingTime:
+          type: integer
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlogSection'
+        tags:
+          type: array
+          items:
+            type: string
+          description: Array of tag slugs
+        isPublished:
+          type: boolean
+          default: false
+        publishedAt:
+          type: string
+          format: date-time
+          description: Required if isPublished is true
+
+    UpdatePostInput:
+      allOf:
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+        - $ref: '#/components/schemas/CreatePostInput'
+
+    ActionResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Field-level validation errors
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+          enum: [NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR, DATABASE_ERROR]

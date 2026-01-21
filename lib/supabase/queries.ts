@@ -1,0 +1,404 @@
+import { createClient as createServerClient, createAdminClient } from "./server"
+import { createClient as createBrowserClient } from "./client"
+import type { BlogPostWithTags, BlogTagRow } from "./types"
+import type { BlogPost, TopicTag } from "@/types/blog"
+
+// ============================================
+// Helper: Transform database row to BlogPost
+// ============================================
+function transformToLegacyBlogPost(row: BlogPostWithTags): BlogPost {
+  return {
+    slug: row.slug,
+    title: row.title,
+    excerpt: row.excerpt || "",
+    content: row.content,
+    publishedAt: new Date(row.published_at || row.created_at),
+    tags: row.tags,
+    author: row.author || "Rockship Team",
+    readingTime: row.reading_time || undefined,
+    sections: row.sections || undefined,
+  }
+}
+
+// Helper: Extract tag slugs from join query result
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractTags(tagData: any[] | null): string[] {
+  if (!tagData) return []
+  return tagData
+    .map((t) => t.blog_tags?.slug)
+    .filter((slug): slug is string => typeof slug === "string")
+}
+
+// ============================================
+// Public Queries (use anon key)
+// ============================================
+
+/**
+ * Get all published blog posts sorted by date (newest first)
+ * Returns empty array if database is not configured or tables don't exist
+ */
+export async function getPublishedPosts(): Promise<BlogPost[]> {
+  // Skip if Supabase not configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase not configured, returning empty posts")
+    return []
+  }
+
+  try {
+    const supabase = await createServerClient()
+
+    // First, get all published posts
+    const { data: posts, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false })
+
+    if (error) {
+      // Table might not exist yet - return empty array instead of throwing
+      console.error("Error fetching posts:", error.message || error)
+      return []
+    }
+
+    if (!posts || posts.length === 0) {
+      return []
+    }
+
+    // Get tags for each post
+    const postsWithTags = await Promise.all(
+      posts.map(async (post) => {
+        const { data: tagData } = await supabase
+          .from("blog_post_tags")
+          .select("tag_id, blog_tags(slug)")
+          .eq("post_id", post.id)
+
+        const tags = extractTags(tagData)
+
+        return {
+          ...post,
+          tags,
+        } as BlogPostWithTags
+      })
+    )
+
+    return postsWithTags.map(transformToLegacyBlogPost)
+  } catch (error) {
+    console.error("Error in getPublishedPosts:", error)
+    return []
+  }
+}
+
+/**
+ * Get all tags with post counts
+ * Returns empty array if database is not configured or tables don't exist
+ */
+export async function getAllTags(): Promise<TopicTag[]> {
+  // Skip if Supabase not configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return []
+  }
+
+  try {
+    const supabase = await createServerClient()
+
+    // Get all tags
+    const { data: tags, error: tagsError } = await supabase
+      .from("blog_tags")
+      .select("id, name, slug")
+
+    if (tagsError) {
+      console.error("Error fetching tags:", tagsError.message || tagsError)
+      return []
+    }
+
+    if (!tags || tags.length === 0) {
+      return []
+    }
+
+    // Count posts for each tag (only published posts)
+    const tagsWithCounts = await Promise.all(
+      tags.map(async (tag) => {
+        const { count } = await supabase
+          .from("blog_post_tags")
+          .select("post_id", { count: "exact", head: true })
+          .eq("tag_id", tag.id)
+
+        return {
+          name: tag.name,
+          slug: tag.slug,
+          count: count || 0,
+        }
+      })
+    )
+
+    return tagsWithCounts.filter((t) => t.count > 0)
+  } catch (error) {
+    console.error("Error in getAllTags:", error)
+    return []
+  }
+}
+
+/**
+ * Get a single post by slug
+ */
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  const supabase = await createServerClient()
+
+  const { data: post, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single()
+
+  if (error || !post) {
+    return null
+  }
+
+  // Get tags for this post
+  const { data: tagData } = await supabase
+    .from("blog_post_tags")
+    .select("tag_id, blog_tags(slug)")
+    .eq("post_id", post.id)
+
+  const tags = extractTags(tagData)
+
+  const postWithTags: BlogPostWithTags = {
+    ...post,
+    tags,
+  }
+
+  return transformToLegacyBlogPost(postWithTags)
+}
+
+/**
+ * Get all slugs for static generation
+ * Note: Uses admin client because this runs at build time (no cookies available)
+ * Falls back to empty array if Supabase is not configured (build without env vars)
+ */
+export async function getAllSlugs(): Promise<string[]> {
+  // Skip if Supabase env vars not configured (build without database)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.warn("Supabase not configured, skipping slug generation")
+    return []
+  }
+
+  try {
+    const supabase = createAdminClient()
+
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("slug")
+      .eq("is_published", true)
+
+    if (error) {
+      console.error("Error fetching slugs:", error)
+      return []
+    }
+
+    return data?.map((p) => p.slug) || []
+  } catch (error) {
+    console.error("Error in getAllSlugs:", error)
+    return []
+  }
+}
+
+/**
+ * Search posts using full-text search
+ */
+export async function searchPosts(query: string): Promise<BlogPost[]> {
+  const supabase = await createServerClient()
+
+  // Use PostgreSQL full-text search
+  const { data: posts, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("is_published", true)
+    .textSearch("search_vector", query, {
+      type: "websearch",
+      config: "english",
+    })
+    .order("published_at", { ascending: false })
+
+  if (error) {
+    console.error("Error searching posts:", error)
+    throw new Error("Failed to search blog posts")
+  }
+
+  if (!posts || posts.length === 0) {
+    return []
+  }
+
+  // Get tags for each post
+  const postsWithTags = await Promise.all(
+    posts.map(async (post) => {
+      const { data: tagData } = await supabase
+        .from("blog_post_tags")
+        .select("tag_id, blog_tags(slug)")
+        .eq("post_id", post.id)
+
+      const tags = extractTags(tagData)
+
+      return {
+        ...post,
+        tags,
+      } as BlogPostWithTags
+    })
+  )
+
+  return postsWithTags.map(transformToLegacyBlogPost)
+}
+
+/**
+ * Get posts by tag slug
+ */
+export async function getPostsByTag(tagSlug: string): Promise<BlogPost[]> {
+  const supabase = await createServerClient()
+
+  // First get the tag ID
+  const { data: tag, error: tagError } = await supabase
+    .from("blog_tags")
+    .select("id")
+    .eq("slug", tagSlug)
+    .single()
+
+  if (tagError || !tag) {
+    return []
+  }
+
+  // Get post IDs with this tag
+  const { data: postTags, error: postTagsError } = await supabase
+    .from("blog_post_tags")
+    .select("post_id")
+    .eq("tag_id", tag.id)
+
+  if (postTagsError || !postTags) {
+    return []
+  }
+
+  const postIds = postTags.map((pt) => pt.post_id)
+
+  // Get the posts
+  const { data: posts, error: postsError } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("is_published", true)
+    .in("id", postIds)
+    .order("published_at", { ascending: false })
+
+  if (postsError || !posts) {
+    return []
+  }
+
+  // Get tags for each post
+  const postsWithTags = await Promise.all(
+    posts.map(async (post) => {
+      const { data: tagData } = await supabase
+        .from("blog_post_tags")
+        .select("tag_id, blog_tags(slug)")
+        .eq("post_id", post.id)
+
+      const tags = extractTags(tagData)
+
+      return {
+        ...post,
+        tags,
+      } as BlogPostWithTags
+    })
+  )
+
+  return postsWithTags.map(transformToLegacyBlogPost)
+}
+
+// ============================================
+// Admin Queries (use service role key)
+// ============================================
+
+/**
+ * Get all posts for admin (including drafts)
+ */
+export async function getAllPostsForAdmin(): Promise<BlogPostWithTags[]> {
+  const supabase = createAdminClient()
+
+  const { data: posts, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("updated_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching admin posts:", error)
+    throw new Error("Failed to fetch blog posts")
+  }
+
+  if (!posts || posts.length === 0) {
+    return []
+  }
+
+  // Get tags for each post
+  const postsWithTags = await Promise.all(
+    posts.map(async (post) => {
+      const { data: tagData } = await supabase
+        .from("blog_post_tags")
+        .select("tag_id, blog_tags(slug)")
+        .eq("post_id", post.id)
+
+      const tags = extractTags(tagData)
+
+      return {
+        ...post,
+        tags,
+      } as BlogPostWithTags
+    })
+  )
+
+  return postsWithTags
+}
+
+/**
+ * Get a single post by ID for admin (including drafts)
+ */
+export async function getPostById(id: string): Promise<BlogPostWithTags | null> {
+  const supabase = createAdminClient()
+
+  const { data: post, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("id", id)
+    .single()
+
+  if (error || !post) {
+    return null
+  }
+
+  // Get tags for this post
+  const { data: tagData } = await supabase
+    .from("blog_post_tags")
+    .select("tag_id, blog_tags(slug)")
+    .eq("post_id", post.id)
+
+  const tags = extractTags(tagData)
+
+  return {
+    ...post,
+    tags,
+  }
+}
+
+/**
+ * Get all tags for admin (with all tags, not just those with posts)
+ */
+export async function getAllTagsForAdmin(): Promise<BlogTagRow[]> {
+  const supabase = createAdminClient()
+
+  const { data, error } = await supabase
+    .from("blog_tags")
+    .select("*")
+    .order("name")
+
+  if (error) {
+    console.error("Error fetching tags:", error)
+    throw new Error("Failed to fetch tags")
+  }
+
+  return data || []
+}

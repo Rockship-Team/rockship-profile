@@ -1,0 +1,318 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { Save, Eye, EyeOff, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { createPost, updatePost } from "@/actions/blog"
+import type { CreatePostInput, UpdatePostInput } from "@/actions/blog"
+import type { BlogPostWithTags } from "@/lib/supabase/types"
+import ReactMarkdown from "react-markdown"
+
+interface PostFormProps {
+  post?: BlogPostWithTags
+  mode: "create" | "edit"
+}
+
+export function PostForm({ post, mode }: PostFormProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [showPreview, setShowPreview] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Form state
+  const [slug, setSlug] = useState(post?.slug || "")
+  const [title, setTitle] = useState(post?.title || "")
+  const [excerpt, setExcerpt] = useState(post?.excerpt || "")
+  const [content, setContent] = useState(post?.content || "")
+  const [author, setAuthor] = useState(post?.author || "Rockship Team")
+  const [isPublished, setIsPublished] = useState(post?.is_published ?? false)
+  const [tagsInput, setTagsInput] = useState(post?.tags?.join(", ") || "")
+
+  // Auto-generate slug from title
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (mode === "create" && !slug) {
+      const generatedSlug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim()
+      setSlug(generatedSlug)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+
+    // Parse tags
+    const tags = tagsInput
+      .split(",")
+      .map((t) => t.trim().toLowerCase().replace(/\s+/g, "-"))
+      .filter(Boolean)
+
+    startTransition(async () => {
+      if (mode === "create") {
+        const input: CreatePostInput = {
+          slug,
+          title,
+          excerpt,
+          content,
+          author,
+          isPublished,
+          tags,
+        }
+
+        const result = await createPost(input)
+
+        if (result.success) {
+          router.push("/admin/post")
+          router.refresh()
+        } else {
+          setError(result.error || "Failed to create post")
+        }
+      } else {
+        const input: UpdatePostInput = {
+          id: post!.id,
+          slug,
+          title,
+          excerpt,
+          content,
+          author,
+          isPublished,
+          tags,
+        }
+
+        const result = await updatePost(input)
+
+        if (result.success) {
+          router.push("/admin/post")
+          router.refresh()
+        } else {
+          setError(result.error || "Failed to update post")
+        }
+      }
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Title & Slug */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+            Title *
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            required
+            className={cn(
+              "w-full px-4 py-3 rounded-lg",
+              "bg-rockship-900/50 border border-white/10",
+              "text-white placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            )}
+            placeholder="Post title"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="slug" className="block text-sm font-medium text-gray-300 mb-2">
+            Slug *
+          </label>
+          <input
+            type="text"
+            id="slug"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            required
+            pattern="[a-z0-9-]+"
+            className={cn(
+              "w-full px-4 py-3 rounded-lg",
+              "bg-rockship-900/50 border border-white/10",
+              "text-white placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            )}
+            placeholder="post-url-slug"
+          />
+        </div>
+      </div>
+
+      {/* Author & Tags */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="author" className="block text-sm font-medium text-gray-300 mb-2">
+            Author
+          </label>
+          <input
+            type="text"
+            id="author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            className={cn(
+              "w-full px-4 py-3 rounded-lg",
+              "bg-rockship-900/50 border border-white/10",
+              "text-white placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            )}
+            placeholder="Author name"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-2">
+            Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            id="tags"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            className={cn(
+              "w-full px-4 py-3 rounded-lg",
+              "bg-rockship-900/50 border border-white/10",
+              "text-white placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            )}
+            placeholder="ai, cloud, infrastructure"
+          />
+        </div>
+      </div>
+
+      {/* Excerpt */}
+      <div>
+        <label htmlFor="excerpt" className="block text-sm font-medium text-gray-300 mb-2">
+          Excerpt
+        </label>
+        <textarea
+          id="excerpt"
+          value={excerpt}
+          onChange={(e) => setExcerpt(e.target.value)}
+          rows={2}
+          className={cn(
+            "w-full px-4 py-3 rounded-lg resize-none",
+            "bg-rockship-900/50 border border-white/10",
+            "text-white placeholder-gray-500",
+            "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+          )}
+          placeholder="Brief description of the post"
+        />
+      </div>
+
+      {/* Content */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label htmlFor="content" className="block text-sm font-medium text-gray-300">
+            Content (Markdown) *
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowPreview(!showPreview)}
+            className={cn(
+              "inline-flex items-center gap-2 px-3 py-1 rounded text-sm",
+              "bg-rockship-800/50 hover:bg-rockship-800/70",
+              "text-gray-300 transition-colors"
+            )}
+          >
+            {showPreview ? (
+              <>
+                <EyeOff className="w-4 h-4" />
+                Edit
+              </>
+            ) : (
+              <>
+                <Eye className="w-4 h-4" />
+                Preview
+              </>
+            )}
+          </button>
+        </div>
+
+        {showPreview ? (
+          <div
+            className={cn(
+              "min-h-[400px] p-6 rounded-lg",
+              "bg-rockship-900/50 border border-white/10",
+              "prose prose-invert prose-rockship max-w-none",
+              "prose-headings:text-white prose-p:text-gray-300",
+              "prose-a:text-rockship-accent prose-strong:text-white",
+              "prose-code:bg-rockship-800 prose-code:px-1 prose-code:rounded"
+            )}
+          >
+            <ReactMarkdown>{content || "*No content yet...*"}</ReactMarkdown>
+          </div>
+        ) : (
+          <textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+            rows={20}
+            className={cn(
+              "w-full px-4 py-3 rounded-lg resize-y font-mono text-sm",
+              "bg-rockship-900/50 border border-white/10",
+              "text-white placeholder-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            )}
+            placeholder="Write your post content in Markdown..."
+          />
+        )}
+      </div>
+
+      {/* Publish Toggle & Submit */}
+      <div className="flex items-center justify-between pt-4 border-t border-white/10">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPublished}
+            onChange={(e) => setIsPublished(e.target.checked)}
+            className={cn(
+              "w-5 h-5 rounded",
+              "bg-rockship-900/50 border border-white/20",
+              "checked:bg-rockship-accent checked:border-rockship-accent",
+              "focus:ring-2 focus:ring-rockship-accent/50"
+            )}
+          />
+          <span className="text-gray-300">
+            {isPublished ? "Published" : "Draft"}
+          </span>
+        </label>
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className={cn(
+            "inline-flex items-center gap-2 px-6 py-3 rounded-lg",
+            "bg-rockship-accent hover:bg-rockship-accent/90",
+            "text-white font-medium",
+            "transition-colors duration-200",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              {mode === "create" ? "Create Post" : "Update Post"}
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  )
+}
