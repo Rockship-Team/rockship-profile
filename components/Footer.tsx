@@ -1,4 +1,4 @@
-import { Facebook, Linkedin } from "lucide-react";
+import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -14,14 +14,27 @@ export const Footer: React.FC = () => {
               width={150}
               height={150}
             />
-            {/* <span className="text-white lowercase font-medium tracking-tighter">
-              rockship
-            </span> */}
-            {/* <span className="gradient-text">AI</span> */}
           </div>
           <p className="max-w-xs mb-6">
             Enterprise AI systems, built for real-world operations.
           </p>
+          <div className="flex flex-col gap-3 mb-6">
+            <a
+              href="mailto:ngoc@rockship.co"
+              className="flex items-center gap-2 link-hover"
+            >
+              <Mail size={18} />
+              <span>ngoc@rockship.co</span>
+            </a>
+            <a
+              href="https://wa.me/6584298483"
+              target="_blank"
+              className="flex items-center gap-2 link-hover"
+            >
+              <Phone size={18} />
+              <span>+65 8429 8483</span>
+            </a>
+          </div>
           <div className="flex gap-4">
             <a
               href="https://www.facebook.com/rockship.co/"
@@ -40,8 +53,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          {/* <h4 className="font-bold text-white mb-4">Solutions</h4>
+        {/* <div>
+          <h4 className="font-bold text-white mb-4">Solutions</h4>
           <ul className="space-y-2">
             <li>
               <a href="#" className="link-hover">
@@ -58,33 +71,24 @@ export const Footer: React.FC = () => {
                 Computer Vision & Document AI
               </a>
             </li>
-          </ul> */}
-        </div>
+          </ul>
+        </div> */}
 
-        <div>
+        <div className="lg:ml-12">
           <h4 className="font-bold text-white mb-4">Company</h4>
           <ul className="space-y-2">
             <li>
-              <a
-                href="#about"
-                className="link-hover"
-              >
+              <a href="#about" className="link-hover">
                 About Us
               </a>
             </li>
             <li>
-              <a
-                href="#case-studies"
-                className="link-hover"
-              >
+              <a href="#case-studies" className="link-hover">
                 Case Studies
               </a>
             </li>
             <li>
-              <a
-                href="#contact"
-                className="link-hover"
-              >
+              <a href="#contact" className="link-hover">
                 Contact
               </a>
             </li>
@@ -96,7 +100,7 @@ export const Footer: React.FC = () => {
         <div className="col-span-2">
           &copy; 2025 Rockship AI. All rights reserved.
         </div>
-        <div className="col-span-2 flex md:flex-col md:flex-row gap-6 lg:gap-[13%]">
+        <div className="col-span-2 flex md:flex-col md:flex-row gap-6 lg:gap-[13%] lg:ml-12">
           <a href="#" className="link-hover">
             Privacy Policy
           </a>
