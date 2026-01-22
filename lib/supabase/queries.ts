@@ -15,7 +15,7 @@ function transformToLegacyBlogPost(row: BlogPostWithTags): BlogPost {
     publishedAt: new Date(row.published_at || row.created_at),
     tags: row.tags,
     author: row.author || "Rockship Team",
-    readingTime: row.reading_time || undefined,
+    readingTime: row.reading_time ? `${row.reading_time} min read` : undefined,
     sections: row.sections || undefined,
   }
 }

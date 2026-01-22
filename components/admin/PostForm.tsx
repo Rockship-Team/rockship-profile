@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Save, Eye, EyeOff, Loader2 } from "lucide-react"
+import { Save, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { createPost, updatePost } from "@/actions/blog"
 import type { CreatePostInput, UpdatePostInput } from "@/actions/blog"
 import type { BlogPostWithTags, BlogTagRow } from "@/lib/supabase/types"
 import { TagMultiSelect } from "./TagMultiSelect"
-import ReactMarkdown from "react-markdown"
+import { TiptapEditor } from "./TiptapEditor"
 
 interface PostFormProps {
   post?: BlogPostWithTags
@@ -19,7 +19,6 @@ interface PostFormProps {
 export function PostForm({ post, mode, availableTags }: PostFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [showPreview, setShowPreview] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Form state
@@ -48,6 +47,12 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Validate content
+    if (!content.trim()) {
+      setError("Content is required")
+      return
+    }
 
     startTransition(async () => {
       if (mode === "create") {
@@ -81,7 +86,9 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
           tags: selectedTags,
         }
 
+        console.log("Updating post with input:", input)
         const result = await updatePost(input)
+        console.log("Update result:", result)
 
         if (result.success) {
           router.push("/admin")
@@ -131,9 +138,8 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
             type="text"
             id="slug"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
             required
-            pattern="[a-z0-9-]+"
             className={cn(
               "w-full px-4 py-3 rounded-lg",
               "bg-rockship-900/50 border border-white/10",
@@ -200,62 +206,14 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
 
       {/* Content */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="content" className="block text-sm font-medium text-gray-300">
-            Content (Markdown) *
-          </label>
-          <button
-            type="button"
-            onClick={() => setShowPreview(!showPreview)}
-            className={cn(
-              "inline-flex items-center gap-2 px-3 py-1 rounded text-sm",
-              "bg-rockship-800/50 hover:bg-rockship-800/70",
-              "text-gray-300 transition-colors"
-            )}
-          >
-            {showPreview ? (
-              <>
-                <EyeOff className="w-4 h-4" />
-                Edit
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4" />
-                Preview
-              </>
-            )}
-          </button>
-        </div>
-
-        {showPreview ? (
-          <div
-            className={cn(
-              "min-h-[400px] p-6 rounded-lg",
-              "bg-rockship-900/50 border border-white/10",
-              "prose prose-invert prose-rockship max-w-none",
-              "prose-headings:text-white prose-p:text-gray-300",
-              "prose-a:text-rockship-accent prose-strong:text-white",
-              "prose-code:bg-rockship-800 prose-code:px-1 prose-code:rounded"
-            )}
-          >
-            <ReactMarkdown>{content || "*No content yet...*"}</ReactMarkdown>
-          </div>
-        ) : (
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={20}
-            className={cn(
-              "w-full px-4 py-3 rounded-lg resize-y font-mono text-sm",
-              "bg-rockship-900/50 border border-white/10",
-              "text-white placeholder-gray-500",
-              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
-            )}
-            placeholder="Write your post content in Markdown..."
-          />
-        )}
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Content *
+        </label>
+        <TiptapEditor
+          content={content}
+          onChange={setContent}
+          placeholder="Write your post content here..."
+        />
       </div>
 
       {/* Publish Toggle & Submit */}

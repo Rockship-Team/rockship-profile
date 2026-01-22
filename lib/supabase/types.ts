@@ -25,7 +25,7 @@ export interface Database {
           excerpt: string | null
           content: string
           author: string | null
-          reading_time: string | null
+          reading_time: number | null
           sections: BlogSection[] | null
           is_published: boolean
           published_at: string | null
@@ -40,7 +40,7 @@ export interface Database {
           excerpt?: string | null
           content: string
           author?: string | null
-          reading_time?: string | null
+          reading_time?: number | null
           sections?: BlogSection[] | null
           is_published?: boolean
           published_at?: string | null
@@ -54,7 +54,7 @@ export interface Database {
           excerpt?: string | null
           content?: string
           author?: string | null
-          reading_time?: string | null
+          reading_time?: number | null
           sections?: BlogSection[] | null
           is_published?: boolean
           published_at?: string | null

@@ -93,7 +93,7 @@ export interface CreatePostInput {
   excerpt: string
   content: string
   author?: string
-  readingTime?: string
+  readingTime?: number
   isPublished: boolean
   tags: string[]
   sections?: BlogSection[]
@@ -110,13 +110,13 @@ export interface ActionResult {
 }
 
 /**
- * Calculate reading time from content
+ * Calculate reading time from content (returns minutes as integer)
  */
-function calculateReadingTime(content: string): string {
+function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200
   const words = content.trim().split(/\s+/).length
   const minutes = Math.ceil(words / wordsPerMinute)
-  return `${minutes} min read`
+  return minutes
 }
 
 /**
@@ -187,11 +187,13 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
  * Update an existing blog post
  */
 export async function updatePost(input: UpdatePostInput): Promise<ActionResult> {
+  console.log("updatePost called with:", { id: input.id, slug: input.slug, title: input.title, contentLength: input.content?.length })
   const supabase = getAdminClient()
 
   try {
     // Validate required fields
     if (!input.id || !input.slug || !input.title || !input.content) {
+      console.log("Validation failed:", { id: !!input.id, slug: !!input.slug, title: !!input.title, content: !!input.content })
       return { success: false, error: "ID, slug, title, and content are required" }
     }
 
@@ -243,6 +245,7 @@ export async function updatePost(input: UpdatePostInput): Promise<ActionResult> 
       updateData.published_at = publishedAt
     }
 
+    console.log("Updating post in database:", { id: input.id, updateData })
     const { error: updateError } = await supabase
       .from("blog_posts")
       .update(updateData)
@@ -250,8 +253,9 @@ export async function updatePost(input: UpdatePostInput): Promise<ActionResult> 
 
     if (updateError) {
       console.error("Error updating post:", updateError)
-      return { success: false, error: "Failed to update post" }
+      return { success: false, error: `Failed to update post: ${updateError.message}` }
     }
+    console.log("Post updated successfully")
 
     // Handle tags - remove existing and add new
     await supabase.from("blog_post_tags").delete().eq("post_id", input.id)
