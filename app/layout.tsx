@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
+import { FeatureFlagProvider } from "@/components/FeatureFlagProvider";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -103,7 +104,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        {children}
+        <FeatureFlagProvider>{children}</FeatureFlagProvider>
       </body>
     </html>
   );

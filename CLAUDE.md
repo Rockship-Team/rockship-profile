@@ -40,6 +40,12 @@
 ## Active Technologies
 - TypeScript 5.x với React 19, Next.js 16 (001-optimize-landing-ux)
 - N/A (không có data persistence) (001-optimize-landing-ux)
+- TypeScript 5.x with React 19, Next.js 16 + Next.js App Router, Tailwind CSS v4, Framer Motion, shadcn/ui, Lucide Reac (002-blog-page)
+- Static JSON data in `lib/blog-data.ts` (no database) (002-blog-page)
+- TypeScript 5.x with React 19, Next.js 16 + Next.js App Router, Framer Motion, Tailwind CSS v4, Lucide Reac (002-blog-page)
+- Static TypeScript data in `lib/blog-data.ts` (no database) (002-blog-page)
+- TypeScript 5.8.x with React 19, Next.js 16 + Supabase JS Client (`@supabase/supabase-js`), existing stack (Next.js, Tailwind CSS v4, Framer Motion, shadcn/ui) (003-supabase-blog-integration)
+- Supabase (PostgreSQL) - hosted database with Row Level Security (003-supabase-blog-integration)
 
 ## Recent Changes
 - 001-optimize-landing-ux: Added TypeScript 5.x với React 19, Next.js 16

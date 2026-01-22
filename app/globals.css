@@ -403,3 +403,269 @@ html {
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
+/* Tiptap Editor Styles */
+.tiptap {
+  outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--color-rockship-500);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap pre {
+  background: var(--color-rockship-800);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: var(--color-rockship-200);
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--color-rockship-accent);
+  padding-left: 1rem;
+  margin-left: 0;
+  font-style: italic;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--color-rockship-700);
+  margin: 1.5rem 0;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5rem;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap a {
+  color: var(--color-rockship-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: var(--color-rockship-accent-secondary);
+}
+
+/* Tiptap Heading Styles */
+.tiptap h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tiptap h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  color: white;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.tiptap h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  color: white;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap p {
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: var(--color-rockship-300);
+  margin-bottom: 0.75rem;
+}
+
+/* Tiptap List Styles */
+.tiptap ul,
+.ProseMirror ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin: 0.75rem 0 !important;
+  color: var(--color-rockship-300);
+  display: block !important;
+}
+
+.tiptap ol,
+.ProseMirror ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin: 0.75rem 0 !important;
+  color: var(--color-rockship-300);
+  display: block !important;
+}
+
+.tiptap ul > li,
+.tiptap ol > li,
+.ProseMirror ul > li,
+.ProseMirror ol > li {
+  display: list-item !important;
+  margin: 0.25rem 0 !important;
+  padding-left: 0.25rem !important;
+}
+
+.tiptap ul > li::marker,
+.ProseMirror ul > li::marker {
+  color: var(--color-rockship-accent) !important;
+}
+
+.tiptap ol > li::marker,
+.ProseMirror ol > li::marker {
+  color: var(--color-rockship-accent) !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure list items have proper content display */
+.tiptap ul > li > p,
+.tiptap ol > li > p,
+.ProseMirror ul > li > p,
+.ProseMirror ol > li > p {
+  display: inline;
+  margin: 0;
+}
+
+/* Blog Content Styles */
+.blog-content h1,
+article.prose h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.blog-content h2,
+article.prose h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  color: white;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.blog-content h3,
+article.prose h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  color: white;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-content p,
+article.prose p {
+  font-size: 1.125rem;
+  line-height: 1.875rem;
+  color: var(--color-rockship-300);
+  margin-bottom: 1rem;
+}
+
+.blog-content ul,
+article.prose ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.75rem !important;
+  margin: 1rem 0 !important;
+  color: var(--color-rockship-300);
+}
+
+.blog-content ol,
+article.prose ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.75rem !important;
+  margin: 1rem 0 !important;
+  color: var(--color-rockship-300);
+}
+
+.blog-content li,
+article.prose li {
+  display: list-item !important;
+  margin: 0.5rem 0 !important;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.blog-content li::marker,
+article.prose li::marker {
+  color: var(--color-rockship-accent) !important;
+}
+
+.blog-content strong,
+article.prose strong {
+  color: white;
+  font-weight: 600;
+}
+
+.blog-content a,
+article.prose a {
+  color: var(--color-rockship-accent);
+  text-decoration: none;
+}
+
+.blog-content a:hover,
+article.prose a:hover {
+  text-decoration: underline;
+}
+
+.blog-content code,
+article.prose code {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-rockship-accent);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.blog-content pre,
+article.prose pre {
+  background: var(--color-rockship-900);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.blog-content pre code,
+article.prose pre code {
+  background: none;
+  padding: 0;
+  color: var(--color-rockship-200);
+}
+
+.blog-content blockquote,
+article.prose blockquote {
+  border-left: 4px solid var(--color-rockship-accent);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--color-rockship-400);
+}
