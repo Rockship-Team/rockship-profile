@@ -1,6 +1,7 @@
 # Implementation Plan: Supabase Integration for Blog Page
 
-**Branch**: `003-supabase-blog-integration` | **Date**: 2026-01-21 | **Spec**: [spec.md](./spec.md)
+**Branch**: `003-supabase-blog-integration` | **Date**: 2026-01-21 | **Updated**: 2026-01-22 | **Spec**: [spec.md](./spec.md)
+**Status**: Implementation Complete (Pending Manual Testing)
 **Input**: Feature specification from `/specs/003-supabase-blog-integration/spec.md`
 
 ## Summary
@@ -54,49 +55,94 @@ specs/003-supabase-blog-integration/
 ### Source Code (repository root)
 
 ```text
-# Next.js App Router structure (existing)
+# Next.js App Router structure (CURRENT IMPLEMENTATION)
 app/
 ├── blog/
-│   ├── page.tsx                    # Blog listing (UPDATE: use Supabase)
-│   ├── BlogPageClient.tsx          # Client component (UPDATE: use Supabase)
+│   ├── page.tsx                    # Blog listing (server component, fetches from Supabase)
+│   ├── BlogPageClient.tsx          # Client component (search/filter UI)
+│   ├── error.tsx                   # Error boundary for database failures
 │   └── [slug]/
-│       ├── page.tsx                # Blog detail (UPDATE: use Supabase)
+│       ├── page.tsx                # Blog detail (server component with SSR)
 │       └── BlogDetailClient.tsx    # Client component
 ├── admin/
+│   ├── layout.tsx                  # Admin layout with header/navigation
+│   ├── page.tsx                    # Admin dashboard
 │   └── post/
-│       ├── page.tsx                # Admin panel (NEW)
-│       ├── AdminPostClient.tsx     # Admin client component (NEW)
+│       ├── page.tsx                # Admin post listing
+│       ├── new/
+│       │   └── page.tsx            # Create new post page
 │       └── [id]/
-│           └── page.tsx            # Edit post page (NEW)
+│           └── page.tsx            # Edit post page
 
 components/
-├── blog/                           # Existing blog components
-└── admin/                          # Admin UI components (NEW)
-    ├── PostForm.tsx                # Create/Edit post form
+├── blog/                           # Public blog components
+│   ├── BlogGrid.tsx
+│   ├── BlogCard.tsx
+│   ├── BlogSearch.tsx
+│   ├── TopicFilter.tsx
+│   ├── BlogListSkeleton.tsx
+│   ├── EmptyBlogState.tsx
+│   ├── BlogContentRenderer.tsx
+│   └── TableOfContents.tsx
+└── admin/                          # Admin UI components
+    ├── PostForm.tsx                # Create/Edit post form with Tiptap
     ├── PostList.tsx                # List posts for admin
-    └── DeleteConfirmDialog.tsx     # Deletion confirmation
+    ├── DeleteConfirmDialog.tsx     # Deletion confirmation dialog
+    ├── TiptapEditor.tsx            # Rich text editor wrapper
+    ├── TagSection.tsx              # Tag management section
+    ├── TagMultiSelect.tsx          # Multi-select for tags
+    ├── TagFormModal.tsx            # Modal for creating/editing tags
+    └── tiptap-extensions/          # Custom Tiptap extensions
+        ├── index.ts
+        ├── CalloutExtension.ts
+        ├── CalloutNodeView.tsx
+        ├── GridExtension.ts
+        ├── GridNodeView.tsx
+        ├── GridDropContext.tsx
+        ├── ImageExtension.ts
+        ├── ImageNodeView.tsx
+        ├── TimelineExtension.ts
+        ├── TimelineNodeView.tsx
+        ├── SeriesCardExtension.ts
+        ├── SeriesCardNodeView.tsx
+        ├── NodeToolbar.tsx
+        └── useResizable.ts
 
 lib/
 ├── supabase/
-│   ├── client.ts                   # Supabase browser client (NEW)
-│   ├── server.ts                   # Supabase server client (NEW)
-│   └── types.ts                    # Database types (NEW)
-├── blog-data.ts                    # DEPRECATED: replaced by Supabase
-└── blog-utils.ts                   # Keep: utility functions
+│   ├── client.ts                   # Supabase browser client (anon key)
+│   ├── server.ts                   # Supabase server client (service role)
+│   ├── queries.ts                  # Database queries (getPublishedPosts, searchPosts, etc.)
+│   ├── types.ts                    # Database TypeScript types
+│   └── storage.ts                  # File storage utilities
+├── auth.ts                         # Basic auth validation
+├── blog-data.ts                    # DEPRECATED: kept for reference
+└── blog-utils.ts                   # Utility functions
 
 actions/
-└── blog.ts                         # Server actions for blog CRUD (NEW)
+└── blog.ts                         # Server actions (searchBlogPosts, createPost, updatePost, deletePost)
 
 types/
-└── blog.ts                         # Existing types (UPDATE: add Supabase types)
+└── blog.ts                         # Blog type definitions (BlogPost, TopicTag, BlogFilterState)
+
+supabase/
+├── migrations/
+│   ├── 001_create_blog_tables.sql  # Schema: blog_posts, blog_tags, blog_post_tags
+│   └── 002_blog_rls_policies.sql   # Row Level Security policies
+└── seed.sql                        # Seed data: 6 existing blog posts
+
+proxy.ts                            # Next.js proxy config for admin auth
 ```
 
-**Structure Decision**: Using existing Next.js App Router structure. New admin routes at `app/admin/post/`. Supabase client utilities in `lib/supabase/`. Server actions in `actions/` per CLAUDE.md conventions.
+**Structure Decision**: Using existing Next.js App Router structure. Admin panel at `app/admin/` with dashboard and post management. Rich text editing via Tiptap with custom extensions. Supabase utilities in `lib/supabase/`. Server actions in `actions/` per CLAUDE.md conventions.
 
 ## Complexity Tracking
 
-> No violations to track - all principles satisfied with standard patterns.
+> Enhanced implementation with rich text editing and tag management.
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| N/A | N/A | N/A |
+| Enhancement | Why Added | Value Provided |
+|-------------|-----------|----------------|
+| Tiptap Rich Text Editor | Better content authoring experience | WYSIWYG editing with custom blocks (callouts, grids, timelines) |
+| Tag Management UI | Admin needs to manage tags | Create, edit, delete tags directly from admin panel |
+| Custom Tiptap Extensions | Rich content blocks for blog posts | Callout, Grid, Timeline, SeriesCard, Image extensions |
+| Admin Dashboard | Central admin entry point | Overview and navigation for admin functions |

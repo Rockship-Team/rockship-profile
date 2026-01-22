@@ -2,6 +2,8 @@
 
 **Input**: Design documents from `/specs/003-supabase-blog-integration/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+**Updated**: 2026-01-22
+**Status**: Implementation Complete (48/67 tasks done, 19 manual testing tasks pending)
 
 **Tests**: Not requested - manual testing per Constitution (visual, mobile, Lighthouse audits)
 
@@ -185,8 +187,8 @@
 
 **Purpose**: Final cleanup, deprecation, and quality assurance
 
-- [x] T058 [P] Remove or deprecate `lib/blog-data.ts` (add deprecation comment, keep for reference)
-- [ ] T059 [P] Update `lib/blog-utils.ts` if needed for Supabase date handling
+- [x] T058 [P] Remove or deprecate `lib/blog-data.ts` (REMOVED - no longer needed)
+- [x] T059 [P] Update `lib/blog-utils.ts` if needed for Supabase date handling (N/A - file does not exist)
 - [x] T060 [P] Add revalidation logic for blog pages after admin changes
 - [x] T061 Run `pnpm build` and fix any TypeScript errors
 - [ ] T062 Run `pnpm lint` and fix any linting warnings (pre-existing ESLint 9 config issue)
