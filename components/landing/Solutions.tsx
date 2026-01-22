@@ -154,7 +154,7 @@ export const Solutions: React.FC = React.memo(() => {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
             <Zap className="text-rockship-accent w-4 h-4" />
             <span className="text-xs font-medium text-rockship-200 tracking-wide uppercase">
-              How It Work
+              How It Works
             </span>
           </div>
           <h3 className="text-4xl md:text-5xl font-display font-medium mb-6 leading-tight">

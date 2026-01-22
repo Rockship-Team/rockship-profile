@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div>
-          <h4 className="font-bold text-white mb-4">Solutions</h4>
+          {/* <h4 className="font-bold text-white mb-4">Solutions</h4>
           <ul className="space-y-2">
             <li>
               <a href="#" className="link-hover">
@@ -58,7 +58,7 @@ export const Footer: React.FC = () => {
                 Computer Vision & Document AI
               </a>
             </li>
-          </ul>
+          </ul> */}
         </div>
 
         <div>
