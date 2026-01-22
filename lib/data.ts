@@ -879,7 +879,7 @@ export const caseStudiesData = [
             title: "Centralized Knowledge Base",
             details: [
               "Single source of truth containing all apartment-specific data and FAQs.",
-              "Reduces human error and ensuring consistent, reliable information across all resident touchpoints.",
+              "Reduces human error and ensures consistent, reliable information across all resident touchpoints.",
               "Improves clarity around rules and procedures, strengthening trust between residents and management.",
             ],
           },
