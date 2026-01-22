@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { BlogHero } from "@/components/blog/BlogHero"
@@ -10,6 +11,7 @@ import { BlogSearch } from "@/components/blog/BlogSearch"
 import { EmptyBlogState } from "@/components/blog/EmptyBlogState"
 import { FadeIn } from "@/components/FadeIn"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useFeatureFlag } from "@/hooks/useFeatureFlag"
 import { searchAndFilterPosts } from "@/actions/blog"
 import type { BlogPost, TopicTag } from "@/types/blog"
 
@@ -19,12 +21,21 @@ interface BlogPageClientProps {
 }
 
 export function BlogPageClient({ initialPosts, initialTags }: BlogPageClientProps) {
+  const router = useRouter()
+  const { isEnabled, isInitialized } = useFeatureFlag()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts)
   const [isPending, startTransition] = useTransition()
 
   const debouncedSearch = useDebounce(searchQuery, 300)
+
+  // Redirect to home if blog feature flag is not enabled
+  useEffect(() => {
+    if (isInitialized && !isEnabled("blog")) {
+      router.replace("/")
+    }
+  }, [isInitialized, isEnabled, router])
 
   // Fetch filtered posts when search or filter changes
   useEffect(() => {
@@ -46,6 +57,19 @@ export function BlogPageClient({ initialPosts, initialTags }: BlogPageClientProp
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value)
+  }
+
+  // Don't render content until feature flag is checked
+  if (!isInitialized || !isEnabled("blog")) {
+    return (
+      <main className="min-h-screen bg-rockship-950">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-pulse text-gray-400">Loading...</div>
+        </div>
+        <Footer />
+      </main>
+    )
   }
 
   return (
