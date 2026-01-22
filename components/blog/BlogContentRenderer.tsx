@@ -144,6 +144,16 @@ interface SeriesItem {
   isCurrent: boolean
 }
 
+interface GridCell {
+  id: string
+  content: string
+}
+
+interface GridRow {
+  id: string
+  cells: GridCell[]
+}
+
 // Parse callout from HTML
 function parseCallout(html: string): CalloutData | null {
   const typeMatch = html.match(/data-callout-type="([^"]+)"/)
@@ -404,6 +414,109 @@ function CustomImageComponent({ src, caption, alignment, width }: { src: string;
   )
 }
 
+// Render grid component
+function GridComponent({
+  rows,
+  columns,
+  width,
+  height,
+  showBorder = true,
+  backgroundColor = "#05060B"
+}: {
+  rows: GridRow[]
+  columns: number
+  width: number | null
+  height: number | null
+  showBorder?: boolean
+  backgroundColor?: string | null
+}) {
+  const getGridColsClass = (cols: number) => {
+    // Responsive: on mobile (< md) use fewer columns
+    switch (cols) {
+      case 1:
+        return "grid-cols-1"
+      case 2:
+        return "grid-cols-1 sm:grid-cols-2"
+      case 3:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+      case 4:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
+      default:
+        return "grid-cols-1 sm:grid-cols-2"
+    }
+  }
+
+  // Get border class based on responsive column changes
+  const getCellBorderClass = (cellIndex: number, cols: number) => {
+    if (!showBorder) return ""
+    if (cellIndex === 0) return ""
+
+    switch (cols) {
+      case 1:
+        return ""
+      case 2:
+        return "sm:border-l border-t sm:border-t-0 border-white/10"
+      case 3:
+        return cellIndex % 2 === 1
+          ? "sm:border-l border-t sm:border-t-0 border-white/10"
+          : "md:border-l border-t md:border-t-0 border-white/10"
+      case 4:
+        return cellIndex % 2 === 1
+          ? "sm:border-l border-t sm:border-t-0 border-white/10"
+          : "md:border-l border-t md:border-t-0 border-white/10"
+      default:
+        return "sm:border-l border-t sm:border-t-0 border-white/10"
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        "my-6 rounded-lg overflow-hidden max-w-full",
+        showBorder && "border border-white/10"
+      )}
+      style={{
+        width: width ? `min(${width}px, 100%)` : undefined,
+        height: height ? `${height}px` : undefined,
+        backgroundColor: backgroundColor || "#05060B",
+      }}
+    >
+      <div
+        className="h-full"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {rows.map((row, rowIndex) => (
+          <div
+            key={row.id}
+            className={cn(
+              "grid gap-0 flex-1",
+              getGridColsClass(columns),
+              rowIndex > 0 && showBorder && "border-t border-white/10"
+            )}
+          >
+            {row.cells.map((cell, cellIndex) => (
+              <div
+                key={cell.id}
+                className={cn(
+                  "p-4 min-h-[80px]",
+                  getCellBorderClass(cellIndex, columns)
+                )}
+              >
+                <div className="text-gray-300 text-sm whitespace-pre-wrap">
+                  {cell.content}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Add IDs to HTML headings that don't have them
 function addIdsToHeadings(html: string): string {
   return html.replace(/<h([1-3])([^>]*)>([^<]+)<\/h\1>/gi, (match, level, attrs, text) => {
@@ -518,17 +631,51 @@ export function BlogContentRenderer({ content, className }: BlogContentRendererP
       return `<div data-component="customImage" data-index="${images.length - 1}"></div>`
     })
 
+    // Find and replace grids
+    const gridRegex = /<div[^>]*data-type="grid"[^>]*>[\s\S]*?<\/div>/gi
+    const grids: { rows: GridRow[]; columns: number; width: number | null; height: number | null; showBorder: boolean; backgroundColor: string | null }[] = []
+
+    processedContent = processedContent.replace(gridRegex, (match) => {
+      try {
+        const columnsMatch = match.match(/data-grid-columns="(\d+)"/)
+        const rowsMatch = match.match(/data-grid-rows="([^"]+)"/)
+        const widthMatch = match.match(/data-width="(\d+)"/)
+        const heightMatch = match.match(/data-height="(\d+)"/)
+        const showBorderMatch = match.match(/data-show-border="([^"]+)"/)
+        const backgroundColorMatch = match.match(/data-background-color="([^"]+)"/)
+
+        if (!rowsMatch) return match
+
+        const decoded = rowsMatch[1].replace(/&quot;/g, '"')
+        const rows = JSON.parse(decoded) as GridRow[]
+
+        grids.push({
+          rows,
+          columns: columnsMatch ? parseInt(columnsMatch[1]) : 2,
+          width: widthMatch ? parseInt(widthMatch[1]) : null,
+          height: heightMatch ? parseInt(heightMatch[1]) : null,
+          showBorder: showBorderMatch ? showBorderMatch[1] !== "false" : true,
+          backgroundColor: backgroundColorMatch ? backgroundColorMatch[1] : "#05060B",
+        })
+        return `<div data-component="grid" data-index="${grids.length - 1}"></div>`
+      } catch {
+        return match
+      }
+    })
+
     return {
       html: processedContent,
       callouts,
       timelines,
       seriesCards,
       images,
+      grids,
     }
   }, [content])
 
   // Split content by component placeholders and render
   const parts = renderedContent.html.split(/(<div data-component="[^"]*" data-index="\d+"><\/div>)/g)
+
 
   return (
     <article
@@ -581,6 +728,15 @@ export function BlogContentRenderer({ content, className }: BlogContentRendererP
           const data = renderedContent.images[idx]
           if (data) {
             return <CustomImageComponent key={`image-${index}`} {...data} />
+          }
+        }
+
+        const gridMatch = part.match(/data-component="grid" data-index="(\d+)"/)
+        if (gridMatch) {
+          const idx = parseInt(gridMatch[1])
+          const data = renderedContent.grids[idx]
+          if (data) {
+            return <GridComponent key={`grid-${index}`} {...data} />
           }
         }
 

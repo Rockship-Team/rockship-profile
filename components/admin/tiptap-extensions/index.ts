@@ -10,3 +10,10 @@ export { SeriesCardNodeView } from "./SeriesCardNodeView"
 
 export { ImageExtension, type ImageAlignment } from "./ImageExtension"
 export { ImageNodeView } from "./ImageNodeView"
+
+export { GridExtension, type GridRow, type GridCell } from "./GridExtension"
+export { GridNodeView } from "./GridNodeView"
+
+// Shared utilities
+export { useResizable, type ResizeDirection } from "./useResizable"
+export { NodeToolbar, ResizeHandles, SizeIndicator, WidthIndicator } from "./NodeToolbar"

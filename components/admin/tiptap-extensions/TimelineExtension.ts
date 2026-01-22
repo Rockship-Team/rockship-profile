@@ -56,6 +56,17 @@ export const TimelineExtension = Node.create<TimelineOptions>({
           "data-timeline-items": JSON.stringify(attributes.items),
         }),
       },
+      width: {
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const width = element.getAttribute("data-width")
+          return width ? parseInt(width, 10) : null
+        },
+        renderHTML: (attributes: Record<string, unknown>) => {
+          if (!attributes.width) return {}
+          return { "data-width": attributes.width }
+        },
+      },
     }
   },
 

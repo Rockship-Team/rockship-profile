@@ -32,6 +32,8 @@ export const CalloutExtension = Node.create<CalloutOptions>({
 
   defining: true,
 
+  draggable: true,
+
   addAttributes() {
     return {
       type: {
@@ -47,6 +49,17 @@ export const CalloutExtension = Node.create<CalloutOptions>({
         renderHTML: (attributes: Record<string, unknown>) => ({
           "data-callout-title": attributes.title,
         }),
+      },
+      width: {
+        default: null,
+        parseHTML: (element: HTMLElement) => {
+          const width = element.getAttribute("data-width")
+          return width ? parseInt(width, 10) : null
+        },
+        renderHTML: (attributes: Record<string, unknown>) => {
+          if (!attributes.width) return {}
+          return { "data-width": attributes.width }
+        },
       },
     }
   },

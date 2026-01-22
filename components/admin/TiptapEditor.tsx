@@ -1,6 +1,7 @@
 "use client"
 
 import { useEditor, EditorContent } from "@tiptap/react"
+import { DOMSerializer } from "@tiptap/pm/model"
 import StarterKit from "@tiptap/starter-kit"
 import { Markdown } from "@tiptap/markdown"
 import Link from "@tiptap/extension-link"
@@ -104,11 +105,13 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
+  LayoutGrid,
 } from "lucide-react"
 import { CalloutExtension } from "./tiptap-extensions/CalloutExtension"
 import { TimelineExtension } from "./tiptap-extensions/TimelineExtension"
 import { SeriesCardExtension } from "./tiptap-extensions/SeriesCardExtension"
 import { ImageExtension } from "./tiptap-extensions/ImageExtension"
+import { GridExtension } from "./tiptap-extensions/GridExtension"
 import { cn } from "@/lib/utils"
 import { executeAIAction, type AIAction } from "@/services/editorAIService"
 import { uploadImage } from "@/lib/supabase/storage"
@@ -517,12 +520,46 @@ export function TiptapEditor({
       TimelineExtension,
       SeriesCardExtension,
       ImageExtension,
+      GridExtension,
     ],
     content,
     // Use HTML format to support custom components
     editorProps: {
       attributes: {
         class: "tiptap min-h-[400px] p-4 outline-none",
+      },
+      handleDOMEvents: {
+        dragstart: (view, event) => {
+          // Store dragged content globally so grid cells can access it
+          const { from, to } = view.state.selection
+          if (from !== to) {
+            // Get selected content as HTML using DOMSerializer
+            const slice = view.state.doc.slice(from, to)
+            const serializer = DOMSerializer.fromSchema(view.state.schema)
+            const fragment = serializer.serializeFragment(slice.content)
+            const div = document.createElement("div")
+            div.appendChild(fragment)
+            const html = div.innerHTML
+            // Store in window for grid cells to access
+            ;(window as unknown as { __draggedContent?: string }).__draggedContent = html
+          }
+          return false
+        },
+        dragend: () => {
+          // Clear stored content
+          ;(window as unknown as { __draggedContent?: string }).__draggedContent = undefined
+          return false
+        },
+        drop: (view, event) => {
+          const target = event.target as HTMLElement
+          const gridCell = target.closest('[data-grid-cell-dropzone="true"]')
+          if (gridCell) {
+            // Clear the stored content since the drop was handled
+            ;(window as unknown as { __draggedContent?: string }).__draggedContent = undefined
+            return true // Prevent ProseMirror from handling
+          }
+          return false
+        },
       },
     },
     onUpdate: ({ editor: updatedEditor }) => {
@@ -605,6 +642,15 @@ export function TiptapEditor({
     editor.chain().focus().setImage({ src: "" }).run()
     setShowInsertMenu(false)
   }, [editor])
+
+  const insertGrid = useCallback(
+    (columns = 2) => {
+      if (!editor) return
+      editor.chain().focus().setGrid(columns).run()
+      setShowInsertMenu(false)
+    },
+    [editor]
+  )
 
   const handleImageFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -721,13 +767,13 @@ export function TiptapEditor({
   return (
     <div
       className={cn(
-        "rounded-lg overflow-hidden",
+        "rounded-lg",
         "bg-rockship-900/50 border border-white/10",
         "focus-within:ring-2 focus-within:ring-rockship-accent/50 focus-within:border-transparent"
       )}
     >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b border-white/10 bg-rockship-900/30">
+      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b border-white/10 bg-rockship-900/30 rounded-t-lg">
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -970,6 +1016,16 @@ export function TiptapEditor({
                 >
                   <Layers className="w-4 h-4 text-green-400" />
                   <span>Series Card</span>
+                </button>
+
+                {/* Grid Layout */}
+                <button
+                  type="button"
+                  onClick={() => insertGrid(2)}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50"
+                >
+                  <LayoutGrid className="w-4 h-4 text-cyan-400" />
+                  <span>Grid Layout</span>
                 </button>
 
                 {/* Upload Image */}

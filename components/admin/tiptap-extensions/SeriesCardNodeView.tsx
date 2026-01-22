@@ -1,18 +1,17 @@
 "use client"
 
 import { NodeViewWrapper, NodeViewProps } from "@tiptap/react"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import {
   Plus,
-  Trash2,
   Pencil,
   X,
-  Save,
-  GripVertical,
-  Link as LinkIcon,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { SeriesItem } from "./SeriesCardExtension"
+import { useResizable } from "./useResizable"
+import { NodeToolbar, ResizeHandles, SizeIndicator } from "./NodeToolbar"
 
 interface SeriesItemEditorProps {
   item: SeriesItem
@@ -83,16 +82,38 @@ export function SeriesCardNodeView({
   updateAttributes,
   deleteNode,
   selected,
+  editor,
+  getPos,
 }: NodeViewProps) {
-  const { title, items, currentIndex } = node.attrs as {
+  const { title, items, currentIndex, width } = node.attrs as {
     title: string
     items: SeriesItem[]
     currentIndex: number
+    width: number | null
   }
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleText, setTitleText] = useState(title)
+
+  const {
+    containerRef,
+    currentWidth,
+    isResizing,
+    resizeDirection,
+    handleResizeStart,
+    resetSize,
+  } = useResizable({
+    initialWidth: width,
+    initialHeight: null,
+    minWidth: 280,
+    minHeight: 80,
+    onWidthChange: useCallback(
+      (newWidth: number | null) => updateAttributes({ width: newWidth }),
+      [updateAttributes]
+    ),
+    onHeightChange: useCallback(() => {}, []),
+  })
 
   const addItem = () => {
     const newItem: SeriesItem = {
@@ -139,48 +160,83 @@ export function SeriesCardNodeView({
     setIsEditingTitle(false)
   }
 
+  const handleSelectNode = () => {
+    const pos = getPos()
+    if (typeof pos === "number" && editor) {
+      editor.chain().focus().setNodeSelection(pos).run()
+    }
+  }
+
   const completedCount = currentIndex + 1
   const totalCount = items.length
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
   return (
-    <NodeViewWrapper className="my-6">
+    <NodeViewWrapper
+      className="my-6 group relative"
+      style={{ width: currentWidth ? `${currentWidth}px` : undefined }}
+      ref={containerRef}
+    >
+      {/* Toolbar - positioned outside the ring container */}
+      {selected && (
+        <NodeToolbar
+          onDelete={deleteNode}
+          showResetSize={!!currentWidth}
+          onResetSize={resetSize}
+          position="top-right"
+          className="-top-12 right-0"
+        >
+          <button
+            type="button"
+            onClick={addItem}
+            className="flex items-center gap-1 px-2 py-1 text-xs text-gray-300 hover:text-white hover:bg-rockship-800 rounded"
+          >
+            <Plus className="w-3 h-3" />
+            Add Part
+          </button>
+          <div className="w-px h-5 bg-white/10" />
+        </NodeToolbar>
+      )}
+
       <div
         className={cn(
-          "rounded-xl border border-white/10 bg-rockship-900/50 overflow-hidden",
-          selected && "ring-2 ring-rockship-accent ring-offset-2 ring-offset-rockship-950"
+          "rounded-xl border border-white/10 bg-rockship-900/50 overflow-hidden relative",
+          selected && "ring-2 ring-rockship-accent ring-offset-2 ring-offset-rockship-950",
+          isResizing && "select-none"
         )}
       >
-        {/* Toolbar */}
-        {selected && (
-          <div
-            className={cn(
-              "flex items-center justify-between px-4 py-2",
-              "bg-rockship-900 border-b border-white/10"
-            )}
-            contentEditable={false}
-          >
-            <span className="text-xs text-gray-500">Series Card</span>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={addItem}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-300 hover:text-white hover:bg-rockship-800 rounded"
-              >
-                <Plus className="w-3 h-3" />
-                Add Part
-              </button>
-              <div className="w-px h-4 bg-white/10" />
-              <button
-                type="button"
-                onClick={deleteNode}
-                className="p-1 rounded text-gray-400 hover:text-red-400 hover:bg-red-500/10"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
+        {/* Resize handles */}
+        <ResizeHandles
+          show={selected}
+          isResizing={isResizing}
+          resizeDirection={resizeDirection}
+          onResizeStart={handleResizeStart}
+        />
+
+        {/* Size indicator */}
+        <SizeIndicator show={isResizing} width={currentWidth} height={null} />
+
+        {/* Selection Header Bar */}
+        <div
+          className={cn(
+            "flex items-center justify-between px-4 py-2",
+            "bg-rockship-800/50 border-b border-white/10",
+            "cursor-pointer select-none",
+            "hover:bg-rockship-800/70 transition-colors"
+          )}
+          contentEditable={false}
+          onClick={handleSelectNode}
+        >
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-rockship-accent" />
+            <span className="text-sm text-gray-400">
+              Series · {items.length} part{items.length !== 1 ? "s" : ""}
+            </span>
           </div>
-        )}
+          <span className="text-xs text-gray-500">
+            {selected ? "Click items to edit" : "Click to select"}
+          </span>
+        </div>
 
         {/* Card content */}
         <div className="p-6">
@@ -236,7 +292,7 @@ export function SeriesCardNodeView({
                 <div
                   key={item.id}
                   className={cn(
-                    "flex items-center gap-3 group",
+                    "flex items-center gap-3 group/item",
                     "transition-colors"
                   )}
                   contentEditable={false}
@@ -275,7 +331,7 @@ export function SeriesCardNodeView({
 
                   {/* Edit/Delete buttons */}
                   {selected && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
                       <button
                         type="button"
                         onClick={() => setEditingId(item.id)}
