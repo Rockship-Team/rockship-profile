@@ -354,7 +354,12 @@ html {
 .animated-border-btn::before {
   content: '';
   position: absolute;
-  inset: -245%; /* Adjusted for better coverage */
+  /* Use fixed size for consistent behavior on mobile and desktop */
+  width: 500px;
+  height: 500px;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
@@ -392,10 +397,10 @@ html {
 
 @keyframes borderRotate {
   from {
-    transform: rotate(0deg);
+    transform: translate(-50%, -50%) rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 

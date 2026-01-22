@@ -8,7 +8,7 @@ export const revalidate = 60;
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Rockship AI - Enterprise AI Solutions",
+  title: "Rockship | Enterprise AI Systems",
   description:
     "We consult, design, and deploy production-ready AI automation that streamlines operations and delivers measurable business impact.",
 };
