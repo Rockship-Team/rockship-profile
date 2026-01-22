@@ -1,22 +1,70 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { ArrowLeft, Clock, Calendar, User } from "lucide-react"
 import { FadeIn } from "@/components/FadeIn"
 import { TableOfContents } from "@/components/blog/TableOfContents"
-import { BlogPost } from "@/types/blog"
+import { BlogPost, BlogSection } from "@/types/blog"
 import { formatDate } from "@/lib/utils"
 
 interface BlogDetailClientProps {
   post: BlogPost
 }
 
+// Extract sections from markdown content
+function extractSectionsFromContent(content: string): BlogSection[] {
+  const sections: BlogSection[] = []
+  const lines = content.split('\n')
+
+  for (const line of lines) {
+    // Match markdown headings (## and ###)
+    const h3Match = line.match(/^### (.+)$/)
+    const h2Match = line.match(/^## (.+)$/)
+    const h1Match = line.match(/^# ([^#].*)$/)
+
+    // Match bold text as section headers (common pattern: **Title**)
+    const boldMatch = line.match(/^\*\*([^*]+)\*\*\s*$/)
+
+    if (h3Match) {
+      const title = h3Match[1].trim()
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      sections.push({ id, title, level: 3 })
+    } else if (h2Match) {
+      const title = h2Match[1].trim()
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      sections.push({ id, title, level: 2 })
+    } else if (h1Match) {
+      const title = h1Match[1].trim()
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      // Skip h1 as it's usually the main title
+      if (sections.length > 0) {
+        sections.push({ id, title, level: 1 })
+      }
+    } else if (boldMatch) {
+      // Treat standalone bold lines as h2 sections
+      const title = boldMatch[1].trim()
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      sections.push({ id, title, level: 2 })
+    }
+  }
+
+  return sections
+}
+
 export default function BlogDetailClient({ post }: BlogDetailClientProps) {
   const [activeSection, setActiveSection] = useState<string>("")
 
+  // Use provided sections or auto-extract from content
+  const sections = useMemo(() => {
+    if (post.sections && post.sections.length > 0) {
+      return post.sections
+    }
+    return extractSectionsFromContent(post.content)
+  }, [post.sections, post.content])
+
   useEffect(() => {
-    if (!post.sections || post.sections.length === 0) return
+    if (sections.length === 0) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -32,7 +80,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
       }
     )
 
-    post.sections.forEach((section) => {
+    sections.forEach((section) => {
       const element = document.getElementById(section.id)
       if (element) {
         observer.observe(element)
@@ -40,7 +88,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
     })
 
     return () => observer.disconnect()
-  }, [post.sections])
+  }, [sections])
 
   const htmlContent = markdownToHtml(post.content)
 
@@ -113,12 +161,12 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
             </FadeIn>
 
             {/* Sidebar - Table of Contents */}
-            {post.sections && post.sections.length > 0 && (
+            {sections.length > 0 && (
               <FadeIn direction="left" delay={300} className="hidden lg:block w-64 flex-shrink-0">
                 <div className="sticky top-32">
                   <div className="bg-rockship-900/60 backdrop-blur-md border border-white/10 rounded-xl p-6">
                     <TableOfContents
-                      sections={post.sections}
+                      sections={sections}
                       activeSection={activeSection}
                     />
                   </div>
@@ -148,8 +196,13 @@ function markdownToHtml(markdown: string): string {
       const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       return `<h1 id="${id}">${title}</h1>`
     })
-    // Bold
-    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+    // Standalone bold lines as h2 headings (must be before general bold)
+    .replace(/^\*\*([^*]+)\*\*\s*$/gim, (_, title) => {
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      return `<h2 id="${id}">${title}</h2>`
+    })
+    // Bold (inline)
+    .replace(/\*\*([^*]+)\*\*/gim, '<strong>$1</strong>')
     // Italic
     .replace(/\*(.*)\*/gim, '<em>$1</em>')
     // Code blocks
