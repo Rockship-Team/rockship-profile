@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     // Send email using Resend
     const { data, error } = await resend.emails.send({
       from: "Rockship AI Contact <onboarding@resend.dev>",
-      to: ["ngoc@rockship.co"],
+      to: ["rockship.ops@gmail.com"],
       subject: `New Contact from ${firstName} ${lastName}`,
       html: `
         <!DOCTYPE html>
