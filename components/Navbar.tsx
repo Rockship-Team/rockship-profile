@@ -1,5 +1,6 @@
-"use client"
+"use client";
 
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -11,6 +12,7 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { handleAnchorClick } = useSmoothScroll();
+  const { isEnabled, isInitialized } = useFeatureFlag();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,8 +54,16 @@ export const Navbar: React.FC = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) =>
-            "isExternal" in link && link.isExternal ? (
+          {navLinks.map((link) => {
+            // Hide Blog link if feature flag is not enabled (only check after initialized)
+            if (link.label === "Blog" && isInitialized && !isEnabled("blog")) {
+              return null;
+            }
+            // Also hide Blog during initialization to prevent flash
+            if (link.label === "Blog" && !isInitialized) {
+              return null;
+            }
+            return "isExternal" in link && link.isExternal ? (
               <Link
                 key={link.label}
                 href={link.href}
@@ -70,8 +80,8 @@ export const Navbar: React.FC = () => {
               >
                 {link.label}
               </a>
-            )
-          )}
+            );
+          })}
           <Link
             href="/contact"
             className="animated-border-btn group relative inline-flex items-center justify-center rounded-full transition-all duration-500"
@@ -101,8 +111,12 @@ export const Navbar: React.FC = () => {
             transition={{ duration: 0.2, ease: [0.21, 0.45, 0.32, 0.9] }}
             className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl"
           >
-            {navLinks.map((link, index) =>
-              "isExternal" in link && link.isExternal ? (
+            {navLinks.map((link, index) => {
+              // Hide Blog link if feature flag is not enabled
+              if (link.label === "Blog" && (!isInitialized || !isEnabled("blog"))) {
+                return null;
+              }
+              return "isExternal" in link && link.isExternal ? (
                 <motion.div
                   key={link.label}
                   initial={{ opacity: 0, x: -20 }}
@@ -132,8 +146,8 @@ export const Navbar: React.FC = () => {
                 >
                   {link.label}
                 </motion.a>
-              )
-            )}
+              );
+            })}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
