@@ -669,3 +669,16 @@ article.prose blockquote {
   font-style: italic;
   color: var(--color-rockship-400);
 }
+
+/* Empty line support - ensure paragraphs maintain height (from rich text editors like Tiptap) */
+.blog-content p:empty,
+.blog-content p:has(> br:only-child) {
+  min-height: 1.875rem;
+  display: block;
+}
+
+/* Ensure br elements within blog content create proper visual line breaks */
+.blog-content br {
+  display: block;
+  line-height: 1.875rem;
+}
