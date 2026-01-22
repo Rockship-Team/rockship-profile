@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { LogoutButton } from "@/components/admin/LogoutButton"
 
 export const metadata: Metadata = {
   title: "Admin | Rockship AI Blog",
@@ -37,6 +38,7 @@ export default function AdminLayout({
               >
                 View Blog
               </a>
+              <LogoutButton />
             </nav>
           </div>
         </div>

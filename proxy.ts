@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Admin routes that require basic auth
-const adminRoutes = ["/admin"]
+const ADMIN_COOKIE_NAME = "admin_session"
+
+// Admin routes that require authentication
+const protectedRoutes = ["/admin"]
+const publicRoutes = ["/admin/login"]
 
 export const config = {
   matcher: ["/admin/:path*"],
@@ -10,50 +13,46 @@ export const config = {
 export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
-  // Check if this is an admin route
-  const isAdminRoute = adminRoutes.some((route) => path.startsWith(route))
-
-  if (!isAdminRoute) {
+  // Allow public routes (like login page)
+  if (publicRoutes.some((route) => path === route)) {
     return NextResponse.next()
   }
 
-  // Get authorization header
-  const authHeader = request.headers.get("authorization")
+  // Check if this is a protected admin route
+  const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route))
 
-  if (!authHeader || !authHeader.startsWith("Basic ")) {
-    return new Response("Unauthorized", {
-      status: 401,
-      headers: {
-        "WWW-Authenticate": 'Basic realm="Admin Area"',
-      },
-    })
+  if (!isProtectedRoute) {
+    return NextResponse.next()
   }
 
-  // Validate credentials
-  const expectedUsername = process.env.ADMIN_USERNAME
-  const expectedPassword = process.env.ADMIN_PASSWORD
+  // Check for session cookie
+  const sessionCookie = request.cookies.get(ADMIN_COOKIE_NAME)
 
-  if (!expectedUsername || !expectedPassword) {
-    console.error("ADMIN_USERNAME or ADMIN_PASSWORD not configured")
-    return new Response("Server configuration error", { status: 500 })
+  if (!sessionCookie?.value) {
+    // Redirect to login page
+    return NextResponse.redirect(new URL("/admin/login", request.url))
   }
 
+  // Validate session
+  if (!isValidSession(sessionCookie.value)) {
+    // Invalid session, redirect to login
+    const response = NextResponse.redirect(new URL("/admin/login", request.url))
+    response.cookies.delete(ADMIN_COOKIE_NAME)
+    return response
+  }
+
+  return NextResponse.next()
+}
+
+/**
+ * Validate the session token
+ */
+function isValidSession(sessionToken: string): boolean {
   try {
-    const base64Credentials = authHeader.slice(6)
-    const credentials = atob(base64Credentials)
-    const [username, password] = credentials.split(":")
-
-    if (username === expectedUsername && password === expectedPassword) {
-      return NextResponse.next()
-    }
+    const decoded = Buffer.from(sessionToken, "base64").toString()
+    const [username] = decoded.split(":")
+    return username === process.env.ADMIN_USERNAME
   } catch {
-    // Invalid base64 or format
+    return false
   }
-
-  return new Response("Unauthorized", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="Admin Area"',
-    },
-  })
 }
