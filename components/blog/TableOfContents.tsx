@@ -18,12 +18,26 @@ export function TableOfContents({
 }: TableOfContentsProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault()
-    const element = document.getElementById(id)
+
+    // Try to find element by ID
+    let element = document.getElementById(id)
+
+    // If not found, try to find heading with matching text
+    if (!element) {
+      const headings = document.querySelectorAll('h1, h2, h3')
+      headings.forEach((heading) => {
+        const text = heading.textContent?.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        if (text === id) {
+          element = heading as HTMLElement
+        }
+      })
+    }
+
     if (element) {
       // Update active section immediately on click
       onSectionClick?.(id)
 
-      const offset = 100
+      const offset = 120
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.scrollY - offset
 

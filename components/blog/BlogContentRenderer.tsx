@@ -519,13 +519,16 @@ function GridComponent({
 
 // Add IDs to HTML headings that don't have them
 function addIdsToHeadings(html: string): string {
-  return html.replace(/<h([1-3])([^>]*)>([^<]+)<\/h\1>/gi, (match, level, attrs, text) => {
+  // Match headings with any content (including nested tags)
+  return html.replace(/<h([1-3])([^>]*)>([\s\S]*?)<\/h\1>/gi, (match, level, attrs, innerContent) => {
     // Check if already has an id
     if (attrs.includes('id="')) {
       return match
     }
-    const id = text.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-    return `<h${level}${attrs} id="${id}">${text}</h${level}>`
+    // Strip HTML tags to get text for ID generation
+    const text = innerContent.replace(/<[^>]+>/g, '').trim()
+    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    return `<h${level}${attrs} id="${id}">${innerContent}</h${level}>`
   })
 }
 
@@ -680,16 +683,7 @@ export function BlogContentRenderer({ content, className }: BlogContentRendererP
   return (
     <article
       className={cn(
-        "prose prose-invert prose-lg max-w-none",
-        "prose-headings:font-display prose-headings:font-semibold",
-        "prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl",
-        "prose-p:text-gray-300",
-        "prose-a:text-rockship-accent prose-a:no-underline hover:prose-a:underline",
-        "prose-strong:text-white",
-        "prose-code:text-rockship-accent prose-code:bg-rockship-900/60 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-['']",
-        "prose-pre:bg-rockship-900/60 prose-pre:border prose-pre:border-white/10",
-        "prose-blockquote:border-l-rockship-accent prose-blockquote:text-gray-400",
-        "prose-li:text-gray-300",
+        "blog-content max-w-none",
         className
       )}
     >

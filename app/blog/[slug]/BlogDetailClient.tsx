@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
 import { ArrowLeft, Clock, Calendar, User } from "lucide-react"
 import { FadeIn } from "@/components/FadeIn"
@@ -22,32 +22,31 @@ function isHtmlContent(content: string): boolean {
 // Extract sections from HTML content
 function extractSectionsFromHtml(content: string): BlogSection[] {
   const sections: BlogSection[] = []
+  const seenIds = new Set<string>()
 
-  // Match HTML headings with id attributes: <h1 id="...">...</h1>, <h2 id="...">...</h2>, <h3 id="...">...</h3>
-  const headingRegex = /<h([1-3])(?:\s+[^>]*)?id="([^"]+)"[^>]*>([^<]*(?:<[^/][^>]*>[^<]*<\/[^>]+>)*[^<]*)<\/h\1>/gi
+  // Match all h1, h2, h3 headings - with or without id
+  const headingRegex = /<h([1-3])([^>]*)>([\s\S]*?)<\/h\1>/gi
 
   let match
   while ((match = headingRegex.exec(content)) !== null) {
     const level = parseInt(match[1])
-    const id = match[2]
+    const attrs = match[2]
     // Remove any nested HTML tags from title
     const title = match[3].replace(/<[^>]+>/g, '').trim()
 
-    if (title && (level === 1 || level === 2 || level === 3)) {
-      sections.push({ id, title, level: level as 1 | 2 | 3 })
-    }
-  }
+    if (!title) continue
 
-  // Also try to match headings without id but with content (generate id from content)
-  const headingWithoutIdRegex = /<h([1-3])(?:\s+[^>]*)?>([^<]+)<\/h\1>/gi
+    // Try to get id from attributes
+    const idMatch = attrs.match(/id="([^"]+)"/)
+    const id = idMatch
+      ? idMatch[1]
+      : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-  while ((match = headingWithoutIdRegex.exec(content)) !== null) {
-    const level = parseInt(match[1])
-    const title = match[2].trim()
-    const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    // Skip duplicates
+    if (seenIds.has(id)) continue
+    seenIds.add(id)
 
-    // Check if this section is already added (by id)
-    if (title && !sections.some(s => s.id === id) && (level === 1 || level === 2 || level === 3)) {
+    if (level === 1 || level === 2 || level === 3) {
       sections.push({ id, title, level: level as 1 | 2 | 3 })
     }
   }
@@ -105,6 +104,7 @@ function extractSectionsFromContent(content: string): BlogSection[] {
 
 export default function BlogDetailClient({ post }: BlogDetailClientProps) {
   const [activeSection, setActiveSection] = useState<string>("")
+  const isClickScrolling = useRef(false)
 
   // Use provided sections or auto-extract from content
   const sections = useMemo(() => {
@@ -114,31 +114,61 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
     return extractSectionsFromContent(post.content)
   }, [post.sections, post.content])
 
+  // Handle section click - disable observer temporarily
+  const handleSectionClick = useCallback((sectionId: string) => {
+    isClickScrolling.current = true
+    setActiveSection(sectionId)
+
+    // Re-enable observer after scroll animation completes
+    setTimeout(() => {
+      isClickScrolling.current = false
+    }, 1000)
+  }, [])
+
   useEffect(() => {
     if (sections.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
+    // Delay to ensure DOM is fully rendered
+    const timeoutId = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // Skip if we're doing a click-triggered scroll
+          if (isClickScrolling.current) return
+
+          // Find the entry that is most visible / closest to top
+          const visibleEntries = entries.filter(entry => entry.isIntersecting)
+          if (visibleEntries.length > 0) {
+            // Get the one closest to the top of viewport
+            const topEntry = visibleEntries.reduce((prev, curr) => {
+              return prev.boundingClientRect.top < curr.boundingClientRect.top ? prev : curr
+            })
+            setActiveSection(topEntry.target.id)
           }
-        })
-      },
-      {
-        rootMargin: "-100px 0px -66%",
-        threshold: 0
-      }
-    )
+        },
+        {
+          rootMargin: "-120px 0px -60%",
+          threshold: [0, 0.25, 0.5]
+        }
+      )
 
-    sections.forEach((section) => {
-      const element = document.getElementById(section.id)
-      if (element) {
-        observer.observe(element)
-      }
-    })
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id)
+        if (element) {
+          observer.observe(element)
+        }
+      })
 
-    return () => observer.disconnect()
+      // Store observer for cleanup
+      ;(window as unknown as { __tocObserver?: IntersectionObserver }).__tocObserver = observer
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      const obs = (window as unknown as { __tocObserver?: IntersectionObserver }).__tocObserver
+      if (obs) {
+        obs.disconnect()
+      }
+    }
   }, [sections])
 
   return (
@@ -213,7 +243,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
                     <TableOfContents
                       sections={sections}
                       activeSection={activeSection}
-                      onSectionClick={setActiveSection}
+                      onSectionClick={handleSectionClick}
                     />
                   </div>
                 </div>

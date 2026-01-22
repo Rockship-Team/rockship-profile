@@ -1,7 +1,7 @@
 "use client"
 
 import { useEditor, EditorContent } from "@tiptap/react"
-import { DOMSerializer } from "@tiptap/pm/model"
+import { DOMSerializer, DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model"
 import StarterKit from "@tiptap/starter-kit"
 import { Markdown } from "@tiptap/markdown"
 import Link from "@tiptap/extension-link"
@@ -115,6 +115,111 @@ import { GridExtension } from "./tiptap-extensions/GridExtension"
 import { cn } from "@/lib/utils"
 import { executeAIAction, type AIAction } from "@/services/editorAIService"
 import { uploadImage } from "@/lib/supabase/storage"
+import { marked } from "marked"
+import { Plugin, PluginKey } from "@tiptap/pm/state"
+
+// Configure marked options
+marked.setOptions({
+  gfm: true, // GitHub Flavored Markdown
+  breaks: true, // Convert \n to <br>
+})
+
+// Helper function to detect if text is markdown
+function detectMarkdown(text: string): boolean {
+  // Patterns that indicate markdown content (works with or without newlines)
+  const markdownPatterns = [
+    /#{1,6}\s+\S/,                        // Headings: # Title, ## Subtitle
+    /\*\*[^*]+\*\*/,                      // Bold: **text**
+    /__[^_]+__/,                          // Bold: __text__
+    /~~[^~]+~~/,                          // Strikethrough: ~~text~~
+    /`[^`]+`/,                            // Inline code: `code`
+    /```[\s\S]*?```/,                     // Code blocks: ```code```
+    /\[([^\]]+)\]\(([^)]+)\)/,            // Links: [text](url)
+    /!\[([^\]]*)\]\(([^)]+)\)/,           // Images: ![alt](url)
+  ]
+
+  // Count how many markdown patterns are found
+  let matchCount = 0
+  for (const pattern of markdownPatterns) {
+    if (pattern.test(text)) {
+      matchCount++
+    }
+  }
+
+  // If we find at least 1 pattern, consider it markdown
+  if (matchCount >= 1) return true
+
+  return false
+}
+
+// Custom extension to handle markdown paste
+const MarkdownPasteExtension = Extension.create({
+  name: "markdownPaste",
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey("markdownPaste"),
+        props: {
+          handlePaste: (view, event) => {
+            console.log("[MarkdownPaste] Paste event triggered")
+
+            const clipboardData = event.clipboardData
+            if (!clipboardData) {
+              console.log("[MarkdownPaste] No clipboard data")
+              return false
+            }
+
+            // If HTML content exists, let default handler process it
+            const htmlContent = clipboardData.getData("text/html")
+            console.log("[MarkdownPaste] HTML content:", htmlContent ? "yes" : "no")
+            if (htmlContent && htmlContent.trim()) {
+              console.log("[MarkdownPaste] Using default HTML handler")
+              return false
+            }
+
+            // Get plain text
+            const text = clipboardData.getData("text/plain")
+            console.log("[MarkdownPaste] Plain text:", text?.substring(0, 100))
+            if (!text || !text.trim()) return false
+
+            // Check if it's markdown
+            const isMarkdownText = detectMarkdown(text)
+            console.log("[MarkdownPaste] Is markdown:", isMarkdownText)
+            if (!isMarkdownText) return false
+
+            // Prevent default paste
+            event.preventDefault()
+
+            try {
+              // Convert markdown to HTML
+              const html = marked.parse(text, { async: false }) as string
+              console.log("[MarkdownPaste] Converted HTML:", html.substring(0, 200))
+
+              // Create temp element and parse
+              const tempDiv = document.createElement("div")
+              tempDiv.innerHTML = html
+
+              // Parse using ProseMirror
+              const { state, dispatch } = view
+              const parser = ProseMirrorDOMParser.fromSchema(state.schema)
+              const doc = parser.parse(tempDiv)
+              const slice = doc.slice(0, doc.content.size)
+
+              // Insert content
+              dispatch(state.tr.replaceSelection(slice))
+              console.log("[MarkdownPaste] Success!")
+              return true
+            } catch (error) {
+              console.error("[MarkdownPaste] Error:", error)
+              return false
+            }
+          },
+        },
+      }),
+    ]
+  },
+})
 
 interface TiptapEditorProps {
   content: string
@@ -500,6 +605,7 @@ export function TiptapEditor({
         },
       }),
       Markdown,
+      MarkdownPasteExtension,
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
