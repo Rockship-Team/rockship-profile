@@ -18,8 +18,8 @@ export function BlogSearch({
 }: BlogSearchProps) {
   return (
     <div className={cn("relative", className)}>
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <Search className="w-5 h-5 text-rockship-400" aria-hidden="true" />
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+        <Search className="w-5 h-5 text-gray-400" aria-hidden="true" />
       </div>
       <input
         type="text"

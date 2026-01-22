@@ -7,13 +7,56 @@ import { FadeIn } from "@/components/FadeIn"
 import { TableOfContents } from "@/components/blog/TableOfContents"
 import { BlogPost, BlogSection } from "@/types/blog"
 import { formatDate } from "@/lib/utils"
+import { BlogContentRenderer } from "@/components/blog/BlogContentRenderer"
 
 interface BlogDetailClientProps {
   post: BlogPost
 }
 
+// Check if content is HTML
+function isHtmlContent(content: string): boolean {
+  const trimmed = content.trim()
+  return trimmed.startsWith("<") || trimmed.includes("<div") || trimmed.includes("<p>") || trimmed.includes("<h")
+}
+
+// Extract sections from HTML content
+function extractSectionsFromHtml(content: string): BlogSection[] {
+  const sections: BlogSection[] = []
+
+  // Match HTML headings with id attributes: <h1 id="...">...</h1>, <h2 id="...">...</h2>, <h3 id="...">...</h3>
+  const headingRegex = /<h([1-3])(?:\s+[^>]*)?id="([^"]+)"[^>]*>([^<]*(?:<[^/][^>]*>[^<]*<\/[^>]+>)*[^<]*)<\/h\1>/gi
+
+  let match
+  while ((match = headingRegex.exec(content)) !== null) {
+    const level = parseInt(match[1])
+    const id = match[2]
+    // Remove any nested HTML tags from title
+    const title = match[3].replace(/<[^>]+>/g, '').trim()
+
+    if (title && (level === 1 || level === 2 || level === 3)) {
+      sections.push({ id, title, level: level as 1 | 2 | 3 })
+    }
+  }
+
+  // Also try to match headings without id but with content (generate id from content)
+  const headingWithoutIdRegex = /<h([1-3])(?:\s+[^>]*)?>([^<]+)<\/h\1>/gi
+
+  while ((match = headingWithoutIdRegex.exec(content)) !== null) {
+    const level = parseInt(match[1])
+    const title = match[2].trim()
+    const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+    // Check if this section is already added (by id)
+    if (title && !sections.some(s => s.id === id) && (level === 1 || level === 2 || level === 3)) {
+      sections.push({ id, title, level: level as 1 | 2 | 3 })
+    }
+  }
+
+  return sections
+}
+
 // Extract sections from markdown content
-function extractSectionsFromContent(content: string): BlogSection[] {
+function extractSectionsFromMarkdown(content: string): BlogSection[] {
   const sections: BlogSection[] = []
   const lines = content.split('\n')
 
@@ -29,27 +72,35 @@ function extractSectionsFromContent(content: string): BlogSection[] {
     if (h3Match) {
       const title = h3Match[1].trim()
       const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      sections.push({ id, title, level: 3 })
+      sections.push({ id, title, level: 3 as const })
     } else if (h2Match) {
       const title = h2Match[1].trim()
       const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      sections.push({ id, title, level: 2 })
+      sections.push({ id, title, level: 2 as const })
     } else if (h1Match) {
       const title = h1Match[1].trim()
       const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       // Skip h1 as it's usually the main title
       if (sections.length > 0) {
-        sections.push({ id, title, level: 1 })
+        sections.push({ id, title, level: 1 as const })
       }
     } else if (boldMatch) {
       // Treat standalone bold lines as h2 sections
       const title = boldMatch[1].trim()
       const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      sections.push({ id, title, level: 2 })
+      sections.push({ id, title, level: 2 as const })
     }
   }
 
   return sections
+}
+
+// Extract sections from content (auto-detect HTML or markdown)
+function extractSectionsFromContent(content: string): BlogSection[] {
+  if (isHtmlContent(content)) {
+    return extractSectionsFromHtml(content)
+  }
+  return extractSectionsFromMarkdown(content)
 }
 
 export default function BlogDetailClient({ post }: BlogDetailClientProps) {
@@ -89,8 +140,6 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
 
     return () => observer.disconnect()
   }, [sections])
-
-  const htmlContent = markdownToHtml(post.content)
 
   return (
     <>
@@ -153,11 +202,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
           <div className="flex flex-col lg:flex-row gap-12">
             {/* Main Content */}
             <FadeIn direction="up" delay={200} className="flex-1 min-w-0">
-              <article className="prose prose-invert prose-lg max-w-none prose-headings:font-display prose-headings:font-semibold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-300 prose-a:text-rockship-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-code:text-rockship-accent prose-code:bg-rockship-900/60 prose-code:px-2 prose-code:py-0.5 prose-code:rounded prose-code:before:content-[''] prose-code:after:content-[''] prose-pre:bg-rockship-900/60 prose-pre:border prose-pre:border-white/10 prose-blockquote:border-l-rockship-accent prose-blockquote:text-gray-400 prose-li:text-gray-300">
-                <div
-                  dangerouslySetInnerHTML={{ __html: htmlContent }}
-                />
-              </article>
+              <BlogContentRenderer content={post.content} />
             </FadeIn>
 
             {/* Sidebar - Table of Contents */}
@@ -168,6 +213,7 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
                     <TableOfContents
                       sections={sections}
                       activeSection={activeSection}
+                      onSectionClick={setActiveSection}
                     />
                   </div>
                 </div>
@@ -178,52 +224,4 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
       </section>
     </>
   )
-}
-
-// Simple markdown to HTML converter with section IDs for TOC navigation
-function markdownToHtml(markdown: string): string {
-  return markdown
-    // Headers with IDs
-    .replace(/^### (.*$)/gim, (_, title) => {
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      return `<h3 id="${id}">${title}</h3>`
-    })
-    .replace(/^## (.*$)/gim, (_, title) => {
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      return `<h2 id="${id}">${title}</h2>`
-    })
-    .replace(/^# (.*$)/gim, (_, title) => {
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      return `<h1 id="${id}">${title}</h1>`
-    })
-    // Standalone bold lines as h2 headings (must be before general bold)
-    .replace(/^\*\*([^*]+)\*\*\s*$/gim, (_, title) => {
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      return `<h2 id="${id}">${title}</h2>`
-    })
-    // Bold (inline)
-    .replace(/\*\*([^*]+)\*\*/gim, '<strong>$1</strong>')
-    // Italic
-    .replace(/\*(.*)\*/gim, '<em>$1</em>')
-    // Code blocks
-    .replace(/```(\w+)?\n([\s\S]*?)```/gim, '<pre><code>$2</code></pre>')
-    // Inline code
-    .replace(/`([^`]+)`/gim, '<code>$1</code>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
-    // Unordered lists
-    .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    // Ordered lists
-    .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
-    // Paragraphs
-    .replace(/\n\n/gim, '</p><p>')
-    // Line breaks
-    .replace(/\n/gim, '<br>')
-    // Wrap in paragraph
-    .replace(/^(.*)$/s, '<p>$1</p>')
-    // Clean up empty paragraphs
-    .replace(/<p><\/p>/gim, '')
-    // Clean up list items
-    .replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>')
-    .replace(/<\/ul>\s*<ul>/gim, '')
 }

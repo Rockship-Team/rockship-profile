@@ -7,17 +7,22 @@ interface TableOfContentsProps {
   sections: BlogSection[]
   activeSection?: string
   className?: string
+  onSectionClick?: (sectionId: string) => void
 }
 
 export function TableOfContents({
   sections,
   activeSection,
-  className
+  className,
+  onSectionClick
 }: TableOfContentsProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault()
     const element = document.getElementById(id)
     if (element) {
+      // Update active section immediately on click
+      onSectionClick?.(id)
+
       const offset = 100
       const elementPosition = element.getBoundingClientRect().top
       const offsetPosition = elementPosition + window.scrollY - offset

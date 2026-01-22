@@ -6,6 +6,66 @@ import { Markdown } from "@tiptap/markdown"
 import Link from "@tiptap/extension-link"
 import Underline from "@tiptap/extension-underline"
 import Placeholder from "@tiptap/extension-placeholder"
+import TextAlign from "@tiptap/extension-text-align"
+import { TextStyle } from "@tiptap/extension-text-style"
+import { Extension } from "@tiptap/core"
+
+// Extend TextStyle to support fontSize attribute
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (size: string) => ReturnType
+      unsetFontSize: () => ReturnType
+    }
+  }
+}
+
+// Custom FontSize extension that extends TextStyle
+const FontSize = Extension.create({
+  name: "fontSize",
+
+  addOptions() {
+    return {
+      types: ["textStyle"],
+    }
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element: HTMLElement) => element.style.fontSize?.replace(/['"]+/g, "") || null,
+            renderHTML: (attributes: { fontSize?: string | null }) => {
+              if (!attributes.fontSize) return {}
+              return { style: `font-size: ${attributes.fontSize}` }
+            },
+          },
+        },
+      },
+    ]
+  },
+
+  addCommands() {
+    return {
+      setFontSize:
+        (fontSize: string) =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize }).run()
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }) => {
+          return chain()
+            .setMark("textStyle", { fontSize: null })
+            .removeEmptyTextStyle()
+            .run()
+        },
+    }
+  },
+})
 import { useEffect, useCallback, useState, useRef } from "react"
 import {
   Bold,
@@ -35,9 +95,23 @@ import {
   Loader2,
   ChevronDown,
   X,
+  Plus,
+  Info,
+  Clock,
+  Layers,
+  Image,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from "lucide-react"
+import { CalloutExtension } from "./tiptap-extensions/CalloutExtension"
+import { TimelineExtension } from "./tiptap-extensions/TimelineExtension"
+import { SeriesCardExtension } from "./tiptap-extensions/SeriesCardExtension"
+import { ImageExtension } from "./tiptap-extensions/ImageExtension"
 import { cn } from "@/lib/utils"
 import { executeAIAction, type AIAction } from "@/services/editorAIService"
+import { uploadImage } from "@/lib/supabase/storage"
 
 interface TiptapEditorProps {
   content: string
@@ -81,6 +155,136 @@ function ToolbarButton({
 
 function ToolbarDivider() {
   return <div className="w-px h-6 bg-white/10 mx-1" />
+}
+
+// Font Size Combobox - allows both selection and manual input
+const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36", "48", "64", "72"]
+
+interface FontSizeComboboxProps {
+  value: string
+  onChange: (size: string) => void
+}
+
+function FontSizeCombobox({ value, onChange }: FontSizeComboboxProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Extract number from value (e.g., "24px" -> "24")
+  const displayValue = value ? value.replace(/px$/, "") : ""
+
+  useEffect(() => {
+    setInputValue(displayValue)
+  }, [displayValue])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/[^0-9]/g, "")
+    setInputValue(val)
+  }
+
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      if (inputValue) {
+        onChange(`${inputValue}px`)
+      }
+      setIsOpen(false)
+      inputRef.current?.blur()
+    }
+    if (e.key === "Escape") {
+      setIsOpen(false)
+      setInputValue(displayValue)
+    }
+  }
+
+  const handleInputBlur = () => {
+    // Apply value on blur if changed
+    if (inputValue && inputValue !== displayValue) {
+      onChange(`${inputValue}px`)
+    }
+  }
+
+  const handleSelect = (size: string) => {
+    onChange(`${size}px`)
+    setInputValue(size)
+    setIsOpen(false)
+  }
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <div
+        className={cn(
+          "flex items-center h-8 rounded",
+          "bg-rockship-800/50 border border-white/10",
+          "hover:border-white/20 transition-colors",
+          isOpen && "ring-1 ring-rockship-accent border-transparent"
+        )}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          onBlur={handleInputBlur}
+          onFocus={() => setIsOpen(true)}
+          placeholder="Size"
+          className={cn(
+            "w-12 h-full px-2 bg-transparent text-sm text-center",
+            "text-gray-300 placeholder-gray-500",
+            "focus:outline-none"
+          )}
+          title="Font Size"
+        />
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="px-1 h-full text-gray-400 hover:text-white"
+        >
+          <ChevronDown className={cn("w-3 h-3 transition-transform", isOpen && "rotate-180")} />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div
+          className={cn(
+            "absolute top-full left-0 mt-1 z-50",
+            "w-20 max-h-48 overflow-y-auto rounded-lg",
+            "bg-rockship-900 border border-white/10",
+            "shadow-xl shadow-black/20"
+          )}
+        >
+          {FONT_SIZES.map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => handleSelect(size)}
+              className={cn(
+                "w-full px-3 py-1.5 text-sm text-left",
+                "hover:bg-rockship-800/50 transition-colors",
+                size === displayValue
+                  ? "text-rockship-accent bg-rockship-accent/10"
+                  : "text-gray-300"
+              )}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface AIMenuProps {
@@ -264,8 +468,28 @@ export function TiptapEditor({
   const [aiError, setAIError] = useState<string | null>(null)
   const aiMenuRef = useRef<HTMLDivElement>(null)
 
+  const [showInsertMenu, setShowInsertMenu] = useState(false)
+  const insertMenuRef = useRef<HTMLDivElement>(null)
+
+  const [isImageUploading, setIsImageUploading] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+
+  // Force re-render when editor state changes (for active button states)
+  const [, setEditorState] = useState(0)
+
+  // Track if we're updating from internal changes to prevent sync loops
+  const isInternalUpdate = useRef(false)
+
   const editor = useEditor({
     immediatelyRender: false,
+    onSelectionUpdate: () => {
+      // Force re-render to update toolbar active states
+      setEditorState((prev) => prev + 1)
+    },
+    onTransaction: () => {
+      // Force re-render on any transaction
+      setEditorState((prev) => prev + 1)
+    },
     extensions: [
       StarterKit.configure({
         heading: {
@@ -283,34 +507,41 @@ export function TiptapEditor({
       Placeholder.configure({
         placeholder,
       }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
+      TextStyle,
+      FontSize,
+      // Custom extensions
+      CalloutExtension,
+      TimelineExtension,
+      SeriesCardExtension,
+      ImageExtension,
     ],
     content,
-    contentType: "markdown",
+    // Use HTML format to support custom components
     editorProps: {
       attributes: {
-        class: cn(
-          "min-h-[400px] p-4 outline-none",
-          "prose prose-invert prose-rockship max-w-none",
-          "prose-headings:text-white prose-p:text-gray-300",
-          "prose-a:text-rockship-accent prose-strong:text-white",
-          "prose-code:bg-rockship-800 prose-code:px-1 prose-code:rounded",
-          "prose-blockquote:border-rockship-accent prose-blockquote:text-gray-400",
-          "prose-ul:text-gray-300 prose-ol:text-gray-300",
-          "prose-li:text-gray-300"
-        ),
+        class: "tiptap min-h-[400px] p-4 outline-none",
       },
     },
-    onUpdate: ({ editor }) => {
-      const markdown = editor.getMarkdown()
-      onChange(markdown)
+    onUpdate: ({ editor: updatedEditor }) => {
+      // Save as HTML to preserve custom components
+      const html = updatedEditor.getHTML()
+      // Mark this as an internal update to prevent sync loop
+      isInternalUpdate.current = true
+      onChange(html)
     },
   })
 
-  // Close AI menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (aiMenuRef.current && !aiMenuRef.current.contains(event.target as Node)) {
         setShowAIMenu(false)
+      }
+      if (insertMenuRef.current && !insertMenuRef.current.contains(event.target as Node)) {
+        setShowInsertMenu(false)
       }
     }
 
@@ -318,11 +549,16 @@ export function TiptapEditor({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Sync external content changes
+  // Sync external content changes (only when content prop changes from outside)
   useEffect(() => {
-    if (editor && content !== editor.getMarkdown()) {
-      editor.commands.setContent(content, { contentType: "markdown" })
+    if (editor && !isInternalUpdate.current) {
+      const currentContent = editor.getHTML()
+      // Only update if content is significantly different (not just whitespace)
+      if (content && content.trim() !== currentContent.trim()) {
+        editor.commands.setContent(content)
+      }
     }
+    isInternalUpdate.current = false
   }, [content, editor])
 
   const setLink = useCallback(() => {
@@ -340,6 +576,80 @@ export function TiptapEditor({
 
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run()
   }, [editor])
+
+  // Insert custom components
+  const insertCallout = useCallback(
+    (type: "info" | "success" | "warning" | "error" | "mission" = "info") => {
+      if (!editor) return
+      editor.chain().focus().setCallout({ type }).run()
+      setShowInsertMenu(false)
+    },
+    [editor]
+  )
+
+  const insertTimeline = useCallback(() => {
+    if (!editor) return
+    editor.chain().focus().setTimeline().run()
+    setShowInsertMenu(false)
+  }, [editor])
+
+  const insertSeriesCard = useCallback(() => {
+    if (!editor) return
+    editor.chain().focus().setSeriesCard().run()
+    setShowInsertMenu(false)
+  }, [editor])
+
+  const insertImage = useCallback(() => {
+    if (!editor) return
+    // Insert an empty image block that will show upload placeholder
+    editor.chain().focus().setImage({ src: "" }).run()
+    setShowInsertMenu(false)
+  }, [editor])
+
+  const handleImageFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file || !editor) return
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        setAIError("Please select an image file")
+        return
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setAIError("Image must be less than 5MB")
+        return
+      }
+
+      setIsImageUploading(true)
+
+      try {
+        const result = await uploadImage(file)
+        if (result.error) {
+          setAIError(result.error)
+        } else {
+          editor.chain().focus().setImage({ src: result.url }).run()
+        }
+      } catch (error) {
+        setAIError("Failed to upload image")
+        console.error("Upload error:", error)
+      } finally {
+        setIsImageUploading(false)
+        setShowInsertMenu(false)
+        // Reset input
+        if (imageInputRef.current) {
+          imageInputRef.current.value = ""
+        }
+      }
+    },
+    [editor]
+  )
+
+  const triggerImageUpload = useCallback(() => {
+    imageInputRef.current?.click()
+  }, [])
 
   const handleAIAction = useCallback(
     async (action: AIAction, prompt?: string) => {
@@ -500,6 +810,52 @@ export function TiptapEditor({
 
         <ToolbarDivider />
 
+        {/* Text Alignment */}
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          isActive={editor.isActive({ textAlign: "left" })}
+          title="Align Left"
+        >
+          <AlignLeft className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          isActive={editor.isActive({ textAlign: "center" })}
+          title="Align Center"
+        >
+          <AlignCenter className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          isActive={editor.isActive({ textAlign: "right" })}
+          title="Align Right"
+        >
+          <AlignRight className="w-4 h-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          isActive={editor.isActive({ textAlign: "justify" })}
+          title="Justify"
+        >
+          <AlignJustify className="w-4 h-4" />
+        </ToolbarButton>
+
+        <ToolbarDivider />
+
+        {/* Font Size - Combobox */}
+        <FontSizeCombobox
+          value={editor.getAttributes("textStyle").fontSize || ""}
+          onChange={(size) => {
+            if (size) {
+              editor.chain().focus().setFontSize(size).run()
+            } else {
+              editor.chain().focus().unsetFontSize().run()
+            }
+          }}
+        />
+
+        <ToolbarDivider />
+
         {/* Links */}
         <ToolbarButton
           onClick={setLink}
@@ -550,6 +906,105 @@ export function TiptapEditor({
         >
           <Minus className="w-4 h-4" />
         </ToolbarButton>
+
+        <ToolbarDivider />
+
+        {/* Insert Custom Components */}
+        <div className="relative" ref={insertMenuRef}>
+          <button
+            type="button"
+            onClick={() => setShowInsertMenu(!showInsertMenu)}
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium",
+              "bg-rockship-800/50 border border-white/10",
+              "hover:bg-rockship-800 hover:border-white/20",
+              "text-gray-300 hover:text-white transition-all",
+              showInsertMenu && "bg-rockship-800 border-white/20 text-white"
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Insert</span>
+            <ChevronDown className={cn("w-3 h-3 transition-transform", showInsertMenu && "rotate-180")} />
+          </button>
+
+          {/* Insert Dropdown Menu */}
+          {showInsertMenu && (
+            <div
+              className={cn(
+                "absolute top-full left-0 mt-1 z-50",
+                "w-56 rounded-lg overflow-hidden",
+                "bg-rockship-900 border border-white/10",
+                "shadow-xl shadow-black/20"
+              )}
+            >
+              <div className="py-1">
+                <div className="px-3 py-1.5 text-xs text-gray-500 uppercase tracking-wider">
+                  Custom Components
+                </div>
+
+                {/* Callout */}
+                <button
+                  type="button"
+                  onClick={() => insertCallout("info")}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50"
+                >
+                  <Info className="w-4 h-4 text-blue-400" />
+                  <span>Callout Box</span>
+                </button>
+
+                {/* Timeline */}
+                <button
+                  type="button"
+                  onClick={insertTimeline}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50"
+                >
+                  <Clock className="w-4 h-4 text-purple-400" />
+                  <span>Timeline</span>
+                </button>
+
+                {/* Series Card */}
+                <button
+                  type="button"
+                  onClick={insertSeriesCard}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50"
+                >
+                  <Layers className="w-4 h-4 text-green-400" />
+                  <span>Series Card</span>
+                </button>
+
+                {/* Upload Image */}
+                <button
+                  type="button"
+                  onClick={triggerImageUpload}
+                  disabled={isImageUploading}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50",
+                    isImageUploading && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <Image className="w-4 h-4 text-orange-400" />
+                  <span>{isImageUploading ? "Uploading..." : "Upload Image"}</span>
+                </button>
+
+                {/* Image from URL */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = window.prompt("Image URL")
+                    if (url && editor) {
+                      editor.chain().focus().setImage({ src: url }).run()
+                    }
+                    setShowInsertMenu(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-rockship-800/50"
+                >
+                  <LinkIcon className="w-4 h-4 text-orange-400" />
+                  <span>Image from URL</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <ToolbarDivider />
 
@@ -611,6 +1066,15 @@ export function TiptapEditor({
           </button>
         </div>
       )}
+
+      {/* Hidden file input for image upload */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageFileUpload}
+        className="hidden"
+      />
 
       {/* Editor */}
       <EditorContent editor={editor} />
