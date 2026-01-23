@@ -614,6 +614,10 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
     <mesh
       ref={meshRef}
       scale={scale}
+      onClick={() => {
+        // Dispatch custom event to open chat dialog
+        window.dispatchEvent(new CustomEvent("openAIChat"));
+      }}
       onPointerOver={() => {
         document.body.style.cursor = "pointer";
         setHover(true);
