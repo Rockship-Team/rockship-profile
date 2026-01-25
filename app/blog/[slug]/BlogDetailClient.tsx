@@ -9,7 +9,6 @@ import { TableOfContents } from "@/components/blog/TableOfContents"
 import { BlogPost, BlogSection } from "@/types/blog"
 import { formatDate } from "@/lib/utils"
 import { BlogContentRenderer } from "@/components/blog/BlogContentRenderer"
-import { useFeatureFlag } from "@/hooks/useFeatureFlag"
 
 interface BlogDetailClientProps {
   post: BlogPost
@@ -106,16 +105,9 @@ function extractSectionsFromContent(content: string): BlogSection[] {
 
 export default function BlogDetailClient({ post }: BlogDetailClientProps) {
   const router = useRouter()
-  const { isEnabled, isInitialized } = useFeatureFlag()
   const [activeSection, setActiveSection] = useState<string>("")
   const isClickScrolling = useRef(false)
 
-  // Redirect to home if blog feature flag is not enabled
-  useEffect(() => {
-    if (isInitialized && !isEnabled("blog")) {
-      router.replace("/")
-    }
-  }, [isInitialized, isEnabled, router])
 
   // Use provided sections or auto-extract from content
   const sections = useMemo(() => {
@@ -181,15 +173,6 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
       }
     }
   }, [sections])
-
-  // Don't render content until feature flag is checked
-  if (!isInitialized || !isEnabled("blog")) {
-    return (
-      <div className="min-h-screen bg-rockship-950 flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading...</div>
-      </div>
-    )
-  }
 
   return (
     <>
