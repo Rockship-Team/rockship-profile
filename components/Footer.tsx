@@ -13,6 +13,7 @@ export const Footer: React.FC = () => {
               alt="Rockship"
               width={150}
               height={150}
+              loading="lazy"
             />
           </div>
           <p className="max-w-xs mb-6">
@@ -22,16 +23,19 @@ export const Footer: React.FC = () => {
             <a
               href="mailto:ngoc@rockship.co"
               className="flex items-center gap-2 link-hover"
+              aria-label="Email us at ngoc@rockship.co"
             >
-              <Mail size={18} />
+              <Mail size={18} aria-hidden="true" />
               <span>ngoc@rockship.co</span>
             </a>
             <a
               href="https://wa.me/6584298483"
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 link-hover"
+              aria-label="Call us at +65 8429 8483"
             >
-              <Phone size={18} />
+              <Phone size={18} aria-hidden="true" />
               <span>+65 8429 8483</span>
             </a>
           </div>
@@ -40,15 +44,19 @@ export const Footer: React.FC = () => {
               href="https://www.facebook.com/rockship.co/"
               className="link-hover"
               target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our Facebook page"
             >
-              <Facebook size={20} />
+              <Facebook size={20} aria-hidden="true" />
             </a>
             <a
               href="https://www.linkedin.com/company/rockship"
               className="link-hover"
               target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our LinkedIn page"
             >
-              <Linkedin size={20} />
+              <Linkedin size={20} aria-hidden="true" />
             </a>
           </div>
         </div>

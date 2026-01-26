@@ -117,6 +117,7 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
           <input
             type="text"
             id="title"
+            name="title"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             required
@@ -124,7 +125,8 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
               "w-full px-4 py-3 rounded-lg",
               "bg-rockship-900/50 border border-white/10",
               "text-white placeholder-gray-500",
-              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent",
+              "focus-visible:ring-2 focus-visible:ring-rockship-accent"
             )}
             placeholder="Post title"
           />
@@ -137,6 +139,7 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
           <input
             type="text"
             id="slug"
+            name="slug"
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
             required
@@ -144,7 +147,8 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
               "w-full px-4 py-3 rounded-lg",
               "bg-rockship-900/50 border border-white/10",
               "text-white placeholder-gray-500",
-              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent",
+              "focus-visible:ring-2 focus-visible:ring-rockship-accent"
             )}
             placeholder="post-url-slug"
           />
@@ -160,13 +164,15 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
           <input
             type="text"
             id="author"
+            name="author"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             className={cn(
               "w-full px-4 py-3 rounded-lg",
               "bg-rockship-900/50 border border-white/10",
               "text-white placeholder-gray-500",
-              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+              "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent",
+              "focus-visible:ring-2 focus-visible:ring-rockship-accent"
             )}
             placeholder="Author name"
           />
@@ -191,6 +197,7 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
         </label>
         <textarea
           id="excerpt"
+          name="excerpt"
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
           rows={2}
@@ -198,7 +205,8 @@ export function PostForm({ post, mode, availableTags }: PostFormProps) {
             "w-full px-4 py-3 rounded-lg resize-none",
             "bg-rockship-900/50 border border-white/10",
             "text-white placeholder-gray-500",
-            "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent"
+            "focus:outline-none focus:ring-2 focus:ring-rockship-accent/50 focus:border-transparent",
+            "focus-visible:ring-2 focus-visible:ring-rockship-accent"
           )}
           placeholder="Brief description of the post"
         />

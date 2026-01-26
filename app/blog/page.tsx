@@ -14,8 +14,9 @@ export const metadata: Metadata = {
   },
 }
 
-// Revalidate every 60 seconds
-export const revalidate = 60
+// Revalidate every 15 minutes (900 seconds) - reduces database hits
+// Content is cached at build time and regenerated in background
+export const revalidate = 900
 
 export default async function BlogPage() {
   const [posts, tags] = await Promise.all([

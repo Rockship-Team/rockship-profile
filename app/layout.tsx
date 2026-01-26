@@ -84,7 +84,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "dark" }}>
       <head>
         {/* Preconnect to CDN for faster resource fetching */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

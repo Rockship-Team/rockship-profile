@@ -22,11 +22,12 @@ export function BlogSearch({
         <Search className="w-5 h-5 text-gray-400" aria-hidden="true" />
       </div>
       <input
-        type="text"
+        type="search"
+        name="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-rockship-900/60 backdrop-blur-md border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent transition-colors"
+        className="w-full bg-rockship-900/60 backdrop-blur-md border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent transition-colors"
         aria-label="Search blog posts"
       />
     </div>
