@@ -122,7 +122,10 @@ export function BlogPageClient({ initialPosts, initialTags }: BlogPageClientProp
               }}
             />
           ) : (
-            <BlogGrid posts={posts} />
+            <BlogGrid
+              key={posts.map(p => p.slug).join(',')}
+              posts={posts}
+            />
           )}
         </div>
       </section>

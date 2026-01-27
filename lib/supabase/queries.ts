@@ -218,13 +218,14 @@ export async function getAllSlugs(): Promise<string[]> {
 }
 
 /**
- * Search posts using full-text search
- * Uses single query with join to avoid N+1 problem
+ * Search posts using full-text search with ILIKE fallback
+ * Full-text search ignores stop words (how, what, the, etc.)
+ * so we fall back to ILIKE for those cases
  */
 export async function searchPosts(query: string): Promise<BlogPost[]> {
   const supabase = await createServerClient()
 
-  // Use PostgreSQL full-text search with tags join
+  // First try PostgreSQL full-text search
   const { data: posts, error } = await supabase
     .from("blog_posts")
     .select(`
@@ -247,11 +248,47 @@ export async function searchPosts(query: string): Promise<BlogPost[]> {
     throw new Error("Failed to search blog posts")
   }
 
-  if (!posts || posts.length === 0) {
+  // If full-text search returns results, use them
+  if (posts && posts.length > 0) {
+    return posts.map((post) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tags = post.blog_post_tags
+        ?.map((t: any) => t.blog_tags?.slug)
+        .filter((slug: unknown): slug is string => typeof slug === "string") || []
+
+      return transformToLegacyBlogPost({
+        ...post,
+        tags,
+      } as BlogPostWithTags)
+    })
+  }
+
+  // Fallback to ILIKE search for stop words (how, what, the, etc.)
+  const searchPattern = `%${query}%`
+  const { data: ilikePosts, error: ilikeError } = await supabase
+    .from("blog_posts")
+    .select(`
+      *,
+      blog_post_tags (
+        blog_tags (
+          slug
+        )
+      )
+    `)
+    .eq("is_published", true)
+    .or(`title.ilike.${searchPattern},excerpt.ilike.${searchPattern}`)
+    .order("published_at", { ascending: false })
+
+  if (ilikeError) {
+    console.error("Error in ILIKE search:", ilikeError)
     return []
   }
 
-  return posts.map((post) => {
+  if (!ilikePosts || ilikePosts.length === 0) {
+    return []
+  }
+
+  return ilikePosts.map((post) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tags = post.blog_post_tags
       ?.map((t: any) => t.blog_tags?.slug)

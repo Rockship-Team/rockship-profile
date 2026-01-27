@@ -1,5 +1,5 @@
-import { AISphereButton } from "@/components/ui/AIRocketLogicButton";
 import { Mic, Send, Square, Trash2, Volume2, VolumeX, X } from "lucide-react";
+import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -749,11 +749,13 @@ export const GroqAssistant: React.FC = () => {
           {/* Header */}
           <div className="bg-gradient-to-r from-rockship-900 to-rockship-800 p-4 flex justify-between items-center border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 flex-shrink-0">
-                <AISphereButton
-                  size={40}
-                  isSpeaking={isSpeaking}
-                  audioLevel={audioLevel}
+              <div className="w-10 h-10 flex-shrink-0 relative overflow-hidden rounded-full">
+                <Image
+                  src="/captain_chatbot_no_bg.png"
+                  alt="Rockship Assistant"
+                  width={40}
+                  height={40}
+                  className="object-cover"
                 />
               </div>
               <div>
@@ -1025,13 +1027,27 @@ export const GroqAssistant: React.FC = () => {
       {/* Floating Action Button - AISphere Mini (hidden in hero section) */}
       {!isOpen && (
         <div
-          className={`transition-all duration-500 ease-out ${
+          className={`transition-all duration-500 ease-out flex flex-col items-center ${
             showButton
               ? "opacity-100 translate-y-0 scale-100"
               : "opacity-0 translate-y-4 scale-90 pointer-events-none"
           }`}
         >
-          <AISphereButton onClick={toggleOpen} size={84} />
+          {/* Badge */}
+          <div className="mb-2 bg-white text-rockship-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce border border-rockship-accent/30 whitespace-nowrap">
+            Need help?
+          </div>
+          <button
+            onClick={toggleOpen}
+            className="relative w-24 h-24 rounded-full  overflow-hidden hover:scale-110 transition-transform active:scale-95 bg-transparent group"
+          >
+            <Image
+              src="/captain_chatbot_no_bg.png"
+              alt="Open chat"
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+          </button>
         </div>
       )}
     </div>

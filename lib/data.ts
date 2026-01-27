@@ -40,9 +40,9 @@ export const companyData = {
 export const heroData = {
   title: "Proven AI Impact",
   stats: [
-    { label: "Workflow Automation", val: "60–70%" },
-    { label: "System Uptime", val: "99.9%" },
-    { label: "Enterprise Clients", val: "150+" },
+    { label: "Automation", val: "60–70%" },
+    { label: "Cost Reduction", val: "30–50%" },
+    { label: "Faster Execution", val: "2–3x" },
   ],
 };
 

@@ -26,6 +26,7 @@ export function BlogGrid({ posts, className }: BlogGridProps) {
           key={post.slug}
           direction="up"
           delay={index * 100}
+          viewTrigger={false}
         >
           <BlogCard post={post} />
         </FadeIn>
