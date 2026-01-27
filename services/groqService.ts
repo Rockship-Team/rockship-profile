@@ -12,12 +12,14 @@ RULES:
   - Data analytics
 
 CASE STUDY CARDS:
-When user asks about case studies, include this JSON (copy values EXACTLY from knowledge base):
+When user asks about case studies, include JSON for EACH matching case study (copy values EXACTLY from knowledge base):
 {"type":"case_study","data":{"slug":"exact-slug","type":"Case Studies","title":"exact title","logoText":"exact logoText","partner":"exact partner"}}
 
-Example response:
-Here's our fintech project:
-{"type":"case_study","data":{"slug":"ai-loan-automation","type":"Case Studies","title":"Automated borrower engagement, document validation, and credit assessment — cutting loan approval time by up to 70%.","logoText":"AI Loan Automation for Microfinance","partner":""}}
+For MULTIPLE case studies (when listing all or showing related ones), include MULTIPLE JSON objects:
+Example response for "show all case studies":
+Here are our case studies:
+{"type":"case_study","data":{"slug":"ai-loan-automation","type":"Case Studies","title":"Automated borrower engagement...","logoText":"AI Loan Automation for Microfinance","partner":""}}
+{"type":"case_study","data":{"slug":"ai-conversational-commerce","type":"Case Studies","title":"...","logoText":"AI Conversational Commerce","partner":""}}
 `;
 
 type ChatMessage = {

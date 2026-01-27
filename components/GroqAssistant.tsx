@@ -1,4 +1,4 @@
-import { AISphereButton } from "@/components/ui/AISphereButton";
+import { AISphereButton } from "@/components/ui/AIRocketLogicButton";
 import { Mic, Send, Square, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -220,9 +220,11 @@ export const GroqAssistant: React.FC = () => {
     try {
       // Create audio context if not exists
       if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext ||
+        audioContextRef.current = new (
+          window.AudioContext ||
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (window as any).webkitAudioContext)();
+          (window as any).webkitAudioContext
+        )();
       }
 
       const audioContext = audioContextRef.current;
@@ -293,19 +295,22 @@ export const GroqAssistant: React.FC = () => {
   }, []);
 
   // Fallback TTS using Web Speech API
-  const speakWithFallback = useCallback(async (cleanText: string) => {
-    console.log("[TTS] Starting Web Speech fallback...");
-    startSimulatedAudioLevel();
-    try {
-      await textToSpeechFallback(cleanText);
-      console.log("[TTS] Web Speech fallback completed");
-    } catch (error) {
-      console.warn("[TTS] Web Speech fallback failed:", error);
-    } finally {
-      stopAudioAnalysis();
-      setIsSpeaking(false);
-    }
-  }, [startSimulatedAudioLevel, stopAudioAnalysis]);
+  const speakWithFallback = useCallback(
+    async (cleanText: string) => {
+      console.log("[TTS] Starting Web Speech fallback...");
+      startSimulatedAudioLevel();
+      try {
+        await textToSpeechFallback(cleanText);
+        console.log("[TTS] Web Speech fallback completed");
+      } catch (error) {
+        console.warn("[TTS] Web Speech fallback failed:", error);
+      } finally {
+        stopAudioAnalysis();
+        setIsSpeaking(false);
+      }
+    },
+    [startSimulatedAudioLevel, stopAudioAnalysis],
+  );
 
   // TTS playback function using Groq Orpheus API with Web Speech fallback
   const speakText = useCallback(
@@ -745,7 +750,11 @@ export const GroqAssistant: React.FC = () => {
           <div className="bg-gradient-to-r from-rockship-900 to-rockship-800 p-4 flex justify-between items-center border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 flex-shrink-0">
-                <AISphereButton size={40} isSpeaking={isSpeaking} audioLevel={audioLevel} />
+                <AISphereButton
+                  size={40}
+                  isSpeaking={isSpeaking}
+                  audioLevel={audioLevel}
+                />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -1022,7 +1031,7 @@ export const GroqAssistant: React.FC = () => {
               : "opacity-0 translate-y-4 scale-90 pointer-events-none"
           }`}
         >
-          <AISphereButton onClick={toggleOpen} size={60} />
+          <AISphereButton onClick={toggleOpen} size={84} />
         </div>
       )}
     </div>

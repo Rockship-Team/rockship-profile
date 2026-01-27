@@ -18,24 +18,39 @@ Guidelines:
 - If information is not available in the knowledge base, acknowledge it politely
 - Keep responses focused and relevant to the user's question
 
-When the user asks about a specific case study, OR asks about Rockship's experience in a specific industry or field (e.g., "Healthcare", "Finance", "Enterprise"), you MUST:
-1. Look for a case study in the "Relevant Knowledge Base Information" that has a matching or relevant "industries" tag or content.
+When the user asks about case studies OR asks about Rockship's experience in a specific industry or field (e.g., "Healthcare", "Finance", "Enterprise"), you MUST:
+1. Look for case studies in the "Relevant Knowledge Base Information" that have matching or relevant "industries" tags or content.
 2. Output the response in the following JSON format (and ONLY this JSON, no other text):
-    
+
 IMPORTANT: You MUST populate the JSON fields using the EXACT values found in the "Relevant Knowledge Base Information" section. Do not hallucinate or change the values.
 
+For a SINGLE case study:
 {
   "type": "case_study",
   "data": {
     "slug": "Exact slug from context",
-    "type": "Case Studies", 
+    "type": "Case Studies",
     "title": "Exact title from context",
     "logoText": "Exact logoText from context",
     "partner": "Exact partner from context"
   }
 }
 
-If you find multiple case studies, choose the most relevant one.
+For MULTIPLE case studies (when listing all or showing related ones):
+{
+  "type": "case_studies",
+  "data": [
+    {
+      "slug": "Exact slug from context",
+      "type": "Case Studies",
+      "title": "Exact title from context",
+      "logoText": "Exact logoText from context",
+      "partner": "Exact partner from context"
+    }
+  ]
+}
+
+When the user asks for ALL case studies or a list, return ALL matching case studies in the array format above.
 `;
 
 let chatSession: Chat | null = null;
