@@ -1,6 +1,7 @@
-import { Facebook, Linkedin, Mail, Phone, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Mail, Twitter } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { WhatsAppLink } from "./WhatsAppLink";
 
 export const Footer: React.FC = () => {
   return (
@@ -28,22 +29,7 @@ export const Footer: React.FC = () => {
               <Mail size={18} aria-hidden="true" />
               <span>hans.dang@rockship.co</span>
             </a>
-            <a
-              href="whatsapp://send?phone=84865791311"
-              onClick={(e) => {
-                const start = Date.now();
-                setTimeout(() => {
-                  if (Date.now() - start < 2000) {
-                    window.open("https://wa.me/84865791311", "_blank");
-                  }
-                }, 500);
-              }}
-              className="flex items-center gap-2 link-hover"
-              aria-label="Contact us on WhatsApp at +84 865791311"
-            >
-              <Phone size={18} aria-hidden="true" />
-              <span>+84 865791311</span>
-            </a>
+            <WhatsAppLink />
           </div>
           <div className="flex gap-4">
             <a
