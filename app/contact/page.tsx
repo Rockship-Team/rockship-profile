@@ -102,7 +102,7 @@ export default function ContactPage() {
                     Email Us
                   </p>
                   <p className="text-lg font-medium group-hover:text-rockship-accent transition-colors">
-                    ngoc@rockship.co
+                    hans.dang@rockship.co
                   </p>
                 </div>
               </div>

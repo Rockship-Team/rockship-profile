@@ -266,39 +266,57 @@ export async function searchPosts(query: string): Promise<BlogPost[]> {
 
 /**
  * Get posts by tag slug
- * Uses single query with joins to avoid N+1 problem
+ * Uses two-step query: first get tag_id, then get posts with that tag
  */
 export async function getPostsByTag(tagSlug: string): Promise<BlogPost[]> {
   const supabase = await createServerClient()
 
-  // Single query with nested joins - posts -> post_tags -> tags -> filter by tag slug
-  const { data: posts, error } = await supabase
-    .from("blog_post_tags")
-    .select(`
-      post_id,
-      blog_posts (
-        *,
-        blog_post_tags (
-          blog_tags (
-            slug
-          )
-        )
-      )
-    `)
-    .eq("blog_tags.slug", tagSlug)
-    .eq("blog_posts.is_published", true)
+  // Step 1: Get the tag ID from slug
+  const { data: tag, error: tagError } = await supabase
+    .from("blog_tags")
+    .select("id")
+    .eq("slug", tagSlug)
+    .single()
 
-  if (error || !posts) {
+  if (tagError || !tag) {
+    console.error("Tag not found:", tagSlug)
     return []
   }
 
-  // Extract posts from the join result
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const blogPosts = posts
-    .map((pt: any) => pt.blog_posts)
-    .filter((post): post is any => post != null)
+  // Step 2: Get post IDs that have this tag
+  const { data: postTags, error: postTagsError } = await supabase
+    .from("blog_post_tags")
+    .select("post_id")
+    .eq("tag_id", tag.id)
 
-  return blogPosts.map((post) => {
+  if (postTagsError || !postTags || postTags.length === 0) {
+    return []
+  }
+
+  const postIds = postTags.map((pt) => pt.post_id)
+
+  // Step 3: Get the posts with all their tags
+  const { data: posts, error: postsError } = await supabase
+    .from("blog_posts")
+    .select(`
+      *,
+      blog_post_tags (
+        blog_tags (
+          slug
+        )
+      )
+    `)
+    .in("id", postIds)
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+
+  if (postsError || !posts) {
+    console.error("Error fetching posts by tag:", postsError)
+    return []
+  }
+
+  return posts.map((post) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tags = post.blog_post_tags
       ?.map((t: any) => t.blog_tags?.slug)
       .filter((slug: unknown): slug is string => typeof slug === "string") || []

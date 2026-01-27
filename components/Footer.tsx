@@ -1,4 +1,4 @@
-import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
+import { Facebook, Linkedin, Mail, Phone, Twitter } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -21,22 +21,28 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex flex-col gap-3 mb-6">
             <a
-              href="mailto:ngoc@rockship.co"
+              href="mailto:hans.dang@rockship.co"
               className="flex items-center gap-2 link-hover"
-              aria-label="Email us at ngoc@rockship.co"
+              aria-label="Email us at hans.dang@rockship.co"
             >
               <Mail size={18} aria-hidden="true" />
-              <span>ngoc@rockship.co</span>
+              <span>hans.dang@rockship.co</span>
             </a>
             <a
-              href="https://wa.me/6584298483"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="whatsapp://send?phone=84865791311"
+              onClick={(e) => {
+                const start = Date.now();
+                setTimeout(() => {
+                  if (Date.now() - start < 2000) {
+                    window.open("https://wa.me/84865791311", "_blank");
+                  }
+                }, 500);
+              }}
               className="flex items-center gap-2 link-hover"
-              aria-label="Call us at +65 8429 8483"
+              aria-label="Contact us on WhatsApp at +84 865791311"
             >
               <Phone size={18} aria-hidden="true" />
-              <span>+65 8429 8483</span>
+              <span>+84 865791311</span>
             </a>
           </div>
           <div className="flex gap-4">
@@ -57,6 +63,15 @@ export const Footer: React.FC = () => {
               aria-label="Visit our LinkedIn page"
             >
               <Linkedin size={20} aria-hidden="true" />
+            </a>
+            <a
+              href="https://x.com/RockshipCo"
+              className="link-hover"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our X (Twitter) page"
+            >
+              <Twitter size={20} aria-hidden="true" />
             </a>
           </div>
         </div>
