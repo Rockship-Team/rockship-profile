@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -12,11 +11,17 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { handleAnchorClick } = useSmoothScroll();
-  const { isEnabled, isInitialized } = useFeatureFlag();
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     // Add passive option for better scroll performance
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -55,14 +60,6 @@ export const Navbar: React.FC = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
-            // Hide Blog link if feature flag is not enabled (only check after initialized)
-            if (link.label === "Blog" && isInitialized && !isEnabled("blog")) {
-              return null;
-            }
-            // Also hide Blog during initialization to prevent flash
-            if (link.label === "Blog" && !isInitialized) {
-              return null;
-            }
             return "isExternal" in link && link.isExternal ? (
               <Link
                 key={link.label}
@@ -96,8 +93,10 @@ export const Navbar: React.FC = () => {
         <button
           className="md:hidden text-white"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
         >
-          {mobileMenuOpen ? <X /> : <Menu />}
+          {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
       </div>
 
@@ -112,10 +111,6 @@ export const Navbar: React.FC = () => {
             className="md:hidden absolute top-full left-0 right-0 bg-rockship-900/95 backdrop-blur-xl border-b border-white/10 p-6 flex flex-col gap-4 shadow-2xl"
           >
             {navLinks.map((link, index) => {
-              // Hide Blog link if feature flag is not enabled
-              if (link.label === "Blog" && (!isInitialized || !isEnabled("blog"))) {
-                return null;
-              }
               return "isExternal" in link && link.isExternal ? (
                 <motion.div
                   key={link.label}

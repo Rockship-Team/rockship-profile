@@ -87,6 +87,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
               className="w-full h-auto max-h-[85vh] rounded-lg shadow-2xl object-contain"
               controls
               autoPlay
+              preload="none"
               aria-label="Rockship AI overview video"
             />
           </motion.div>

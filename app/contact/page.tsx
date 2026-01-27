@@ -102,7 +102,7 @@ export default function ContactPage() {
                     Email Us
                   </p>
                   <p className="text-lg font-medium group-hover:text-rockship-accent transition-colors">
-                    ngoc@rockship.co
+                    hans.dang@rockship.co
                   </p>
                 </div>
               </div>
@@ -154,10 +154,12 @@ export default function ContactPage() {
                     <input
                       type="text"
                       id="firstName"
+                      name="firstName"
+                      autoComplete="given-name"
                       value={formData.firstName}
                       onChange={handleChange}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent transition"
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent transition"
                       placeholder="John"
                     />
                   </div>
@@ -171,10 +173,12 @@ export default function ContactPage() {
                     <input
                       type="text"
                       id="lastName"
+                      name="lastName"
+                      autoComplete="family-name"
                       value={formData.lastName}
                       onChange={handleChange}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent transition"
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent transition"
                       placeholder="Doe"
                     />
                   </div>
@@ -190,10 +194,13 @@ export default function ContactPage() {
                   <input
                     type="email"
                     id="email"
+                    name="email"
+                    autoComplete="email"
+                    spellCheck="false"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent transition"
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent transition"
                     placeholder="john@company.com"
                   />
                 </div>
@@ -207,11 +214,12 @@ export default function ContactPage() {
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     rows={4}
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent transition resize-none"
+                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-rockship-accent focus:ring-1 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent transition resize-none"
                     placeholder="Tell us about your goals and technical requirements..."
                   ></textarea>
                 </div>

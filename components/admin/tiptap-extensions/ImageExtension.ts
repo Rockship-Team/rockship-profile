@@ -50,9 +50,6 @@ export const ImageExtension = Node.create<ImageOptions>({
           const img = element.querySelector("img")
           return img?.getAttribute("src") || null
         },
-        renderHTML: (attributes: Record<string, unknown>) => {
-          return {} // src is rendered on the img element, not figure
-        },
       },
       alt: {
         default: null,
@@ -60,9 +57,7 @@ export const ImageExtension = Node.create<ImageOptions>({
           const img = element.querySelector("img")
           return img?.getAttribute("alt") || null
         },
-        renderHTML: (attributes: Record<string, unknown>) => {
-          return {} // alt is rendered on the img element, not figure
-        },
+        // Don't define renderHTML - handled at node level
       },
       caption: {
         default: "",
@@ -70,18 +65,13 @@ export const ImageExtension = Node.create<ImageOptions>({
           const figcaption = element.querySelector("figcaption")
           return figcaption?.textContent || ""
         },
-        renderHTML: (attributes: Record<string, unknown>) => {
-          return {} // caption is rendered as figcaption element
-        },
+        // Don't define renderHTML - handled at node level
       },
       alignment: {
         default: "center" as ImageAlignment,
         parseHTML: (element: HTMLElement) => {
           return element.getAttribute("data-alignment") || "center"
         },
-        renderHTML: (attributes: Record<string, unknown>) => ({
-          "data-alignment": attributes.alignment,
-        }),
       },
       width: {
         default: null,
@@ -90,9 +80,7 @@ export const ImageExtension = Node.create<ImageOptions>({
           const width = img?.getAttribute("width")
           return width ? parseInt(width) : null
         },
-        renderHTML: (attributes: Record<string, unknown>) => {
-          return {} // width is rendered on the img element, not figure
-        },
+        // Don't define renderHTML - handled at node level
       },
     }
   },

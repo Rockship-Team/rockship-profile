@@ -252,14 +252,16 @@ export const GeminiAssistant: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Ask about our AI..."
-              className="flex-1 bg-rockship-800 border-none rounded-xl px-4 py-2 text-sm text-white focus:ring-2 focus:ring-rockship-accent outline-none"
+              aria-label="Type your message"
+              className="flex-1 bg-rockship-800 border-none rounded-xl px-4 py-2 text-sm text-white focus:ring-2 focus:ring-rockship-accent focus-visible:ring-2 focus-visible:ring-rockship-accent outline-none"
             />
             <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
+              aria-label="Send message"
               className="bg-rockship-accent hover:bg-cyan-300 text-rockship-900 p-2 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Send size={18} />
+              <Send size={18} aria-hidden="true" />
             </button>
           </div>
         </div>

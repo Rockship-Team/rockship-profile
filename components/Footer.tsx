@@ -1,4 +1,4 @@
-import { Facebook, Linkedin, Mail, Phone } from "lucide-react";
+import { Facebook, Linkedin, Mail, Phone, Twitter } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -13,6 +13,7 @@ export const Footer: React.FC = () => {
               alt="Rockship"
               width={150}
               height={150}
+              loading="lazy"
             />
           </div>
           <p className="max-w-xs mb-6">
@@ -20,19 +21,28 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex flex-col gap-3 mb-6">
             <a
-              href="mailto:ngoc@rockship.co"
+              href="mailto:hans.dang@rockship.co"
               className="flex items-center gap-2 link-hover"
+              aria-label="Email us at hans.dang@rockship.co"
             >
-              <Mail size={18} />
-              <span>ngoc@rockship.co</span>
+              <Mail size={18} aria-hidden="true" />
+              <span>hans.dang@rockship.co</span>
             </a>
             <a
-              href="https://wa.me/6584298483"
-              target="_blank"
+              href="whatsapp://send?phone=84865791311"
+              onClick={(e) => {
+                const start = Date.now();
+                setTimeout(() => {
+                  if (Date.now() - start < 2000) {
+                    window.open("https://wa.me/84865791311", "_blank");
+                  }
+                }, 500);
+              }}
               className="flex items-center gap-2 link-hover"
+              aria-label="Contact us on WhatsApp at +84 865791311"
             >
-              <Phone size={18} />
-              <span>+65 8429 8483</span>
+              <Phone size={18} aria-hidden="true" />
+              <span>+84 865791311</span>
             </a>
           </div>
           <div className="flex gap-4">
@@ -40,15 +50,28 @@ export const Footer: React.FC = () => {
               href="https://www.facebook.com/rockship.co/"
               className="link-hover"
               target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our Facebook page"
             >
-              <Facebook size={20} />
+              <Facebook size={20} aria-hidden="true" />
             </a>
             <a
               href="https://www.linkedin.com/company/rockship"
               className="link-hover"
               target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our LinkedIn page"
             >
-              <Linkedin size={20} />
+              <Linkedin size={20} aria-hidden="true" />
+            </a>
+            <a
+              href="https://x.com/RockshipCo"
+              className="link-hover"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit our X (Twitter) page"
+            >
+              <Twitter size={20} aria-hidden="true" />
             </a>
           </div>
         </div>
