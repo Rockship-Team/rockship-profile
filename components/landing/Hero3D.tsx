@@ -54,7 +54,9 @@ const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
 // Detect device capabilities and viewport
 // Only use screen width to determine mobile vs desktop
 const usePerformanceConfig = (): PerformanceConfig => {
-  const [config, setConfig] = useState<PerformanceConfig>(QUALITY_SETTINGS.high);
+  const [config, setConfig] = useState<PerformanceConfig>(
+    QUALITY_SETTINGS.high,
+  );
   const [quality, setQuality] = useState<QualityLevel>("high");
 
   React.useEffect(() => {
@@ -339,281 +341,314 @@ const NeuralNetwork = ({
   );
 };
 
-// --- AI Core Sphere Object (Refined Liquid Blob) ---
-const AISphere = ({ config }: { config: PerformanceConfig }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHover] = useState(false);
-  const { viewport } = useThree();
+const SmokeSystem = () => {
+  const { scene } = useThree();
+  const maxParticles = 500;
+  const meshRef = useRef<THREE.InstancedMesh>(null);
 
-  const isMobile = config.level === "low";
-  const isDesktop = viewport.width > 8;
+  // Particle state
+  const particleData = useRef(
+    Array.from({ length: maxParticles }, () => ({
+      position: new THREE.Vector3(),
+      velocity: new THREE.Vector3(),
+      life: 0,
+      maxLife: 1,
+      scale: 1,
+      rotation: Math.random() * Math.PI,
+    })),
+  );
 
-  // Mobile: center position, moderate scale
-  const positionX = isDesktop ? 3.5 : 0;
-  const positionY = isDesktop ? 0 : (isMobile ? -1.5 : -2.5);
-  const scale = isMobile ? 0.55 : (isDesktop ? 1 : 0.55); // Larger on mobile for visibility
+  const nextIdx = useRef(0);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  // Dynamic sphere segments based on quality setting
-  const sphereSegments = config.sphereSegments;
+  useEffect(() => {
+    // Attach spawn function to scene for RocketLogic to use
+    (scene as any).spawnParticle = (
+      pos: THREE.Vector3,
+      dir: THREE.Vector3,
+      scale: number,
+    ) => {
+      const idx = nextIdx.current;
+      const data = particleData.current[idx];
 
-  // Sphere radius
-  const sphereRadius = isMobile ? 2.2 : 2.5;
+      // Spawn at position
+      data.position.copy(pos);
 
-  const shaderMaterial = useMemo(() => {
-    // Ultra-optimized shader for mobile - minimal calculations
-    if (config.level === "low") {
-      return new THREE.ShaderMaterial({
-        uniforms: {
-          colorLeft: { value: new THREE.Color("#d8b4fe") },
-          colorRight: { value: new THREE.Color("#67e8f9") },
-          time: { value: 0 },
-          // Keep these for compatibility with useFrame (not used in shader)
-          hoverStrength: { value: 0 },
-          mousePos: { value: new THREE.Vector2(0, 0) },
-        },
-        vertexShader: `
-          varying vec3 vNormal;
-          uniform float time;
+      // Velocity: Direction + Random spread
+      data.velocity.copy(dir).multiplyScalar(2 + Math.random() * 1.5);
+      data.velocity.x += (Math.random() - 0.5) * 0.5;
+      data.velocity.y += (Math.random() - 0.5) * 0.5;
+      data.velocity.z += (Math.random() - 0.5) * 0.5;
 
-          void main() {
-            vNormal = normalize(normalMatrix * normal);
+      data.life = 0.8 + Math.random() * 0.4; // Random life ~1s
+      data.maxLife = data.life;
+      data.scale = scale;
+      data.rotation = Math.random() * Math.PI * 2;
 
-            // Ultra simple displacement - single sine wave
-            float displacement = sin(position.y * 2.5 + time * 0.3) * 0.1;
-
-            vec3 newPos = position + normal * displacement;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
-          }
-        `,
-        fragmentShader: `
-          uniform vec3 colorLeft;
-          uniform vec3 colorRight;
-          varying vec3 vNormal;
-
-          void main() {
-            // Simple gradient - no complex calculations
-            float mixFactor = vNormal.x * 0.5 + 0.5;
-            vec3 color = mix(colorLeft, colorRight, mixFactor);
-            gl_FragColor = vec4(color, 1.0);
-          }
-        `,
-      });
-    }
-
-    // High quality shader with noise
-    return new THREE.ShaderMaterial({
-      uniforms: {
-        colorLeft: { value: new THREE.Color("#d8b4fe") },
-        colorRight: { value: new THREE.Color("#67e8f9") },
-        time: { value: 0 },
-        hoverStrength: { value: 0 },
-        mousePos: { value: new THREE.Vector2(0, 0) },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        uniform float time;
-        uniform float hoverStrength;
-        uniform vec2 mousePos;
-
-        // Simplex Noise
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-        float snoise(vec3 v) {
-          const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-          const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-          vec3 i  = floor(v + dot(v, C.yyy) );
-          vec3 x0 = v - i + dot(i, C.xxx) ;
-          vec3 g = step(x0.yzx, x0.xyz);
-          vec3 l = 1.0 - g;
-          vec3 i1 = min( g.xyz, l.zxy );
-          vec3 i2 = max( g.xyz, l.zxy );
-          vec3 x1 = x0 - i1 + C.xxx;
-          vec3 x2 = x0 - i2 + C.yyy;
-          vec3 x3 = x0 - D.yyy;
-          i = mod289(i);
-          vec4 p = permute( permute( permute(
-                     i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                   + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                   + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-          float n_ = 0.142857142857;
-          vec3  ns = n_ * D.wyz - D.xzx;
-          vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-          vec4 x_ = floor(j * ns.z);
-          vec4 y_ = floor(j - 7.0 * x_ );
-          vec4 x = x_ *ns.x + ns.yyyy;
-          vec4 y = y_ *ns.x + ns.yyyy;
-          vec4 h = 1.0 - abs(x) - abs(y);
-          vec4 b0 = vec4( x.xy, y.xy );
-          vec4 b1 = vec4( x.zw, y.zw );
-          vec4 s0 = floor(b0)*2.0 + 1.0;
-          vec4 s1 = floor(b1)*2.0 + 1.0;
-          vec4 sh = -step(h, vec4(0.0));
-          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-          vec3 p0 = vec3(a0.xy,h.x);
-          vec3 p1 = vec3(a0.zw,h.y);
-          vec3 p2 = vec3(a1.xy,h.z);
-          vec3 p3 = vec3(a1.zw,h.w);
-          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-          p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-          m = m * m;
-          return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
-        }
-
-        void main() {
-          vUv = uv;
-          vNormal = normalize(normalMatrix * normal);
-          
-          // Zero-Gravity Liquid movement logic
-          float slowTime = time * 0.15;
-          float flowTime = time * 0.4;
-          
-          // Layer 1: Large-scale global morphing (The "body" moving)
-          float baseNoise = snoise(position * 0.15 + vec3(slowTime));
-          
-          // Layer 2: Medium-scale billowy undulations (Zero-G "blobs")
-          float blobNoise = snoise(position * 0.45 + vec3(flowTime + baseNoise * 0.5));
-          
-          // Layer 3: Subtle surface tension ripples
-          float surfaceNoise = snoise(position * 0.8 + vec3(flowTime * 1.5));
-          
-          // Combine layers for a complex, non-repeating organic feel
-          float liquidBase = baseNoise * 0.6 + blobNoise * 0.3;
-          float liquidRipples = surfaceNoise * 0.15;
-          
-          // Displacement calculation
-          // The base movement is always thick and viscous
-          float displacement = liquidBase;
-          
-          // Hovering intensifies the surface tension and adds a bit of "energy"
-          displacement += (liquidRipples + blobNoise * 0.2) * hoverStrength;
-          
-          // Subtly expand and soften the core on hover
-          displacement += hoverStrength * 0.12;
-          
-          vec3 newPos = position + normal * displacement;
-          vPosition = newPos;
-          
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 colorLeft;
-        uniform vec3 colorRight;
-        uniform float time;
-        uniform float hoverStrength;
-        varying vec2 vUv;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-
-        void main() {
-          float mixFactor = smoothstep(-0.8, 0.8, vNormal.x);
-          vec3 baseColor = mix(colorLeft, colorRight, mixFactor);
-          
-          vec3 viewDir = vec3(0.0, 0.0, 1.0);
-          float facingRatio = dot(vNormal, viewDir);
-          
-          // Deep, soft glowing center (Viscous feel)
-          float centerGlow = smoothstep(0.3, 1.0, facingRatio);
-          
-          // Soften the color transitions on hover
-          float hoverGlow = hoverStrength * 0.12;
-          vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), (centerGlow + hoverGlow) * 0.8);
-          
-          finalColor *= (1.05 + hoverStrength * 0.08); // Very subtle brightness boost
-
-          gl_FragColor = vec4(finalColor, 1.0);
-        }
-      `,
-    });
-  }, [config.level]);
-
-  // Dispose material on unmount to prevent GPU memory leak
-  React.useEffect(() => {
-    return () => {
-      shaderMaterial.dispose();
+      nextIdx.current = (nextIdx.current + 1) % maxParticles;
     };
-  }, [shaderMaterial]);
 
-  const rotationTimeRef = useRef(0);
+    return () => {
+      delete (scene as any).spawnParticle;
+    };
+  }, [scene]);
 
-  // Reusable vector to avoid garbage collection churn in useFrame
-  const anchorVec = useMemo(() => new THREE.Vector3(), []);
+  useFrame((_state, delta) => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
-  useFrame((state, delta) => {
-    if (!meshRef.current) return;
-    const time = state.clock.elapsedTime;
-    const { pointer } = state;
-
-    // Cap delta to prevent spinning glitch on tab switch
+    // safe delta
     const dt = Math.min(delta, 0.1);
-    rotationTimeRef.current += dt;
 
-    // Movement intensity
-    const moveIntensity = 0.5; // Sensitivity to mouse movement
-    const floatIntensity = 0.15; // Vertical floating amplitude
+    particleData.current.forEach((data, i) => {
+      if (data.life > 0) {
+        data.life -= dt;
 
-    shaderMaterial.uniforms.time.value = time;
-    shaderMaterial.uniforms.mousePos.value.set(pointer.x, pointer.y);
-    shaderMaterial.uniforms.hoverStrength.value = THREE.MathUtils.lerp(
-      shaderMaterial.uniforms.hoverStrength.value,
-      hovered ? 1.0 : 0.0,
-      0.1,
-    );
+        // Move
+        data.position.addScaledVector(data.velocity, dt);
 
-    // Calculate proximity to the object's base position to limit influence
-    // Use reusable vector and reset it every frame
-    anchorVec.set(positionX, positionY, 0);
-    anchorVec.project(state.camera); // Project world position to NDC
+        // Drag (slow down)
+        data.velocity.multiplyScalar(0.95);
 
-    const dist = Math.hypot(pointer.x - anchorVec.x, pointer.y - anchorVec.y);
-    const proximity = 1.0 - THREE.MathUtils.smoothstep(0.0, 0.8, dist); // Radius approx 0.8 NDC
+        // Scale Effect: Grow -> Fade/Shrink
+        const lifeRatio = 1 - data.life / data.maxLife;
+        // Start small, grow fast, then stay big/fade
+        const currentScale = data.scale * (0.5 + lifeRatio * 2.0);
 
-    // Calculate target position combining base position, floating, and mouse sway
-    // Apply proximity factor so it only moves when mouse is near
-    const targetX = positionX + pointer.x * 2 * moveIntensity * proximity; // Move on X axis
-    const targetY =
-      positionY +
-      Math.sin(time * 0.4) * floatIntensity +
-      pointer.y * 1.5 * moveIntensity * proximity; // Move on Y axis
+        // Opacity/Shrink fade out
+        // We simulate fade out by shrinking rapidly at the end
+        const finalScale =
+          data.life < 0.2 ? currentScale * (data.life / 0.2) : currentScale;
 
-    // Smoothly interpolate position (Flying effect)
-    meshRef.current.position.x = THREE.MathUtils.lerp(
-      meshRef.current.position.x,
-      targetX,
-      0.05,
-    );
-    meshRef.current.position.y = THREE.MathUtils.lerp(
-      meshRef.current.position.y,
-      targetY,
-      0.05,
-    );
+        dummy.position.copy(data.position);
+        dummy.scale.setScalar(Math.max(0, finalScale));
+        dummy.rotation.set(0, 0, data.rotation);
+        dummy.updateMatrix();
 
-    // Dynamic rotation dependent on mouse
-    // Base rotation + mouse influence
-    // Use manually accumulated time (rotationTimeRef) to avoid jumps
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(
-      meshRef.current.rotation.y,
-      rotationTimeRef.current * 0.15 + pointer.x * 0.5,
-      0.05,
-    );
-    meshRef.current.rotation.z = THREE.MathUtils.lerp(
-      meshRef.current.rotation.z,
-      Math.sin(time * 0.2) * 0.1 - pointer.y * 0.3,
-      0.05,
-    );
+        mesh.setMatrixAt(i, dummy.matrix);
+      } else {
+        // Hide dead particles
+        dummy.scale.setScalar(0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      }
+    });
+
+    mesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <mesh
-      ref={meshRef}
-      scale={scale}
+    <instancedMesh ref={meshRef} args={[undefined, undefined, maxParticles]}>
+      {/* Low-poly sphere (Icosahedron) for toon smoke look */}
+      <icosahedronGeometry args={[0.5, 0]} />
+      <meshBasicMaterial
+        color="#e2e8f0"
+        transparent
+        opacity={0.4}
+        depthWrite={false}
+      />
+    </instancedMesh>
+  );
+};
+
+const RocketLogic = () => {
+  const group = useRef<THREE.Group>(null);
+  const [hovered, setHover] = useState(false);
+  const { viewport } = useThree();
+
+  // Materials
+  const matBodyMain = useMemo(
+    () => new THREE.MeshToonMaterial({ color: 0xe2e8f0 }),
+    [],
+  );
+  const matBodyDark = useMemo(
+    () => new THREE.MeshToonMaterial({ color: 0x1e293b }),
+    [],
+  );
+  const matAccent = useMemo(
+    () => new THREE.MeshToonMaterial({ color: 0x6366f1 }),
+    [],
+  );
+  const matGlow = useMemo(
+    () => new THREE.MeshBasicMaterial({ color: 0x0ea5e9 }),
+    [],
+  );
+  const matEngine = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        metalness: 0.8,
+        roughness: 0.2,
+      }),
+    [],
+  );
+
+  // Geometry
+  const finShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0.8, -1.0);
+    shape.lineTo(0.8, -1.8);
+    shape.lineTo(0, -1.2);
+    return shape;
+  }, []);
+  const finExtrudeSettings = useMemo(
+    () => ({ depth: 0.05, bevelEnabled: false }),
+    [],
+  );
+
+  // Logic Constants
+  // Responsive Position: On narrow screens (< 12 width), center the rocket higher up
+  // Responsive Position: On narrow screens (< 12 width), center the rocket higher up
+  const isMobile = viewport.width < 12;
+
+  // Auto-fly Effect for Mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // Function to trigger a single flight
+    const triggerFlight = () => {
+      setHover(true);
+      // Reset hover flag shortly after ensuring flight started
+      // This prevents instant re-looping, allowing a pause
+      setTimeout(() => setHover(false), 1000);
+    };
+
+    // Start first flight after 1s delay
+    const startTimer = setTimeout(triggerFlight, 1000);
+
+    // Continue flying every 7 seconds (approx 5.5s flight + 1.5s pause)
+    const loopTimer = setInterval(triggerFlight, 7000);
+
+    return () => {
+      clearTimeout(startTimer);
+      clearInterval(loopTimer);
+    };
+  }, [isMobile]);
+
+  const HOME_POS = useMemo(
+    () =>
+      isMobile
+        ? new THREE.Vector3(2.5, -0.5, 0.5) // Moved up further as requested
+        : new THREE.Vector3(3.5, 0, 0),
+    [isMobile],
+  );
+
+  const flightPath = useMemo(() => {
+    // Mobile Path: Tighter simple loop in visible range
+    if (isMobile) {
+      const points = [
+        HOME_POS.clone(),
+        new THREE.Vector3(0, 2, 1), // Up higher
+        new THREE.Vector3(-2, 0, 0), // Mid-left
+        new THREE.Vector3(0, -2, 0), // Bottom center (higher than before)
+        new THREE.Vector3(2, -1, 1), // Rightish return
+        HOME_POS.clone(),
+      ];
+      const curve = new THREE.CatmullRomCurve3(points);
+      curve.closed = false;
+      curve.tension = 0.5;
+      return curve;
+    }
+
+    // Default Desktop Path
+    const points = [
+      HOME_POS.clone(),
+      new THREE.Vector3(1, 4, 2),
+      new THREE.Vector3(-4, 3, 5),
+      new THREE.Vector3(-8, 0, 0),
+      new THREE.Vector3(-4, -4, -4),
+      new THREE.Vector3(4, -3, -6),
+      new THREE.Vector3(7, -1, -2),
+      HOME_POS.clone(),
+    ];
+    const curve = new THREE.CatmullRomCurve3(points);
+    curve.closed = false;
+    curve.tension = 0.5;
+    return curve;
+  }, [HOME_POS, isMobile]);
+
+  // State Refs
+  const state = useRef({
+    isFlying: false,
+    progress: 0,
+    time: 0,
+  });
+
+  useFrame((r3fState) => {
+    if (!group.current) return;
+    const { clock, scene } = r3fState;
+    const delta = 0.02; // Fixed step approximation from original code
+    state.current.time += delta;
+
+    // Logic: If hovered and not already flying, start flight
+    if (hovered && !state.current.isFlying) {
+      state.current.isFlying = true;
+      state.current.progress = 0;
+    }
+
+    const { isFlying, progress, time } = state.current;
+
+    // Spawn Helper
+    const spawn = (scene as any).spawnParticle;
+
+    if (isFlying) {
+      state.current.progress += 0.003; // Flight speed
+      if (state.current.progress > 1) {
+        state.current.progress = 1;
+        state.current.isFlying = false;
+        group.current.position.copy(HOME_POS);
+        group.current.rotation.set(0, 0, Math.PI / 6);
+      } else {
+        const currentPos = flightPath.getPointAt(state.current.progress);
+        const nextPos = flightPath.getPointAt(
+          Math.min(state.current.progress + 0.01, 1),
+        );
+
+        group.current.position.copy(currentPos);
+        group.current.lookAt(nextPos);
+        group.current.rotateX(Math.PI / 2);
+
+        // Banking
+        const turnFactor = (currentPos.x - nextPos.x) * 0.8;
+        group.current.rotateZ(turnFactor);
+
+        // Exhaust
+        if (spawn) {
+          const enginePos = new THREE.Vector3(0, -2.0, 0);
+          enginePos.applyMatrix4(group.current.matrixWorld);
+          const thrust = new THREE.Vector3(0, -1, 0).applyQuaternion(
+            group.current.quaternion,
+          );
+          for (let k = 0; k < 4; k++) spawn(enginePos, thrust, 0.4);
+        }
+      }
+    } else {
+      // Idle
+      group.current.position.copy(HOME_POS);
+      group.current.position.y += Math.sin(time * 2) * 0.2;
+      group.current.rotation.set(0, 0, Math.PI / 6);
+      group.current.rotation.z += Math.sin(time * 1.5) * 0.05;
+      group.current.rotation.y += 0.005;
+
+      // Idle particles
+      if (Math.random() > 0.8 && spawn) {
+        const enginePos = new THREE.Vector3(0, -2.0, 0);
+        enginePos.applyMatrix4(group.current.matrixWorld);
+        const thrust = new THREE.Vector3(0, -1, 0).applyQuaternion(
+          group.current.quaternion,
+        );
+        spawn(enginePos, thrust, 0.1);
+      }
+    }
+  });
+
+  return (
+    <group
+      ref={group}
+      // Initial position from HOME_POS, but animation loop takes over
+      position={HOME_POS}
+      rotation={[0, 0, Math.PI / 6]}
       onPointerOver={() => {
         document.body.style.cursor = "pointer";
         setHover(true);
@@ -623,9 +658,73 @@ const AISphere = ({ config }: { config: PerformanceConfig }) => {
         setHover(false);
       }}
     >
-      <sphereGeometry args={[sphereRadius, sphereSegments, sphereSegments]} />
-      <primitive object={shaderMaterial} attach="material" />
-    </mesh>
+      {/* Hitbox */}
+      <mesh visible={false}>
+        <cylinderGeometry args={[1.5, 1.5, 5, 8]} />
+        <meshBasicMaterial />
+      </mesh>
+
+      {/* 1. Nose Cone */}
+      <mesh position={[0, 2.0, 0]} material={matAccent}>
+        <coneGeometry args={[0.5, 1.5, 32]} />
+      </mesh>
+
+      {/* 2. Main Fuselage */}
+      <mesh position={[0, 0, 0]} material={matBodyMain}>
+        <cylinderGeometry args={[0.5, 0.6, 2.5, 32]} />
+      </mesh>
+
+      {/* 3. Cockpit */}
+      <group position={[0, 0.5, 0.3]}>
+        <mesh material={matBodyDark}>
+          <boxGeometry args={[0.6, 0.8, 0.5]} />
+        </mesh>
+        <mesh position={[0, 0.1, 0.26]} material={matGlow}>
+          <boxGeometry args={[0.5, 0.3, 0.1]} />
+        </mesh>
+      </group>
+
+      {/* 4. Intakes */}
+      <mesh position={[-0.55, 0, 0]} material={matBodyDark}>
+        <capsuleGeometry args={[0.2, 1.0, 4, 8]} />
+      </mesh>
+      <mesh position={[0.55, 0, 0]} material={matBodyDark}>
+        <capsuleGeometry args={[0.2, 1.0, 4, 8]} />
+      </mesh>
+
+      {/* 5. Fins */}
+      {[0, 1, 2, 3].map((i) => (
+        <group key={i} rotation={[0, (Math.PI / 2) * i, 0]}>
+          <group position={[0, -0.2, 0.5]}>
+            <mesh material={matAccent} rotation={[0, -Math.PI / 2, 0]}>
+              <extrudeGeometry args={[finShape, finExtrudeSettings]} />
+            </mesh>
+          </group>
+        </group>
+      ))}
+
+      {/* 6. Engine Block */}
+      <mesh position={[0, -1.5, 0]} material={matBodyDark}>
+        <cylinderGeometry args={[0.6, 0.5, 0.5, 8]} />
+      </mesh>
+
+      {/* 7. Nozzle */}
+      <mesh
+        position={[0, -1.9, 0]}
+        rotation={[Math.PI, 0, 0]}
+        material={matEngine}
+      >
+        <coneGeometry args={[0.4, 0.5, 16, 1, true]} />
+      </mesh>
+
+      {/* Light */}
+      <pointLight
+        position={[0, -2.5, 0]}
+        color="#f43f5e"
+        distance={5}
+        intensity={2}
+      />
+    </group>
   );
 };
 
@@ -648,7 +747,8 @@ const SceneContent = ({ config }: { config: PerformanceConfig }) => {
       )}
 
       {/* Foreground Hero Blob - Always show */}
-      <AISphere config={config} />
+      <RocketLogic />
+      <SmokeSystem />
 
       {/* Environment - Skip Stars on mobile for performance */}
       {!isMobile && (

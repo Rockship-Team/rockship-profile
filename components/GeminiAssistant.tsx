@@ -205,6 +205,17 @@ export const GeminiAssistant: React.FC = () => {
                             );
                             try {
                               const parsed = JSON.parse(potentialJson);
+                              // Handle multiple case studies
+                              if (parsed.type === "case_studies" && Array.isArray(parsed.data)) {
+                                return (
+                                  <div className="space-y-2">
+                                    {parsed.data.map((item: { slug: string; type: string; title: string; logoText: string; partner: string }, i: number) => (
+                                      <CaseStudyCard key={item.slug || i} item={item} index={i} />
+                                    ))}
+                                  </div>
+                                );
+                              }
+                              // Handle single case study
                               if (parsed.type === "case_study" && parsed.data) {
                                 return (
                                   <CaseStudyCard item={parsed.data} index={0} />
@@ -271,10 +282,10 @@ export const GeminiAssistant: React.FC = () => {
       {isOpen ? null : (
         <button
           onClick={toggleOpen}
-          className={`group flex items-center gap-2 p-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-300 border border-white/20 ${"bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white hover:scale-110"}`}
+          className="group flex items-center gap-2 p-1 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.6)] border border-white/20 bg-gradient-to-r from-rockship-accent to-rockship-accent-secondary text-white scale-100 hover:scale-110 hover:transition-transform hover:duration-300"
           aria-label="Open AI chat"
         >
-          <Image src="/chatbot.png" alt="AI" width={50} height={50} />
+          <Image src="/chatbot.png" alt="AI" width={50} height={50} className="w-[50px] h-[50px]" />
         </button>
       )}
     </div>

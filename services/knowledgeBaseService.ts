@@ -306,8 +306,18 @@ class KnowledgeBaseService {
 
   private formatCaseStudiesInfo(data: any): string {
     const items = data.items || [];
-    // Return raw JSON so the LLM can copy the exact structure
-    return items.map((item: any) => JSON.stringify(item)).join("\n");
+    // Return only essential fields for card display
+    return items.map((item: any) => {
+      const cardData = {
+        slug: item.slug,
+        type: item.type,
+        title: item.title,
+        logoText: item.logoText,
+        partner: item.partner || "",
+        industries: item.industries,
+      };
+      return JSON.stringify(cardData);
+    }).join("\n");
   }
 
   private formatResearchInfo(data: any): string {

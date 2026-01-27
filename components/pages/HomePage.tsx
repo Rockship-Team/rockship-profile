@@ -72,10 +72,10 @@ const CareerCTA = dynamic(
 );
 
 // Dynamically import heavy components to improve initial load performance
-const GeminiAssistant = dynamic(
+const GroqAssistant = dynamic(
   () =>
-    import("../GeminiAssistant").then((mod) => ({
-      default: mod.GeminiAssistant,
+    import("../GroqAssistant").then((mod) => ({
+      default: mod.GroqAssistant,
     })),
   {
     loading: () => (
@@ -110,7 +110,7 @@ export default function HomePage() {
     preload3DModule();
   }, []);
 
-  // Delay loading GeminiAssistant on mobile for better initial performance
+  // Delay loading GroqAssistant on mobile for better initial performance
   const shouldRenderChatbot = useDelayedRender(3000);
 
   return (
@@ -131,7 +131,7 @@ export default function HomePage() {
         <CareerCTA />
       </main>
       <Footer />
-      {shouldRenderChatbot && <GeminiAssistant />}
+      {shouldRenderChatbot && <GroqAssistant />}
     </div>
   );
 }
