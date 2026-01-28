@@ -3,12 +3,16 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { FeatureFlagProvider } from "@/components/FeatureFlagProvider";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  // Only load weights actually used - reduces font file size
+  weight: ["400", "500", "700"],
   variable: "--font-dm-sans",
   display: "swap",
+  // Preload for faster font loading
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -95,6 +99,8 @@ export default function RootLayout({
         />
         {/* DNS prefetch for potential external resources */}
         <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+        {/* Preload critical above-the-fold assets */}
+        <link rel="preload" href="/rockship.svg" as="image" type="image/svg+xml" />
       </head>
       <body
         className={cn(
@@ -104,6 +110,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
+        <GoogleAnalytics />
         <FeatureFlagProvider>{children}</FeatureFlagProvider>
       </body>
     </html>

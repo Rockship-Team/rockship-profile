@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-
 export function CaseStudySidebarCTAs() {
   return (
     <>
@@ -30,27 +27,6 @@ export function CaseStudySidebarCTAs() {
         </div>
       </div>
 
-      {/* Call To Action */}
-      <div className="p-8 rounded-3xl bg-gradient-to-br from-rockship-accent to-purple-600 text-white relative overflow-hidden group shadow-2xl shadow-rockship-accent/20">
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 delay-100" />
-
-        <h3 className="text-2xl font-display font-bold mb-4 relative z-10">
-          Ready to Transform?
-        </h3>
-        <p className="text-white/90 mb-8 relative z-10 text-sm leading-relaxed">
-          Let's discuss how RockshipAI can automate your critical workflows and
-          drive efficiency similar to this case study.
-        </p>
-        <Link href="/contact" className="relative z-10 block">
-          <Button
-            variant="secondary"
-            className="w-full bg-white text-rockship-900 hover:bg-white/90 font-semibold shadow-lg h-12 text-base border-none"
-          >
-            Book a Consultation
-          </Button>
-        </Link>
-      </div>
     </>
   );
 }

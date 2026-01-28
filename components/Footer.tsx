@@ -1,12 +1,36 @@
+"use client";
+
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { Facebook, Linkedin, Mail, Twitter } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import Link from "next/link";
 import { WhatsAppLink } from "./WhatsAppLink";
 
-export const Footer: React.FC = () => {
+const SOCIAL_LINKS = [
+  { href: "https://www.facebook.com/rockship.co/", icon: Facebook, label: "Facebook" },
+  { href: "https://www.linkedin.com/company/rockship", icon: Linkedin, label: "LinkedIn" },
+  { href: "https://x.com/RockshipCo", icon: Twitter, label: "X (Twitter)" },
+] as const;
+
+const COMPANY_LINKS = [
+  { href: "#company", label: "About Us", isAnchor: true },
+  { href: "#case-studies", label: "Case Studies", isAnchor: true },
+  { href: "/contact", label: "Contact", isAnchor: false },
+] as const;
+
+const LEGAL_LINKS = [
+  { href: "#", label: "Privacy Policy" },
+  { href: "#", label: "Terms of Service" },
+  { href: "#", label: "Cookie Policy" },
+] as const;
+
+export const Footer = () => {
+  const { handleAnchorClick } = useSmoothScroll();
+
   return (
     <footer className="bg-rockship-950 pt-20 pb-10 border-t border-white/5 text-gray-400 text-sm">
       <div className="container mx-auto px-6 grid md:grid-cols-4 gap-12 mb-12">
+        {/* Brand & Contact */}
         <div className="col-span-2">
           <div className="text-2xl font-display font-bold text-white mb-4">
             <Image
@@ -31,94 +55,56 @@ export const Footer: React.FC = () => {
             </a>
             <WhatsAppLink />
           </div>
+
+          {/* Social Links */}
           <div className="flex gap-4">
-            <a
-              href="https://www.facebook.com/rockship.co/"
-              className="link-hover"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit our Facebook page"
-            >
-              <Facebook size={20} aria-hidden="true" />
-            </a>
-            <a
-              href="https://www.linkedin.com/company/rockship"
-              className="link-hover"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit our LinkedIn page"
-            >
-              <Linkedin size={20} aria-hidden="true" />
-            </a>
-            <a
-              href="https://x.com/RockshipCo"
-              className="link-hover"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit our X (Twitter) page"
-            >
-              <Twitter size={20} aria-hidden="true" />
-            </a>
+            {SOCIAL_LINKS.map(({ href, icon: Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                className="link-hover"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Visit our ${label} page`}
+              >
+                <Icon size={20} aria-hidden="true" />
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* <div>
-          <h4 className="font-bold text-white mb-4">Solutions</h4>
-          <ul className="space-y-2">
-            <li>
-              <a href="#" className="link-hover">
-                Generative AI
-              </a>
-            </li>
-            <li>
-              <a href="#" className="link-hover">
-                AI Agents & Workflow Intelligence
-              </a>
-            </li>
-            <li>
-              <a href="#" className="link-hover">
-                Computer Vision & Document AI
-              </a>
-            </li>
-          </ul>
-        </div> */}
-
+        {/* Company Links */}
         <div className="lg:ml-12">
           <h4 className="font-bold text-white mb-4">Company</h4>
           <ul className="space-y-2">
-            <li>
-              <a href="#about" className="link-hover">
-                About Us
-              </a>
-            </li>
-            <li>
-              <a href="#case-studies" className="link-hover">
-                Case Studies
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="link-hover">
-                Contact
-              </a>
-            </li>
+            {COMPANY_LINKS.map(({ href, label, isAnchor }) => (
+              <li key={label}>
+                {isAnchor ? (
+                  <a href={href} onClick={handleAnchorClick} className="link-hover">
+                    {label}
+                  </a>
+                ) : (
+                  <Link href={href} className="link-hover">
+                    {label}
+                  </Link>
+                )}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
+      {/* Footer Bottom */}
       <div className="container mx-auto px-6 border-t border-white/5 pt-8 grid md:grid-cols-4 gap-12">
         <div className="col-span-2">
-          &copy; 2025 Rockship AI. All rights reserved.
+          &copy; {new Date().getFullYear()} Rockship AI. All rights reserved.
         </div>
         <div className="col-span-2 flex md:flex-col md:flex-row gap-6 lg:gap-[13%] lg:ml-12">
-          <a href="#" className="link-hover">
-            Privacy Policy
-          </a>
-          <a href="#" className="link-hover">
-            Terms of Service
-          </a>
-          <a href="#" className="link-hover">
-            Cookie Policy
-          </a>
+          {LEGAL_LINKS.map(({ href, label }) => (
+            <a key={label} href={href} className="link-hover">
+              {label}
+            </a>
+          ))}
         </div>
       </div>
     </footer>

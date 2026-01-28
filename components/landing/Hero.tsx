@@ -7,6 +7,14 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { FadeIn, FadeInStagger } from "../FadeIn";
 
+// Static fallback background for mobile - pure CSS, no JS
+const StaticHeroBackground = () => (
+  <div className="absolute inset-0 bg-rockship-950">
+    <div className="absolute inset-0 bg-gradient-to-br from-rockship-purple/10 via-rockship-950 to-rockship-accent/10" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,_var(--color-rockship-800)_0%,_transparent_50%)] opacity-30" />
+  </div>
+);
+
 // Dynamically import heavy 3D component to improve initial load performance
 // Priority low vì đây là background decoration, không block main content
 const Hero3D = dynamic(
@@ -19,28 +27,24 @@ const Hero3D = dynamic(
       return { default: mod.Hero3D };
     }),
   {
-    loading: () => (
-      <div className="absolute inset-0 bg-rockship-950">
-        {/* Progressive loading skeleton with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rockship-purple/5 via-transparent to-rockship-accent/5 animate-pulse" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,_var(--color-rockship-800)_0%,_transparent_50%)] opacity-20" />
-      </div>
-    ),
+    loading: () => <StaticHeroBackground />,
     ssr: false,
   },
 );
 
 // Hook to detect mobile devices - skip 3D entirely on mobile for performance
-// Returns null initially until we can detect, then true/false
+// Returns null initially until hydration completes, then true/false
 const useIsMobile = (): boolean | null => {
+  // Always start with null to avoid hydration mismatch
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768 || navigator.maxTouchPoints > 0);
     };
+    // Initial check after hydration
     checkMobile();
-    window.addEventListener("resize", checkMobile);
+    window.addEventListener("resize", checkMobile, { passive: true });
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -74,8 +78,7 @@ export const Hero: React.FC = React.memo(() => {
       {/* Static background fallback - show only during initial detection */}
       {isMobile === null && (
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-rockship-purple/10 via-rockship-950 to-rockship-accent/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_50%,_var(--color-rockship-800)_0%,_transparent_50%)] opacity-30" />
+          <StaticHeroBackground />
         </div>
       )}
 
@@ -155,7 +158,7 @@ export const Hero: React.FC = React.memo(() => {
                   {heroData.title}
                 </h3>
               )}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8">
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 border-t border-white/10 pt-8">
                 {heroData.stats.map((stat, i) => {
                   const isCenter = i === 1;
                   return (
@@ -166,10 +169,10 @@ export const Hero: React.FC = React.memo(() => {
                         isCenter && "lg:ml-6",
                       )}
                     >
-                      <span className="text-2xl font-display font-bold text-white">
+                      <span className="text-lg md:text-2xl font-display font-bold text-white">
                         {stat.val}
                       </span>
-                      <span className="text-xs text-gray-500 uppercase tracking-wider">
+                      <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wider">
                         {stat.label}
                       </span>
                     </div>

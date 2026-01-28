@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
           href="/"
           className="text-2xl font-display font-bold text-white tracking-tight"
         >
-          <Image src="/rockship.svg" alt="Rockship" width={150} height={150} />
+          <Image src="/rockship.svg" alt="Rockship" width={150} height={150} priority />
           {/* <span className="text-white lowercase font-medium tracking-tighter">
             rockship
           </span> */}
@@ -150,10 +150,12 @@ export const Navbar: React.FC = () => {
             >
               <Link
                 href="/contact"
-                className="w-full block text-center py-3 bg-rockship-accent text-rockship-900 font-bold rounded-lg mt-2 btn-hover"
+                className="animated-border-btn group relative inline-flex items-center justify-center rounded-xl w-full transition-all duration-300"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Start an AI Pilot
+                <span className="px-5 py-3 text-white font-bold flex items-center justify-center w-full">
+                  Start an AI Pilot
+                </span>
               </Link>
             </motion.div>
           </motion.div>

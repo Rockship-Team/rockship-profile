@@ -742,7 +742,7 @@ export const GroqAssistant: React.FC = () => {
   ]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-4 right-2 md:bottom-6 md:right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
         <div className="mb-4 w-80 md:w-96 h-[500px] glass-panel rounded-2xl flex flex-col shadow-2xl border border-rockship-accent/30 overflow-hidden animate-fade-in-up">
@@ -1034,12 +1034,12 @@ export const GroqAssistant: React.FC = () => {
           }`}
         >
           {/* Badge */}
-          <div className="mb-2 bg-white text-rockship-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce border border-rockship-accent/30 whitespace-nowrap">
+          <div className="mb-1 md:mb-2 mr-1 md:mr-0 bg-white text-rockship-900 px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold shadow-lg animate-bounce-sync border border-rockship-accent/30 whitespace-nowrap">
             Need help?
           </div>
           <button
             onClick={toggleOpen}
-            className="relative w-24 h-24 rounded-full  overflow-hidden hover:scale-110 transition-transform active:scale-95 bg-transparent group"
+            className="relative w-14 h-14 md:w-24 md:h-24 mr-1 md:mr-0 rounded-full overflow-hidden hover:scale-110 transition-transform active:scale-95 bg-transparent group animate-bounce-gentle"
           >
             <Image
               src="/captain_chatbot_no_bg.png"
@@ -1048,6 +1048,24 @@ export const GroqAssistant: React.FC = () => {
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
           </button>
+          {/* Synced bounce animations */}
+          <style>{`
+            @keyframes bounce-sync {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-8px); }
+            }
+            @keyframes bounce-gentle {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-4px); }
+            }
+            .animate-bounce-sync {
+              animation: bounce-sync 1.5s ease-in-out infinite;
+            }
+            .animate-bounce-gentle {
+              animation: bounce-gentle 1.5s ease-in-out infinite;
+              animation-delay: 0.1s;
+            }
+          `}</style>
         </div>
       )}
     </div>

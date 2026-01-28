@@ -19,33 +19,33 @@ interface PerformanceConfig {
 }
 
 const QUALITY_SETTINGS: Record<QualityLevel, PerformanceConfig> = {
-  // Mobile - heavily optimized for phone GPUs
+  // Mobile - heavily optimized for phone GPUs but still show rocket
   low: {
     level: "low",
-    sphereSegments: 16, // Very low poly for mobile
-    neuralCount: 0, // Disabled on mobile
+    sphereSegments: 12, // Ultra low poly for mobile
+    neuralCount: 0, // Disabled on mobile - biggest performance hit
     connectionDistance: 0,
     starCount: 0, // Disabled on mobile
-    pixelRatioCap: 1.0, // Strict 1x scale
-    frameThrottle: 3, // Aggressive throttling (~20fps)
+    pixelRatioCap: 1.0, // Strict 1x scale - huge performance gain
+    frameThrottle: 2, // ~30fps target for smooth but efficient
   },
   // Tablet / low-end desktop
   medium: {
     level: "medium",
-    sphereSegments: 48,
-    neuralCount: 35,
-    connectionDistance: 6.0,
-    starCount: 500,
+    sphereSegments: 32,
+    neuralCount: 20, // Reduced for tablet
+    connectionDistance: 5.0,
+    starCount: 300, // Reduced star count
     pixelRatioCap: 1.5,
     frameThrottle: 1,
   },
   // Desktop - full quality
   high: {
     level: "high",
-    sphereSegments: 64,
-    neuralCount: 60,
-    connectionDistance: 8.0,
-    starCount: 1200,
+    sphereSegments: 48, // Slightly reduced from 64
+    neuralCount: 45, // Reduced from 60
+    connectionDistance: 7.0,
+    starCount: 800, // Reduced from 1200
     pixelRatioCap: 2,
     frameThrottle: 1,
   },
@@ -276,10 +276,10 @@ const NeuralNetwork = ({
     if (!containerRef.current || !group1Ref.current || !group2Ref.current)
       return;
 
-    // Frame throttling for mobile
+    // Frame throttling for mobile - more aggressive
     frameCountRef.current += 1;
     const isMobile = window.innerWidth < 768;
-    const throttleAmount = isMobile ? 2 : 1;
+    const throttleAmount = isMobile ? 3 : 1; // Skip more frames on mobile
 
     if (frameCountRef.current % throttleAmount !== 0) {
       return; // Skip frame for throttling
@@ -341,9 +341,10 @@ const NeuralNetwork = ({
   );
 };
 
-const SmokeSystem = () => {
+const SmokeSystem = ({ isMobile = false }: { isMobile?: boolean }) => {
   const { scene } = useThree();
-  const maxParticles = 500;
+  // Reduce particles on mobile for better performance
+  const maxParticles = isMobile ? 150 : 500;
   const meshRef = useRef<THREE.InstancedMesh>(null);
 
   // Particle state
@@ -465,8 +466,69 @@ const RocketLogic = () => {
     () => new THREE.MeshToonMaterial({ color: 0x1e293b }),
     [],
   );
+  // Animated gradient material matching text gradient (#6366f1 → #0ea5e9 → #a855f7)
   const matAccent = useMemo(
-    () => new THREE.MeshToonMaterial({ color: 0x6366f1 }),
+    () =>
+      new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: { value: 0 },
+          uColor1: { value: new THREE.Color("#6366f1") }, // Indigo
+          uColor2: { value: new THREE.Color("#0ea5e9") }, // Cyan
+          uColor3: { value: new THREE.Color("#a855f7") }, // Purple
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          varying vec3 vWorldPosition;
+          void main() {
+            vUv = uv;
+            vPosition = position;
+            vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform float uTime;
+          uniform vec3 uColor1;
+          uniform vec3 uColor2;
+          uniform vec3 uColor3;
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          varying vec3 vWorldPosition;
+
+          void main() {
+            // Animation speed matching CSS (4s cycle = 1.57 rad/s)
+            float timeScale = uTime * 1.57;
+
+            // Animated gradient sweep (135deg direction like CSS)
+            float diagonal = vPosition.y * 0.7 - vPosition.x * 0.5;
+            float normalizedPos = diagonal * 0.5 + 0.5; // Normalize to 0-1
+
+            // Moving wave animation (sweeps across the surface)
+            float wave = sin(timeScale) * 0.5 + 0.5;
+            float gradientPos = fract(normalizedPos + wave);
+
+            // Smooth three-color gradient
+            vec3 color;
+            float t;
+            if (gradientPos < 0.33) {
+              t = smoothstep(0.0, 0.33, gradientPos);
+              color = mix(uColor1, uColor2, t);
+            } else if (gradientPos < 0.66) {
+              t = smoothstep(0.33, 0.66, gradientPos);
+              color = mix(uColor2, uColor3, t);
+            } else {
+              t = smoothstep(0.66, 1.0, gradientPos);
+              color = mix(uColor3, uColor1, t);
+            }
+
+            // Add glow/brightness boost for more vibrant look
+            color *= 1.2;
+
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `,
+      }),
     [],
   );
   const matGlow = useMemo(
@@ -502,29 +564,6 @@ const RocketLogic = () => {
   // Responsive Position: On narrow screens (< 12 width), center the rocket higher up
   const isMobile = viewport.width < 12;
 
-  // Auto-fly Effect for Mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    // Function to trigger a single flight
-    const triggerFlight = () => {
-      setHover(true);
-      // Reset hover flag shortly after ensuring flight started
-      // This prevents instant re-looping, allowing a pause
-      setTimeout(() => setHover(false), 1000);
-    };
-
-    // Start first flight after 1s delay
-    const startTimer = setTimeout(triggerFlight, 1000);
-
-    // Continue flying every 7 seconds (approx 5.5s flight + 1.5s pause)
-    const loopTimer = setInterval(triggerFlight, 7000);
-
-    return () => {
-      clearTimeout(startTimer);
-      clearInterval(loopTimer);
-    };
-  }, [isMobile]);
 
   const HOME_POS = useMemo(
     () =>
@@ -581,8 +620,12 @@ const RocketLogic = () => {
     const delta = 0.02; // Fixed step approximation from original code
     state.current.time += delta;
 
-    // Logic: If hovered and not already flying, start flight
-    if (hovered && !state.current.isFlying) {
+    // Update gradient animation
+    matAccent.uniforms.uTime.value = clock.elapsedTime;
+
+    // Logic: If hovered and not already flying, start flight (desktop only)
+    // On mobile, disable auto-fly to avoid accidental triggers
+    if (!isMobile && hovered && !state.current.isFlying) {
       state.current.isFlying = true;
       state.current.progress = 0;
     }
@@ -650,7 +693,10 @@ const RocketLogic = () => {
       position={HOME_POS}
       rotation={[0, 0, Math.PI / 6]}
       onPointerOver={() => {
-        document.body.style.cursor = "pointer";
+        // Only show pointer cursor on desktop where flight is enabled
+        if (!isMobile) {
+          document.body.style.cursor = "pointer";
+        }
         setHover(true);
       }}
       onPointerOut={() => {
@@ -748,7 +794,7 @@ const SceneContent = ({ config }: { config: PerformanceConfig }) => {
 
       {/* Foreground Hero Blob - Always show */}
       <RocketLogic />
-      <SmokeSystem />
+      <SmokeSystem isMobile={isMobile} />
 
       {/* Environment - Skip Stars on mobile for performance */}
       {!isMobile && (
@@ -810,11 +856,13 @@ export const Hero3D: React.FC = () => {
       {shouldRender && (
         <Canvas
           dpr={[1, config.pixelRatioCap]}
-          frameloop={isVisible && canvasReady ? "always" : "demand"} // Start with demand, then always
+          frameloop={isVisible && canvasReady ? "always" : "demand"}
           gl={{
-            antialias: config.pixelRatioCap > 1,
+            // Disable antialias on mobile for huge performance boost
+            antialias: config.level !== "low",
             alpha: true,
-            powerPreference: "high-performance",
+            // Use low-power mode on mobile to save battery and reduce heat
+            powerPreference: config.level === "low" ? "low-power" : "high-performance",
             // Additional GPU optimizations
             stencil: false,
             depth: true,
