@@ -17,9 +17,9 @@ export const companyData = {
 
   teamMembers: [
     {
-      name: "Ngoc Tran",
-      role: "CEO & Founder",
-      image: "Ngoc.png",
+      name: "Huy Dang",
+      role: "Managing Partner @ Rockship",
+      image: "Huy.png",
     },
     {
       name: "Son Vo",
