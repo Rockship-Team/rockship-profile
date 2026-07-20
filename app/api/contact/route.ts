@@ -1,11 +1,33 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// Initialize Resend with the provided API Key
-const resend = new Resend(process.env.NEXT_PUBLIC_RESEND_API_KEY);
+/**
+ * Read the key at request time, not module load. Constructing Resend at module
+ * scope threw "Missing API key" during `next build`, breaking the build on any
+ * machine without the secret — including CI.
+ *
+ * NEXT_PUBLIC_RESEND_API_KEY is read only as a fallback so existing deploys
+ * keep working. That prefix ships the secret into the browser bundle: rename
+ * the variable to RESEND_API_KEY, rotate the key, then drop the fallback.
+ */
+function getResendClient() {
+  const apiKey =
+    process.env.RESEND_API_KEY ?? process.env.NEXT_PUBLIC_RESEND_API_KEY;
+  if (!apiKey) return null;
+  return new Resend(apiKey);
+}
 
 export async function POST(request: Request) {
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      console.error("Contact form: RESEND_API_KEY is not configured");
+      return NextResponse.json(
+        { error: "Email is not configured on this environment" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { firstName, lastName, email, message } = body;
 

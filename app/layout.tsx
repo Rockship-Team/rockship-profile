@@ -16,46 +16,44 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  // Resolves relative OG/Twitter image URLs. Its absence was the console
+  // warning called out in the rebrand brief.
+  metadataBase: new URL("https://rockship.co"),
   title: {
-    default: "Rockship AI - Enterprise Generative AI & Intelligent Solutions",
-    template: "%s | Rockship AI",
+    default: "Rockship — Senior Engineering Teams for Companies Building Internationally",
+    template: "%s | Rockship",
   },
   description:
-    "Rockship AI provides enterprise-grade generative AI solutions, custom LLMs, computer vision pipelines, and secure cognitive infrastructure for the next generation of business.",
+    "Rockship places senior product engineers with teams in the US, Europe, Singapore and Japan. Team augmentation and dedicated product teams — sometimes called staff augmentation, but you get a senior team, not headcount.",
   keywords: [
-    "Generative AI",
-    "Enterprise AI",
-    "LLM",
-    "Computer Vision",
-    "Machine Learning",
-    "Rockship AI",
-    "Artificial Intelligence Solutions",
+    "team augmentation",
+    "staff augmentation",
+    "dedicated development team",
+    "hire senior engineers",
+    "software engineering partner",
+    "Rockship",
+    "Vietnam software development",
   ],
-  authors: [{ name: "Rockship AI Team" }],
-  creator: "Rockship AI",
+  authors: [{ name: "Rockship" }],
+  creator: "Rockship",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://rockship.ai",
-    title: "Rockship AI - Enterprise Generative AI & Intelligent Solutions",
+    url: "https://rockship.co",
+    title: "Rockship — Senior engineers who ship outcomes, not tickets",
     description:
-      "Powering the next generation of business with secure, compliant, and scalable AI solutions.",
-    siteName: "Rockship AI",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Rockship | Enterprise AI Systems",
-      },
-    ],
+      "Senior product engineers placed with teams in the US, Europe, Singapore and Japan — from architecture to production.",
+    siteName: "Rockship",
+    // Image comes from app/opengraph-image.tsx, generated at build time.
+    // The previous /og-image.jpg and /twitter-image.jpg were referenced here
+    // but never existed on disk, so every social preview was broken.
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rockship AI - Enterprise Generative AI",
-    description: "Enterprise-grade generative AI infrastructure and solutions.",
+    title: "Rockship — Senior engineers who ship outcomes, not tickets",
+    description:
+      "Senior product engineers placed with teams in the US, Europe, Singapore and Japan.",
     creator: "@rockshipai",
-    images: ["/twitter-image.jpg"],
   },
   robots: {
     index: true,
