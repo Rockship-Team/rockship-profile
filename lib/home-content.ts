@@ -44,9 +44,12 @@ export const OUR_TIMEZONE = "Asia/Ho_Chi_Minh";
 export const OUR_HOURS = { start: 9, end: 18 } as const;
 
 export const HERO = {
-  eyebrow: "Ho Chi Minh City",
-  headline: "Senior engineers who ship outcomes, not tickets.",
-  sub: "We place senior product engineers with your team — and stay through production.",
+  eyebrow: "Ho Chi Minh City · Singapore · Working worldwide",
+  /** Split so a single phrase can carry the one accent colour. */
+  headlineLead: "Senior engineers who",
+  headlineAccent: "ship outcomes",
+  headlineTail: ", not tickets.",
+  sub: "We place vetted senior product engineers with teams in the US, Europe, Singapore and Japan — and stay through production.",
   meta: "30 minutes, with an engineer — not a salesperson.",
 } as const;
 
@@ -133,6 +136,7 @@ export const SELECTION: SelectionStage[] = [
 export const CASE_STUDIES: CaseStudy[] = [
   {
     href: "/case-studies/ai-resident-support-automation",
+    image: "/images/case-studies/ai-resident-support-automation/hero-main.png",
     market: "Property management",
     title: "Resident support automation",
     stat: "92.5%",
@@ -140,6 +144,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
   {
     href: "/case-studies/ai-finance-automation",
+    image: "/images/case-studies/ai-finance-automation/hero-main.png",
     market: "Singapore · Healthcare",
     title: "Finance automation for a clinic group",
     stat: "95%",
@@ -147,6 +152,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
   {
     href: "/case-studies/ai-conversational-commerce",
+    image: "/images/case-studies/ai-conversational-commerce/hero-main.png",
     market: "Vietnam · B2B distribution",
     title: "Conversational commerce",
     stat: "+35%",
@@ -154,6 +160,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
   {
     href: "/case-studies/ai-loan-automation",
+    image: "/images/case-studies/ai-loan-automation/hero-main.png",
     market: "Indonesia · Microfinance",
     title: "Loan origination automation",
     stat: "2.5×",

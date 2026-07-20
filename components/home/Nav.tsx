@@ -66,7 +66,7 @@ export default function Nav() {
                 aria-current={active ? "true" : undefined}
                 className="whitespace-nowrap rounded-full px-[10px] py-1.5 text-[12px] transition-colors"
                 style={{
-                  color: active ? "var(--rk-ink)" : "var(--rk-sec)",
+                  color: active ? "var(--rk-accent)" : "var(--rk-sec)",
                   background: active ? "var(--rk-alt)" : "transparent",
                 }}
               >

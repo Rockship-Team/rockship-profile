@@ -37,7 +37,7 @@ export function SectionHead({
   return (
     <header className="mx-auto max-w-[40ch] text-center">
       <span className="rk-num">
-        {index} — {eyebrow}
+        <span style={{ color: "var(--rk-accent)" }}>{index}</span> — {eyebrow}
       </span>
       <h2 className="rk-head mt-[10px]">{headline}</h2>
       {intro ? <p className="rk-intro mt-3">{intro}</p> : null}

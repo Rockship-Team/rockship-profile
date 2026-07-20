@@ -1,5 +1,6 @@
 import { SELECTION } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
+import Reveal from "./Reveal";
 import TK from "./TK";
 
 /**
@@ -11,12 +12,14 @@ import TK from "./TK";
 export default function Selection() {
   return (
     <Section id="selection">
-      <SectionHead
+      <Reveal>
+        <SectionHead
         index="03"
         eyebrow="Selection"
         headline="How we pick the engineers you'll work with."
         intro="Quality is hard to verify from the other side of the world. So we publish the bar."
-      />
+        />
+      </Reveal>
       <div className="mx-auto mt-[clamp(48px,6vw,80px)] max-w-[720px]">
         {SELECTION.map((stage, index) => (
           <div

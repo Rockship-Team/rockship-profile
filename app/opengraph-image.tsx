@@ -31,14 +31,18 @@ export default async function OpenGraphImage() {
         <div
           style={{
             display: "flex",
+            flexWrap: "wrap",
+            gap: "0 18px",
             fontSize: 76,
             lineHeight: 1.05,
             letterSpacing: "-0.03em",
             fontWeight: 600,
-            maxWidth: 900,
+            maxWidth: 940,
           }}
         >
-          Senior engineers who ship outcomes, not tickets.
+          <span>Senior engineers who</span>
+          <span style={{ color: "#FF4D00" }}>ship outcomes,</span>
+          <span>not tickets.</span>
         </div>
         <div style={{ display: "flex", fontSize: 26, color: "#6E6E73" }}>
           United States · Europe · Singapore · Japan · Vietnam

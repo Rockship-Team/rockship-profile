@@ -1,11 +1,14 @@
 import { FAQ } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
+import Reveal from "./Reveal";
 import TK from "./TK";
 
 export default function Faq() {
   return (
     <Section id="faq">
-      <SectionHead index="07" eyebrow="Questions" headline="The things clients ask first." />
+      <Reveal>
+        <SectionHead index="07" eyebrow="Questions" headline="The things clients ask first." />
+      </Reveal>
       <div className="mx-auto mt-[clamp(48px,6vw,80px)] max-w-[720px]">
         {FAQ.map((item, index) => (
           <details

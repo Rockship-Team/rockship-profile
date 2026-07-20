@@ -5,6 +5,7 @@ import CaseStudies from "@/components/home/CaseStudies";
 import Faq from "@/components/home/Faq";
 import FinalCTA from "@/components/home/FinalCTA";
 import Hero from "@/components/home/Hero";
+import Marquee from "@/components/home/Marquee";
 import Nav from "@/components/home/Nav";
 import Selection from "@/components/home/Selection";
 import Services from "@/components/home/Services";
@@ -27,6 +28,7 @@ export default function Page() {
         <Nav />
         <main>
           <Hero />
+          <Marquee />
           <Services />
           <WhyRockship />
           <Selection />

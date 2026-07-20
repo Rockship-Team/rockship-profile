@@ -35,6 +35,8 @@ export interface SelectionStage {
 
 export interface CaseStudy {
   href: string;
+  /** Hero artwork from public/images/case-studies/<slug>/ */
+  image: string;
   market: string;
   title: string;
   stat: string;
