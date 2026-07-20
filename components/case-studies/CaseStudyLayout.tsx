@@ -41,15 +41,15 @@ export function CaseStudyLayout({
   children,
 }: CaseStudyLayoutProps) {
   return (
-    <main className="min-h-screen bg-rockship-950 text-white selection:bg-rockship-accent/30 overflow-x-hidden relative">
+    <main className="rk min-h-screen bg-white text-[#1D1D1F] selection:bg-[#FF4D00]/30 overflow-x-hidden relative">
       {/* Enhanced Background Ornaments */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-rockship-accent/10 rounded-full blur-[160px] -translate-y-1/2 translate-x-1/2 opacity-60" />
-        <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px] opacity-40" />
-        <div className="absolute bottom-[20%] right-[-5%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] opacity-30" />
+        <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-[#FF4D00]/10 rounded-full blur-[160px] -translate-y-1/2 translate-x-1/2 opacity-60" />
+        <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-transparent rounded-full blur-[120px] opacity-40" />
+        <div className="absolute bottom-[20%] right-[-5%] w-[500px] h-[500px] bg-transparent rounded-full blur-[100px] opacity-30" />
 
         {/* Subtle Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
       </div>
 
       <CaseStudyNav logoText={study.logoText} />
@@ -77,7 +77,7 @@ export function CaseStudyLayout({
                   whileInView={{ height: "100%", opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 1.5, ease: "circOut" }}
-                  className="absolute left-[-40px] top-0 w-px bg-gradient-to-b from-rockship-accent/50 via-rockship-accent/10 to-transparent hidden xl:block origin-top"
+                  className="absolute left-[-40px] top-0 w-px bg-gradient-to-b from-[#FF4D00]/50 via-[#FF4D00]/10 to-transparent hidden xl:block origin-top"
                 />
 
                 <div className="space-y-40">{children}</div>
@@ -88,7 +88,7 @@ export function CaseStudyLayout({
             <div className="lg:col-span-4 self-start">
               <div className="sticky top-32 space-y-12">
                 <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-br from-rockship-accent/20 to-transparent blur-lg opacity-50" />
+                  <div className="absolute -inset-1 bg-gradient-to-br from-[#FF4D00]/20 to-transparent blur-lg opacity-50" />
                   <div className="relative space-y-12">
                     <CaseStudySidebarCTAs />
                     {study.content.successFactors && (

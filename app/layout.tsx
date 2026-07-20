@@ -77,7 +77,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#02040a",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -86,7 +86,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" style={{ colorScheme: "dark" }}>
+    <html lang="en" style={{ colorScheme: "light" }}>
       <head>
         {/* Preconnect to CDN for faster resource fetching */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -104,7 +104,7 @@ export default function RootLayout({
         className={cn(
           dmSans.className,
           dmSans.variable,
-          "bg-rockship-950 text-white",
+          "bg-white text-[#1D1D1F]",
         )}
         suppressHydrationWarning={true}
       >

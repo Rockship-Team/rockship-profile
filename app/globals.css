@@ -728,7 +728,7 @@ article.prose blockquote {
 .rk-intro { font-size: 21px;                     line-height: 1.381;  letter-spacing:  0.011em; font-weight: 400; color: var(--rk-sec); }
 .rk-cap   { font-size: 14px;                     line-height: 1.43;   letter-spacing: -0.016em; color: var(--rk-sec); }
 .rk-num   { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-            font-size: 12px; letter-spacing: 0.06em; color: var(--rk-ter); font-weight: 400; }
+            font-size: 15px; letter-spacing: 0.05em; color: var(--rk-ter); font-weight: 400; }
 
 /* Pill buttons — Apple keeps the label at weight 400 */
 .rk-btn {
@@ -806,3 +806,13 @@ article.prose blockquote {
 
 /* The accent phrase in the hero headline. */
 .rk-accent { color: var(--rk-accent); }
+
+/* Anchor targets must clear the sticky nav (68px) or every nav click lands
+   with the section heading hidden behind the bar. */
+html {
+  scroll-padding-top: 84px;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

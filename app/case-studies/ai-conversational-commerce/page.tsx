@@ -11,6 +11,7 @@ import { CaseStudyExecutiveSummary } from "@/components/case-studies/sections/Ca
 import { CaseStudyImplementation } from "@/components/case-studies/sections/CaseStudyImplementation";
 import { CaseStudyOutcomes } from "@/components/case-studies/sections/CaseStudyOutcomes";
 import { CaseStudySolution } from "@/components/case-studies/sections/CaseStudySolution";
+import CaseStudyFigure from "@/components/case-studies/CaseStudyFigure";
 
 export default function ConversationalCommercePage() {
   const slug = "ai-conversational-commerce";
@@ -52,23 +53,11 @@ export default function ConversationalCommercePage() {
       <div className="space-y-32">
         <CaseStudyExecutiveSummary content={content.executiveSummary} />
 
-        <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group -mt-16 ring-1 ring-white/20">
-          <img
-            src="/images/case-studies/ai-conversational-commerce/hero-main.png"
-            alt="Executive Summary"
-            className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
-          />
-        </div>
+        <CaseStudyFigure src="/images/case-studies/ai-conversational-commerce/hero-main.png" alt="Executive Summary" className="-mt-16" />
 
         <CaseStudyChallenge challenge={content.challenge} />
 
-        <div className="rounded-3xl overflow-hidden border border-white/10 bg-black/40 shadow-2xl relative group -mt-16 ring-1 ring-white/20">
-          <img
-            src="/images/case-studies/ai-conversational-commerce/challenge.png"
-            alt="Challenge"
-            className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
-          />
-        </div>
+        <CaseStudyFigure src="/images/case-studies/ai-conversational-commerce/challenge.png" alt="Challenge" className="-mt-16" />
 
         <CaseStudySolution
           solution={content.solution}

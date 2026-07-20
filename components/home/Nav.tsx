@@ -51,9 +51,9 @@ export default function Nav() {
         backdropFilter: "saturate(180%) blur(20px)",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-[1120px] items-center gap-5 px-[clamp(22px,5vw,60px)]">
+      <div className="mx-auto flex h-[68px] max-w-[1120px] items-center gap-6 px-[clamp(22px,5vw,60px)]">
         <Link href="/" aria-label="Rockship home" className="shrink-0">
-          <Logo height={20} />
+          <Logo height={22} />
         </Link>
 
         <div className="hidden gap-px overflow-x-auto lg:flex">
@@ -64,7 +64,7 @@ export default function Nav() {
                 key={tab.href}
                 href={tab.href}
                 aria-current={active ? "true" : undefined}
-                className="whitespace-nowrap rounded-full px-[10px] py-1.5 text-[12px] transition-colors"
+                className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors"
                 style={{
                   color: active ? "var(--rk-accent)" : "var(--rk-sec)",
                   background: active ? "var(--rk-alt)" : "transparent",
@@ -76,7 +76,7 @@ export default function Nav() {
           })}
           <Link
             href="/events"
-            className="whitespace-nowrap rounded-full px-[10px] py-1.5 text-[12px]"
+            className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
             style={{ color: "var(--rk-sec)" }}
           >
             Events
@@ -84,7 +84,7 @@ export default function Nav() {
         </div>
 
         <div className="ml-auto shrink-0">
-          <BookCallButton className="rk-btn rk-btn-sm" />
+          <BookCallButton className="rk-btn" />
         </div>
       </div>
     </nav>

@@ -9,25 +9,25 @@ interface CaseStudyConclusionProps {
 
 export function CaseStudyConclusion({ conclusion }: CaseStudyConclusionProps) {
   return (
-    <section className="py-24 border-t border-white/5 bg-gradient-to-b from-rockship-950 to-black">
+    <section className="py-24 border-t border-black/[0.06] bg-[#F5F5F7]">
       <div className="container mx-auto px-6 max-w-4xl text-center">
         <FadeIn>
-          <div className="w-16 h-16 mx-auto bg-rockship-accent/10 rounded-2xl flex items-center justify-center mb-8 border border-rockship-accent/20">
-            <Target className="w-8 h-8 text-rockship-accent" />
+          <div className="w-16 h-16 mx-auto bg-[#FF4D00]/10 rounded-2xl flex items-center justify-center mb-8 border border-[#FF4D00]/20">
+            <Target className="w-8 h-8 text-[#FF4D00]" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-8 leading-tight">
+          <h2 className="text-2xl md:text-3xl font-display font-bold text-[#1D1D1F] mb-8 leading-tight">
             "{conclusion}"
           </h2>
           <div className="flex justify-center gap-4">
             <Link href="/contact">
-              <Button className="bg-rockship-accent hover:bg-rockship-accent/90 text-white rounded-full px-8 py-6 text-lg shadow-lg shadow-rockship-accent/20 h-auto">
+              <Button className="bg-[#FF4D00] hover:opacity-85 text-white rounded-full px-8 py-5 text-base font-normal h-auto">
                 Start Your Project
               </Button>
             </Link>
             <Link href="/case-studies">
               <Button
                 variant="outline"
-                className="border-white/10 text-white hover:bg-white/5 rounded-full px-8 py-6 text-lg h-auto"
+                className="bg-white border border-[#D2D2D7] text-[#1D1D1F] hover:bg-[#F5F5F7] hover:text-[#1D1D1F] rounded-full px-8 py-5 text-base font-normal h-auto"
               >
                 All Case Studies
               </Button>

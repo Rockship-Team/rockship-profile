@@ -21,7 +21,7 @@ export default function Team() {
           <RevealItem key={person.name}>
             <article className="group">
               <div
-                className="rk-shot relative aspect-[4/5] overflow-hidden rounded-[20px]"
+                className="relative aspect-[4/5] overflow-hidden rounded-[20px]"
                 style={{ background: "var(--rk-paper)", border: "1px solid var(--rk-hair)" }}
               >
                 <Image
@@ -29,7 +29,7 @@ export default function Team() {
                   alt={person.name}
                   fill
                   sizes="(max-width: 700px) 50vw, 300px"
-                  className="object-cover object-top"
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
               <h3 className="mt-5 text-[21px] font-semibold tracking-[0.011em]">
@@ -38,13 +38,11 @@ export default function Team() {
               <div className="mt-1 text-[15px]" style={{ color: "var(--rk-sec)" }}>
                 {person.unverified ? <TK>{person.role}</TK> : person.role}
               </div>
-              <div className="mt-2 text-[13px]" style={{ color: "var(--rk-ter)" }}>
-                {person.previously ? (
-                  `Previously ${person.previously}`
-                ) : (
-                  <TK>Previously — to confirm</TK>
-                )}
-              </div>
+              {person.previously ? (
+                <div className="mt-2 text-[13px]" style={{ color: "var(--rk-ter)" }}>
+                  Previously {person.previously}
+                </div>
+              ) : null}
             </article>
           </RevealItem>
         ))}

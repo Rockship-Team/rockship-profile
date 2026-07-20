@@ -12,9 +12,9 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
   return (
     <FadeIn>
       <div className="relative">
-        <div className="absolute -left-4 -top-4 w-20 h-20 bg-white/5 rounded-full blur-2xl" />
+        <div className="absolute -left-4 -top-4 w-20 h-20 bg-black/[0.03] rounded-full blur-2xl" />
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-12 flex items-center gap-4 relative">
-          <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-xl text-rockship-300">
+          <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-black/[0.03] border border-black/10 text-xl text-[#6E6E73]">
             01
           </span>
           The Challenge
@@ -22,7 +22,7 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
       </div>
 
       <div className="space-y-8">
-        <p className="text-lg text-rockship-300 leading-relaxed border-l-2 border-rockship-accent/30 pl-6">
+        <p className="text-lg text-[#6E6E73] leading-relaxed border-l-2 border-[#FF4D00]/30 pl-6">
           {challenge.description}
         </p>
 
@@ -36,7 +36,7 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
             <FadeInStagger className="space-y-4">
               {challenge.painPoints.map((point, i) => (
                 <FadeIn key={i} delay={i * 100} direction="right" distance={10}>
-                  <li className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed">
+                  <li className="flex items-start gap-3 text-[#3A3D42] text-sm leading-relaxed">
                     <span className="mt-1.5 w-1 h-1 rounded-full bg-red-400 shrink-0" />
                     <span>{point}</span>
                   </li>
@@ -54,7 +54,7 @@ export function CaseStudyChallenge({ challenge }: CaseStudyChallengeProps) {
             <FadeInStagger className="space-y-4">
               {challenge.businessImpact.map((point, i) => (
                 <FadeIn key={i} delay={i * 100} direction="right" distance={10}>
-                  <li className="flex items-start gap-3 text-rockship-200 text-sm leading-relaxed">
+                  <li className="flex items-start gap-3 text-[#3A3D42] text-sm leading-relaxed">
                     <span className="mt-1.5 w-1 h-1 rounded-full bg-orange-400 shrink-0" />
                     <span>{point}</span>
                   </li>
