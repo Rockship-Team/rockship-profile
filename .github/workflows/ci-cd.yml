@@ -30,7 +30,7 @@ jobs:
 
     - name: Install pnpm and Vercel CLI
       run: |
-        npm install -g pnpm vercel
+        npm install -g pnpm@11 vercel
 
     - name: Deploy to Vercel Preview
       run: |
@@ -55,7 +55,7 @@ jobs:
 
     - name: Install pnpm and Vercel CLI
       run: |
-        npm install -g pnpm vercel
+        npm install -g pnpm@11 vercel
 
     - name: Deploy to Vercel Production
       run: |
