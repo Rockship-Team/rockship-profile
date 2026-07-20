@@ -1,0 +1,7 @@
+# pnpm 11 reads settings from here rather than the "pnpm" field in package.json.
+# These packages need their install scripts to run: sharp fetches the native image
+# pipeline, unrs-resolver and @tsparticles/engine fetch native bindings.
+allowBuilds:
+  '@tsparticles/engine': true
+  sharp: true
+  unrs-resolver: true

@@ -1,0 +1,4 @@
+# The image is assembled from the host-built .deploy/ staging directory only.
+# Everything else is excluded so the build context stays small.
+*
+!.deploy

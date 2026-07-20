@@ -1,0 +1,140 @@
+# Builds the Next.js standalone bundle on the runner, packages it into a
+# multi-arch Docker image, pushes to ECR, and swaps the container on the EC2
+# host over SSH.
+#
+# This reuses ./scripts/deploy.sh rather than reimplementing the steps, so CI
+# and a local `pnpm deploy` cannot drift apart. The workflow's only job is to
+# synthesise deploy.config from repo variables and hand off.
+#
+# Setup: docs/deployment.md ("Deploying from GitHub Actions").
+
+name: Deploy to ECR
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Existing ECR tag to release (rollback). Leave empty to build this commit."
+        required: false
+        type: string
+
+# Never let two deploys race for the same container. Deploys are not cancelled
+# mid-flight — that could leave the server with no running container.
+concurrency:
+  group: deploy-ecr
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, push and release
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: read
+      id-token: write # required for OIDC role assumption
+
+    env:
+      # Explicit so scripts/deploy.sh does not derive it from git state.
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+      ROLLBACK: ${{ inputs.image_tag != '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Version comes from the "packageManager" field in package.json.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Set up QEMU
+        if: env.ROLLBACK != 'true'
+        uses: docker/setup-qemu-action@v3 # arm64 emulation for the multi-arch build
+
+      - name: Set up Docker Buildx
+        if: env.ROLLBACK != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Write deploy.config
+        run: |
+          cat > deploy.config <<EOF
+          AWS_REGION="${{ vars.AWS_REGION }}"
+          AWS_ACCOUNT_ID="${{ vars.AWS_ACCOUNT_ID }}"
+          ECR_REPOSITORY="${{ vars.ECR_REPOSITORY }}"
+          AWS_PROFILE=""
+          PLATFORMS="${{ vars.PLATFORMS || 'linux/amd64,linux/arm64' }}"
+          SSH_HOST="${{ vars.SSH_HOST }}"
+          SSH_USER="${{ vars.SSH_USER }}"
+          SSH_PORT="${{ vars.SSH_PORT || '22' }}"
+          SSH_KEY="\$HOME/.ssh/deploy_key"
+          CONTAINER_NAME="${{ vars.CONTAINER_NAME || 'rockship-profile' }}"
+          DOCKER_NETWORK="${{ vars.DOCKER_NETWORK || 'nginx' }}"
+          HOST_PORT="${{ vars.HOST_PORT }}"
+          CONTAINER_PORT="${{ vars.CONTAINER_PORT || '3000' }}"
+          REMOTE_ENV_FILE="${{ vars.REMOTE_ENV_FILE }}"
+          EOF
+
+      # NEXT_PUBLIC_* values are inlined into the client bundle at build time,
+      # so they must be present here — the server's env file is too late.
+      - name: Write .env.production
+        if: env.ROLLBACK != 'true'
+        run: |
+          cat > .env.production <<EOF
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          EOF
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "${{ secrets.SSH_KNOWN_HOSTS }}" ]; then
+            printf '%s\n' "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          else
+            echo "::warning::SSH_KNOWN_HOSTS is not set; trusting the host key on first use (vulnerable to MITM). Populate it with: ssh-keyscan -p PORT HOST"
+            ssh-keyscan -p "${{ vars.SSH_PORT || '22' }}" "${{ vars.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Build Next.js standalone bundle
+        if: env.ROLLBACK != 'true'
+        run: ./scripts/deploy.sh build
+
+      - name: Build multi-arch image and push to ECR
+        if: env.ROLLBACK != 'true'
+        run: ./scripts/deploy.sh push
+
+      - name: Release on server
+        run: ./scripts/deploy.sh release
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deploy ${{ job.status }}"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Image tag | \`$IMAGE_TAG\` |"
+            echo "| Mode | $([ "$ROLLBACK" = 'true' ] && echo 'rollback (no rebuild)' || echo 'build from commit') |"
+            echo "| Host | \`${{ vars.SSH_HOST }}:${{ vars.HOST_PORT || '3000' }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f ~/.ssh/deploy_key deploy.config .env.production

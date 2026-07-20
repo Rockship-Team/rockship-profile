@@ -3,12 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "analyze": "ANALYZE=true next build --webpack"
+    "analyze": "ANALYZE=true next build --webpack",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:build": "./scripts/deploy.sh build",
+    "deploy:image": "./scripts/deploy.sh image",
+    "deploy:push": "./scripts/deploy.sh push",
+    "deploy:release": "./scripts/deploy.sh release"
   },
   "trustedDependencies": [
     "@tsparticles/engine",
