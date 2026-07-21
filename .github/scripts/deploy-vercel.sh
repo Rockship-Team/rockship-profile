@@ -67,7 +67,7 @@ fi
 
 # Install dependencies and remove .git directory to optimize deployment
 echo "📦 Installing dependencies..."
-if ! pnpm install --frozen-lockfile --prod=false; then
+if ! bun install --frozen-lockfile; then
   echo "❌ Failed to install dependencies"
   exit 1
 fi

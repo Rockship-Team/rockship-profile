@@ -10,7 +10,10 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_NAME: ${{ secrets.VERCEL_PROJECT_NAME || github.event.repository.name }}
-  VERCEL_BUILD_COMMAND: ${{ secrets.VERCEL_BUILD_COMMAND || 'pnpm run build' }}
+  # --bun forces the Bun runtime to execute Next itself; a plain `bun run` would
+  # hand off to Node via Next's shebang. Override with the VERCEL_BUILD_COMMAND
+  # secret to fall back to `bun run build` without a code change.
+  VERCEL_BUILD_COMMAND: ${{ secrets.VERCEL_BUILD_COMMAND || 'bun --bun run build' }}
   VERCEL_FRAMEWORK: ${{ secrets.VERCEL_FRAMEWORK || 'nextjs' }}
   VERCEL_OUTPUT_DIR: ${{ secrets.VERCEL_OUTPUT_DIR || '.next' }}
   CI_COMMIT_REF_NAME: ${{ github.ref_name }}
@@ -28,9 +31,15 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install pnpm and Vercel CLI
-      run: |
-        npm install -g pnpm@11 vercel
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    # The Vercel CLI is a build tool, not a project dependency, so it is
+    # installed globally rather than added to package.json.
+    - name: Install Vercel CLI
+      run: bun install -g vercel
 
     - name: Deploy to Vercel Preview
       run: |
@@ -53,9 +62,15 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Install pnpm and Vercel CLI
-      run: |
-        npm install -g pnpm@11 vercel
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    # The Vercel CLI is a build tool, not a project dependency, so it is
+    # installed globally rather than added to package.json.
+    - name: Install Vercel CLI
+      run: bun install -g vercel
 
     - name: Deploy to Vercel Production
       run: |

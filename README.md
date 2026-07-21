@@ -7,26 +7,39 @@ Built with Next.js 16 (App Router) and React 19, TypeScript, and Tailwind CSS v4
 
 ## Getting started
 
-Requires Node 22+ and pnpm. This project uses **pnpm** — npm and yarn are not
-supported (see the workspace `allowBuilds` list in `pnpm-workspace.yaml`).
+This project uses **Bun** as both package manager and runtime. npm, pnpm and
+yarn are not supported — `bun.lock` is the only lockfile, and the postinstall
+allow-list lives in `trustedDependencies` in `package.json`.
 
 ```bash
-pnpm install
-cp .env.local.example .env.local   # then fill in the values below
-pnpm dev                           # http://localhost:3000
+curl -fsSL https://bun.sh/install | bash   # if you don't have it
+bun install
+cp .env.local.example .env.local           # then fill in the values below
+bun --bun run dev                          # http://localhost:3000
 ```
+
+The Bun version is pinned in `.bun-version` (currently 1.3.14); CI reads it via
+`oven-sh/setup-bun`.
 
 ### Scripts
 
 | Command | What it does |
 | --- | --- |
-| `pnpm dev` | Dev server with Turbopack |
-| `pnpm build` | Production build |
-| `pnpm start` | Serve the production build |
-| `pnpm lint` | ESLint via `next lint` |
-| `pnpm analyze` | Bundle analysis — builds with webpack and writes `analyze-client.html` |
+| `bun --bun run dev` | Dev server with Turbopack |
+| `bun --bun run build` | Production build |
+| `bun --bun run start` | Serve the production build |
+| `bun run lint` | ESLint via `next lint` |
+| `bun run analyze` | Bundle analysis — builds with webpack and writes `analyze-client.html` |
 
-There is no test suite in the repo. `npx tsc --noEmit` is the quickest
+### Why `--bun`
+
+Next.js ships a `#!/usr/bin/env node` shebang, so a plain `bun run dev` hands
+execution to **Node** — Bun only acts as the task runner. The `--bun` flag
+forces the Bun runtime to execute Next itself. Both work; `--bun` is what this
+project standardises on, including the Vercel build command in
+`.github/workflows/ci-cd.yml`.
+
+There is no test suite in the repo. `bunx tsc --noEmit` is the quickest
 correctness check before committing.
 
 ## Environment variables

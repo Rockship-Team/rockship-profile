@@ -1,4 +1,4 @@
-- Always use pnpm instead of npm
+- Always use bun instead of npm or pnpm (`bun install`, `bun run <script>`, `bun add`)
 - The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 - Always write components in the "components" folder.
 - Always write pages in the "app" folder.
@@ -17,7 +17,7 @@
 - **Styling**: Tailwind CSS v4 (alpha), shadcn/ui components
 - **Animation**: GSAP, Framer Motion
 - **3D Graphics**: React Three Fiber, Three.js
-- **Package Manager**: pnpm
+- **Package Manager / Runtime**: Bun
 - **Build Tools**: Next.js with Turbopack
 - **Additional**: Google GenAI, React Markdown, Recharts
 
