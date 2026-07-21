@@ -3,8 +3,15 @@ const nextConfig = {
   reactStrictMode: true,
   reactCompiler: true,
 
-  // Emit a self-contained server bundle in .next/standalone for the Docker image
-  output: 'standalone',
+  // Emit a self-contained server bundle in .next/standalone for the Docker
+  // image — scripts/deploy.sh expects .next/standalone/server.js.
+  //
+  // Not on Vercel. Vercel's builder does its own output file tracing and
+  // patches the config ("Applying modifyConfig from Vercel"); standalone is
+  // both unnecessary and unsupported there, and its interaction with that
+  // patching is what leaves onBuildComplete unable to open
+  // .next/next-server.js.nft.json. VERCEL=1 is set in Vercel build envs.
+  output: process.env.VERCEL ? undefined : 'standalone',
 
   // Image optimization configuration
   images: {
