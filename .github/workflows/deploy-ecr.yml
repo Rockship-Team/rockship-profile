@@ -41,7 +41,6 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write # required for OIDC role assumption
 
     env:
       # Explicit so scripts/deploy.sh does not derive it from git state.
@@ -50,7 +49,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # bun runs both the install and the Next build, so no Node setup is needed.
       # The version comes from .bun-version — older bun cannot run the build.
@@ -59,19 +58,32 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+      # Checked up front because the AWS action reports missing credentials as
+      # the opaque "Could not load credentials from any providers".
+      - name: Check AWS credentials are present
+        env:
+          KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if [ -z "$KEY_ID" ] || [ -z "$SECRET" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID and/or AWS_SECRET_ACCESS_KEY secrets are not set. Add them under Settings -> Secrets and variables -> Actions (see docs/deployment.md)."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Set up QEMU
         if: env.ROLLBACK != 'true'
-        uses: docker/setup-qemu-action@v3 # arm64 emulation for the multi-arch build
+        uses: docker/setup-qemu-action@v4 # arm64 emulation for the multi-arch build
 
       - name: Set up Docker Buildx
         if: env.ROLLBACK != 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Values arrive as env vars rather than being pasted into the script text,
       # so a value containing $(...) or a quote cannot alter the commands here.

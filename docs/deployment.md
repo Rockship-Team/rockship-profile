@@ -397,7 +397,8 @@ Same page, **Secrets** tab.
 
 | Secret | How to get it |
 |---|---|
-| `AWS_DEPLOY_ROLE_ARN` | The IAM role ARN from "One-time AWS OIDC setup" below, e.g. `arn:aws:iam::471112636744:role/github-actions-rockship-profile` |
+| `AWS_ACCESS_KEY_ID` | Access key for a dedicated CI IAM user — see "AWS credentials for CI" below |
+| `AWS_SECRET_ACCESS_KEY` | The matching secret, shown only once at creation |
 | `SSH_PRIVATE_KEY` | Contents of the private key whose public half is in the server's `~/.ssh/authorized_keys`. Paste the **whole file**, including the `-----BEGIN...` and `-----END...` lines |
 
 **Recommended:**
@@ -436,7 +437,8 @@ gh variable set SSH_HOST        --repo "$REPO" --body "13.251.100.184"
 gh variable set SSH_USER        --repo "$REPO" --body "ubuntu"
 gh variable set REMOTE_ENV_FILE --repo "$REPO" --body "/home/ubuntu/rockship-profile/.env.production"
 
-gh secret set AWS_DEPLOY_ROLE_ARN --repo "$REPO"          # paste the role ARN
+gh secret set AWS_ACCESS_KEY_ID     --repo "$REPO"      # paste the access key id
+gh secret set AWS_SECRET_ACCESS_KEY --repo "$REPO"      # paste the secret
 gh secret set SSH_PRIVATE_KEY     --repo "$REPO" < ~/Desktop/aws/rockitflow
 ssh-keyscan -p 22 13.251.100.184 2>/dev/null \
   | gh secret set SSH_KNOWN_HOSTS --repo "$REPO"
@@ -450,43 +452,100 @@ The workflow targets `environment: production`. If that environment does not
 exist yet, create it under Settings → Environments (add required reviewers there
 if you want deploys to wait for approval).
 
-### One-time AWS OIDC setup
+### AWS credentials for CI
 
-Register GitHub as an OIDC provider (once per account):
+CI authenticates with a plain access key. Create a **dedicated IAM user** for it
+rather than reusing your own — the key lives in GitHub until you rotate it, and a
+separate user can be revoked without disturbing your local setup.
 
 ```bash
-aws iam create-open-id-connect-provider \
-  --url https://token.actions.githubusercontent.com \
-  --client-id-list sts.amazonaws.com \
-  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+aws iam create-user --user-name github-actions-rockship-profile
 ```
 
-Create a role trusted by this repo only — note the `sub` condition pins it to
-`main`, so a branch or fork cannot assume it:
+Attach a policy limited to pushing this one repository:
 
-```json
+```bash
+cat > /tmp/ecr-push.json <<'JSON'
 {
   "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": { "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com" },
-    "Action": "sts:AssumeRoleWithWebIdentity",
-    "Condition": {
-      "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
-      "StringLike": { "token.actions.githubusercontent.com:sub": "repo:<ORG>/<REPO>:ref:refs/heads/main" }
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeRepositories",
+        "ecr:InitiateLayerUpload",
+        "ecr:ListImages",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "arn:aws:ecr:ap-southeast-1:471112636744:repository/rockship-profile"
     }
-  }]
+  ]
 }
+JSON
+
+aws iam put-user-policy \
+  --user-name github-actions-rockship-profile \
+  --policy-name ecr-push-rockship-profile \
+  --policy-document file:///tmp/ecr-push.json
 ```
 
-Attach a policy allowing `ecr:GetAuthorizationToken` plus push access to the one
-repository (`ecr:BatchCheckLayerAvailability`, `ecr:CompleteLayerUpload`,
-`ecr:InitiateLayerUpload`, `ecr:PutImage`, `ecr:UploadLayerPart`,
-`ecr:DescribeRepositories`, `ecr:CreateRepository`), then put the role ARN in
-`AWS_DEPLOY_ROLE_ARN`.
+`ecr:GetAuthorizationToken` cannot be scoped to a repository — that is an AWS
+constraint, not an oversight. Everything else is pinned to this repository, so
+the key cannot touch other images in the account.
 
-If you add a `production` environment with required reviewers, deploys will wait
-for approval — the workflow already targets `environment: production`.
+Create the key and read the two values:
+
+```bash
+aws iam create-access-key --user-name github-actions-rockship-profile \
+  --query 'AccessKey.{id:AccessKeyId,secret:SecretAccessKey}' --output table
+```
+
+The secret is displayed **once**. If you lose it, delete the key and make a new
+one — it cannot be retrieved later.
+
+Pipe them straight into GitHub without them touching your shell history:
+
+```bash
+REPO=Rockship-Team/rockship-profile
+
+aws iam create-access-key --user-name github-actions-rockship-profile \
+  --output json > /tmp/ci-key.json
+
+jq -r '.AccessKey.AccessKeyId'     /tmp/ci-key.json | gh secret set AWS_ACCESS_KEY_ID     --repo "$REPO"
+jq -r '.AccessKey.SecretAccessKey' /tmp/ci-key.json | gh secret set AWS_SECRET_ACCESS_KEY --repo "$REPO"
+
+rm -f /tmp/ci-key.json          # do not leave this on disk
+```
+
+Verify the key works before relying on a deploy:
+
+```bash
+AWS_ACCESS_KEY_ID=<id> AWS_SECRET_ACCESS_KEY=<secret> AWS_REGION=ap-southeast-1 \
+  aws sts get-caller-identity
+```
+
+`Account` must read `471112636744`.
+
+**Rotating.** Access keys do not expire on their own. To rotate, create a second
+key, update both GitHub secrets, then delete the old one:
+
+```bash
+aws iam list-access-keys --user-name github-actions-rockship-profile
+aws iam delete-access-key --user-name github-actions-rockship-profile --access-key-id <old-id>
+```
+
+> Static keys are the trade-off here: anyone who can read the GitHub secrets, or
+> who compromises a workflow, holds ECR push access until the key is rotated.
+> Role assumption via GitHub's OIDC provider avoids long-lived credentials
+> entirely and is worth revisiting if this repo's CI grows more permissions.
 
 ### Rollback from the Actions tab
 
