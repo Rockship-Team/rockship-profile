@@ -1,0 +1,51 @@
+# Copy to `deploy.config` and fill in. `deploy.config` is gitignored.
+#   cp deploy.config.example deploy.config
+#
+# Every value can also be supplied as an environment variable, which wins over
+# this file:  IMAGE_TAG=hotfix ./scripts/deploy.sh
+
+# ---------------------------------------------------------------- AWS / ECR --
+AWS_REGION="ap-southeast-1"
+AWS_ACCOUNT_ID="471112636744"
+ECR_REPOSITORY="rockship-profile"
+# Named AWS CLI profile to use locally. Leave empty for the default profile.
+AWS_PROFILE=""
+
+# Image tag. Defaults to the short git SHA (plus "-dirty" on uncommitted work).
+# The script always also pushes/updates the `latest` tag.
+# IMAGE_TAG="v1.2.3"
+
+# Architectures to build. The server is what matters here; `latest` and the SHA
+# tag become multi-arch manifests covering all of these.
+PLATFORMS="linux/amd64,linux/arm64"
+
+# --------------------------------------------------------------- SSH target --
+SSH_HOST="1.2.3.4"
+SSH_USER="ubuntu"
+SSH_PORT="22"
+# Path to the private key. Leave empty to use your ssh-agent / ~/.ssh/config.
+SSH_KEY="$HOME/.ssh/rockship-profile.pem"
+
+# ------------------------------------------------------ Container on server --
+CONTAINER_NAME="rockship-profile"
+
+# Docker network to join. The server runs nginx-proxy-manager on the "nginx"
+# network and routes to sibling containers by name, so the proxy target is
+# http://<CONTAINER_NAME>:<CONTAINER_PORT>.
+DOCKER_NETWORK="nginx"
+
+# Host port to publish. LEAVE EMPTY on this server: it hosts many apps and 3000
+# is already taken, so the container is reached over DOCKER_NETWORK instead of a
+# host port. Set it only for a machine where this app owns the port.
+HOST_PORT=""
+
+# Port the app listens on inside the container. Matches the Dockerfile.
+CONTAINER_PORT="3000"
+
+# Port `./scripts/deploy.sh run-local` publishes on your laptop. Only used
+# locally — never affects the server.
+LOCAL_PORT="3000"
+# Env file that already lives ON THE SERVER, holding the runtime secrets
+# (SUPABASE_SERVICE_ROLE_KEY, ADMIN_PASSWORD, GROQ_API_KEY, RESEND_API_KEY...).
+# It is never uploaded by this script — provision it once, by hand.
+REMOTE_ENV_FILE="/etc/rockship-profile/.env.production"

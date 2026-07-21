@@ -30,3 +30,8 @@ dist
 
 # typescript build info
 *.tsbuildinfo
+# deploy
+.deploy
+deploy.config
+.env.production
+.env.production.local

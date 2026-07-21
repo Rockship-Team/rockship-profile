@@ -1,0 +1,559 @@
+# Deployment
+
+The app ships as a Docker image built from a **host-built** Next.js standalone
+bundle. Nothing is compiled inside Docker — the image only packages the output —
+which keeps image builds to a few seconds and avoids installing the full
+dependency tree in the container.
+
+```
+ laptop                                    ECR                    server
+┌──────────────────────────┐            ┌───────┐            ┌──────────────┐
+│ 1. bun run build         │            │       │            │              │
+│    → .next/standalone    │            │       │            │              │
+│    → staged in .deploy/  │            │       │            │              │
+│ 2. docker buildx         │──push──▶   │ image │  ──pull──▶ │ docker run   │
+│    (amd64 + arm64)       │            │       │            │              │
+└──────────────────────────┘            └───────┘            └──────────────┘
+```
+
+## Getting access (new developer, start here)
+
+You need two things before you can deploy: AWS credentials that can push to ECR,
+and an SSH key the server trusts. Neither is in the repo — both are granted by an
+admin (**@axing**).
+
+### 1. Install the AWS CLI
+
+```bash
+brew install awscli          # macOS
+aws --version                # must report aws-cli/2.x
+```
+
+If you get `aws-cli/1.x`, upgrade — v1 cannot log in to ECR the way the deploy
+script expects.
+
+### 2. Ask @axing for AWS credentials
+
+Ask for an IAM user in account **471112636744** with permission to push to the
+`rockship-profile` ECR repository. You'll be given an **Access Key ID** and a
+**Secret Access Key**.
+
+> The secret is shown exactly once, at creation. If you lose it, you need a new
+> key pair — it cannot be recovered.
+
+<details>
+<summary>For @axing: the policy that user needs</summary>
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeRepositories",
+        "ecr:InitiateLayerUpload",
+        "ecr:ListImages",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "arn:aws:ecr:ap-southeast-1:471112636744:repository/rockship-profile"
+    }
+  ]
+}
+```
+</details>
+
+### 3. Configure an AWS profile
+
+A *profile* is a named set of credentials stored on your machine. Create one:
+
+```bash
+aws configure --profile rockship
+```
+
+Answer the four prompts:
+
+```
+AWS Access Key ID [None]: AKIA................
+AWS Secret Access Key [None]: ....................................
+Default region name [None]: ap-southeast-1
+Default output format [None]: json
+```
+
+This writes to `~/.aws/credentials` (the keys) and `~/.aws/config` (region and
+output). Verify it works and points at the right account:
+
+```bash
+aws sts get-caller-identity --profile rockship
+```
+
+```json
+{
+  "UserId": "AIDA................",
+  "Account": "471112636744",
+  "Arn": "arn:aws:iam::471112636744:user/your-name"
+}
+```
+
+The `Account` **must** be `471112636744`. The deploy script refuses to push if it
+isn't, so a wrong profile fails loudly rather than pushing to someone else's
+registry.
+
+Then point the deploy config at it:
+
+```bash
+# deploy.config
+AWS_PROFILE="rockship"
+```
+
+> **Profile name ≠ IAM user name.** The profile is the label you chose in
+> `aws configure --profile <name>`, not the username in the ARN. Run
+> `aws configure list-profiles` to see valid values. Leave `AWS_PROFILE=""` to
+> use the `[default]` profile.
+
+<details>
+<summary>If your org uses AWS SSO instead of access keys</summary>
+
+```bash
+aws configure sso --profile rockship
+aws sso login --profile rockship        # repeat when the session expires
+```
+
+Everything else is identical. Expired SSO sessions show up as
+`Could not authenticate to AWS` from the deploy script.
+</details>
+
+### 4. Generate an SSH key
+
+Make a key dedicated to this server rather than reusing a personal one:
+
+```bash
+ssh-keygen -t ed25519 -C "your.name@rockship.co" -f ~/.ssh/rockship-profile
+```
+
+Press Enter twice to skip the passphrase, or set one and add the key to your
+agent (`ssh-add ~/.ssh/rockship-profile`).
+
+This produces two files:
+
+| File | What it is | Share it? |
+|---|---|---|
+| `~/.ssh/rockship-profile` | **Private key** | **Never.** Anyone holding it can log in as you |
+| `~/.ssh/rockship-profile.pub` | Public key | Yes — this is what you send |
+
+> Older guides say `ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa`. That still works
+> and the server accepts it; ed25519 is just shorter and faster. Use rsa only if
+> something rejects ed25519.
+
+### 5. Send the **public** key to @axing
+
+```bash
+cat ~/.ssh/rockship-profile.pub | pbcopy    # macOS: copies to clipboard
+```
+
+Paste that into your message to @axing. It's a single line starting with
+`ssh-ed25519 AAAA...` and ending with your email. It is safe to send over Slack —
+publishing a public key grants nothing on its own.
+
+<details>
+<summary>For @axing: installing it on the server</summary>
+
+```bash
+ssh ubuntu@13.251.100.184
+echo "ssh-ed25519 AAAA... their.name@rockship.co" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Append — don't overwrite, or you'll lock out everyone else.
+</details>
+
+### 6. Test the connection
+
+```bash
+ssh -i ~/.ssh/rockship-profile ubuntu@13.251.100.184 'docker ps --format "{{.Names}}"'
+```
+
+The first connection asks you to trust the host key — type `yes`. A list of
+running containers means you're in.
+
+### 7. Fill in `deploy.config`
+
+```bash
+cp deploy.config.example deploy.config    # gitignored; never commit it
+```
+
+Set the four values specific to you and the server:
+
+```bash
+AWS_PROFILE="rockship"                    # from step 3
+SSH_KEY="$HOME/.ssh/rockship-profile"     # from step 4 — the PRIVATE key
+SSH_HOST="13.251.100.184"
+SSH_USER="ubuntu"
+```
+
+Leave the rest at their defaults. In particular `HOST_PORT=""` is deliberate:
+the server's host port 3000 already belongs to `prod-rockship-fe-1`, so this
+container publishes nothing and is reached over the `nginx` Docker network
+instead, as `http://rockship-profile:3000`. Setting `HOST_PORT` reintroduces the
+collision.
+
+Confirm everything resolves before deploying anything:
+
+```bash
+./scripts/deploy.sh build
+```
+
+### Access troubleshooting
+
+| Error | Fix |
+|---|---|
+| `The config profile (x) could not be found` | `AWS_PROFILE` names a profile that doesn't exist. Check `aws configure list-profiles`; it is not your IAM username |
+| `Credentials resolve to account X, but deploy.config says Y` | Wrong profile selected — you're pointed at a different AWS account |
+| `Could not authenticate to AWS` | Keys are wrong, or an SSO session expired (`aws sso login --profile rockship`) |
+| `Permissions 0644 for '...' are too open` | `chmod 600 ~/.ssh/rockship-profile` — SSH refuses world-readable private keys |
+| `Permission denied (publickey)` | @axing hasn't installed your key yet, or `SSH_KEY` points at the `.pub` instead of the private key |
+| `Host key verification failed` | The server was rebuilt. Remove the stale entry: `ssh-keygen -R 13.251.100.184` |
+
+## One-time setup
+
+### Local
+
+```bash
+cp deploy.config.example deploy.config   # then fill it in (gitignored)
+aws sso login                            # or however you authenticate
+```
+
+Install bun if you don't have it (`curl -fsSL https://bun.sh/install | bash`).
+Node is not needed on the build machine — bun both installs dependencies and
+runs the Next.js build. The required bun version is pinned in `.bun-version`;
+the build step refuses to run on an older one.
+
+Create `.env.production` for **build-time** values. Anything named
+`NEXT_PUBLIC_*` is inlined into the client bundle when `next build` runs on your
+laptop — it cannot be supplied later on the server:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+### Server
+
+Install Docker and the AWS CLI, give the instance an IAM role with
+`AmazonEC2ContainerRegistryReadOnly`, then create the **runtime** env file. This
+file is never uploaded by the deploy script — provision it once, by hand:
+
+```bash
+sudo mkdir -p /etc/rockship-profile
+sudo nano /etc/rockship-profile/.env.production
+sudo chmod 600 /etc/rockship-profile/.env.production
+```
+
+See `.env.server.example` for the full annotated list. In short:
+
+```
+SUPABASE_SERVICE_ROLE_KEY=...
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=...
+RESEND_API_KEY=...
+```
+
+Do **not** put `NEXT_PUBLIC_*` variables here. Next.js compiles those into the
+bundle during `next build`, so a runtime value is silently ignored.
+
+### Which variable goes where
+
+| Variable | Where | Why |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | build | Inlined into the bundle |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | build | Inlined; public by design (relies on RLS) |
+| `NEXT_PUBLIC_GROQ_API_KEY` | build | Inlined — **shipped to the browser**, see below |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | build | Inlined — **shipped to the browser**, see below |
+| `SUPABASE_SERVICE_ROLE_KEY` | server | Bypasses RLS; server-only |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | server | `/admin` credentials |
+| `RESEND_API_KEY` | server | Contact form; 503 without it |
+
+**Every one of these is optional.** The app boots and serves every page with an
+empty env file: Supabase queries short-circuit to empty, the assistants disable
+themselves, and the contact form returns 503. Placeholder values (`your-project-ref`,
+`xxxx`, `example.com`) count as unconfigured, so a half-filled `.env` degrades
+the same way instead of failing DNS at build time.
+
+The build and CI both warn when Supabase is unset or still a placeholder, but
+neither fails. That is worth remembering when debugging: a healthy container
+does not mean a correctly configured one — check the build log for
+`Supabase is not configured` if the blog is unexpectedly empty.
+
+## Deploying
+
+```bash
+bun run deploy       # build → push → release
+```
+
+Or one step at a time:
+
+| Command | Step | What it does |
+|---|---|---|
+| `./scripts/deploy.sh build` | 1 | `bun install` + `next build`, stages output into `.deploy/` |
+| `./scripts/deploy.sh image` | 2 | Builds the image for *your* arch only, for local testing |
+| `./scripts/deploy.sh push` | 2+3 | Multi-arch `buildx` build, pushes to ECR |
+| `./scripts/deploy.sh release` | 4 | SSH: pull, remove old container, run new one, wait for healthy |
+| `./scripts/deploy.sh run-local` | — | Runs the local image on `:3000` to smoke-test |
+| `./scripts/deploy.sh logs` | — | Tails container logs on the server |
+
+Images are tagged with the short git SHA (`-dirty` if you have uncommitted
+changes) and `latest`. Override with `IMAGE_TAG=v1.2.3 ./scripts/deploy.sh`.
+
+### Testing the image before shipping
+
+```bash
+./scripts/deploy.sh build
+./scripts/deploy.sh image
+./scripts/deploy.sh run-local     # → http://localhost:3000
+```
+
+### Rollback
+
+Every SHA tag stays in ECR, so redeploy any previous build without rebuilding:
+
+```bash
+IMAGE_TAG=<old-sha> ./scripts/deploy.sh release
+```
+
+## Known security issues
+
+Two pre-existing problems worth fixing before this is publicly reachable. Both
+predate the Docker setup.
+
+**Exposed AI keys.** `services/groqService.ts` and `services/geminiService.ts`
+run in the browser (the Groq SDK is constructed with `dangerouslyAllowBrowser`),
+reading `NEXT_PUBLIC_GROQ_API_KEY` and `NEXT_PUBLIC_GEMINI_API_KEY`. The
+`NEXT_PUBLIC_` prefix inlines them into a client chunk, so any visitor can read
+them from devtools and spend your quota. The fix is to proxy both through a
+server route — `app/api/chat/route.ts` already exists as a placeholder and looks
+intended for exactly this — and drop the `NEXT_PUBLIC_` prefix.
+
+**Forgeable admin session.** `actions/auth.ts` sets the session cookie to
+`base64(username:timestamp:password)`, and `proxy.ts` validates it by base64
+decoding and comparing only the username. Base64 is encoding, not signing, so
+anyone can set `admin_session` to `base64("admin:0:")` and reach `/admin` without
+knowing `ADMIN_PASSWORD`. It needs a signed token (HMAC or JWT) with the
+signature verified on every request.
+
+## Deploying from GitHub Actions
+
+`.github/workflows/deploy-ecr.yml` runs on every push to `main` and on manual
+dispatch. It does not reimplement the deploy — it writes a `deploy.config` from
+repo variables and then calls the same `scripts/deploy.sh`, so CI and your
+laptop cannot drift apart.
+
+> Note: the existing `ci-cd.yml` (Vercel) still runs alongside this. Both deploy
+> on pushes to `main`, to two different places.
+
+### Repository variables
+
+Settings → Secrets and variables → Actions → **Variables** tab. These are not
+secret; they are the same values as your local `deploy.config`.
+
+**Required — the workflow fails immediately without them:**
+
+| Variable | Value for this project |
+|---|---|
+| `AWS_REGION` | `ap-southeast-1` |
+| `AWS_ACCOUNT_ID` | `471112636744` |
+| `ECR_REPOSITORY` | `rockship-profile` |
+| `SSH_HOST` | `13.251.100.184` |
+| `SSH_USER` | `ubuntu` |
+| `REMOTE_ENV_FILE` | `/home/ubuntu/rockship-profile/.env.production` |
+
+**Optional — sensible defaults if unset:**
+
+| Variable | Default | Set it only if |
+|---|---|---|
+| `DOCKER_NETWORK` | `nginx` | the proxy network is renamed |
+| `CONTAINER_NAME` | `rockship-profile` | you rename the container (nginx-proxy-manager routes to this name) |
+| `CONTAINER_PORT` | `3000` | the app listens elsewhere |
+| `PLATFORMS` | `linux/amd64,linux/arm64` | you want a single-arch build |
+| `SSH_PORT` | `22` | sshd is on another port |
+| `HOST_PORT` | *(empty)* | **leave unset** — see below |
+
+Do not set `HOST_PORT`. Host port 3000 on that server belongs to
+`prod-rockship-fe-1`; the container is reached over `DOCKER_NETWORK` instead, and
+publishing a port recreates the collision.
+
+### Repository secrets
+
+Same page, **Secrets** tab.
+
+**Required:**
+
+| Secret | How to get it |
+|---|---|
+| `AWS_DEPLOY_ROLE_ARN` | The IAM role ARN from "One-time AWS OIDC setup" below, e.g. `arn:aws:iam::471112636744:role/github-actions-rockship-profile` |
+| `SSH_PRIVATE_KEY` | Contents of the private key whose public half is in the server's `~/.ssh/authorized_keys`. Paste the **whole file**, including the `-----BEGIN...` and `-----END...` lines |
+
+**Recommended:**
+
+| Secret | How to get it |
+|---|---|
+| `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 13.251.100.184`. Without it the workflow trusts the host key on first use and logs a warning — that window is MITM-able |
+
+**Optional — all four are build-time values compiled into the client bundle:**
+
+| Secret | Effect if unset |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Blog renders empty; rest of the site unaffected |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | As above — both are needed together |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Groq assistant disables itself |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Gemini assistant disables itself |
+
+The workflow warns but does not fail when these are missing or still a
+placeholder. Note the two AI keys reach the browser — see "Known security
+issues".
+
+Server-only secrets (`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`,
+`ADMIN_PASSWORD`, `RESEND_API_KEY`) are **not** GitHub secrets — they live only
+in `REMOTE_ENV_FILE` on the server and are never seen by CI.
+
+### Setting them from the CLI
+
+```bash
+gh auth login
+REPO=Rockship-Team/rockship-profile
+
+gh variable set AWS_REGION      --repo "$REPO" --body "ap-southeast-1"
+gh variable set AWS_ACCOUNT_ID  --repo "$REPO" --body "471112636744"
+gh variable set ECR_REPOSITORY  --repo "$REPO" --body "rockship-profile"
+gh variable set SSH_HOST        --repo "$REPO" --body "13.251.100.184"
+gh variable set SSH_USER        --repo "$REPO" --body "ubuntu"
+gh variable set REMOTE_ENV_FILE --repo "$REPO" --body "/home/ubuntu/rockship-profile/.env.production"
+
+gh secret set AWS_DEPLOY_ROLE_ARN --repo "$REPO"          # paste the role ARN
+gh secret set SSH_PRIVATE_KEY     --repo "$REPO" < ~/Desktop/aws/rockitflow
+ssh-keyscan -p 22 13.251.100.184 2>/dev/null \
+  | gh secret set SSH_KNOWN_HOSTS --repo "$REPO"
+
+# Optional
+gh secret set NEXT_PUBLIC_SUPABASE_URL      --repo "$REPO"
+gh secret set NEXT_PUBLIC_SUPABASE_ANON_KEY --repo "$REPO"
+```
+
+The workflow targets `environment: production`. If that environment does not
+exist yet, create it under Settings → Environments (add required reviewers there
+if you want deploys to wait for approval).
+
+### One-time AWS OIDC setup
+
+Register GitHub as an OIDC provider (once per account):
+
+```bash
+aws iam create-open-id-connect-provider \
+  --url https://token.actions.githubusercontent.com \
+  --client-id-list sts.amazonaws.com \
+  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1
+```
+
+Create a role trusted by this repo only — note the `sub` condition pins it to
+`main`, so a branch or fork cannot assume it:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": { "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com" },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
+      "StringLike": { "token.actions.githubusercontent.com:sub": "repo:<ORG>/<REPO>:ref:refs/heads/main" }
+    }
+  }]
+}
+```
+
+Attach a policy allowing `ecr:GetAuthorizationToken` plus push access to the one
+repository (`ecr:BatchCheckLayerAvailability`, `ecr:CompleteLayerUpload`,
+`ecr:InitiateLayerUpload`, `ecr:PutImage`, `ecr:UploadLayerPart`,
+`ecr:DescribeRepositories`, `ecr:CreateRepository`), then put the role ARN in
+`AWS_DEPLOY_ROLE_ARN`.
+
+If you add a `production` environment with required reviewers, deploys will wait
+for approval — the workflow already targets `environment: production`.
+
+### Rollback from the Actions tab
+
+Run the workflow manually and set **image_tag** to a previously pushed tag. The
+build and push steps are skipped entirely; only the release step runs.
+
+CI tags images with the full commit SHA (`github.sha`), while local deploys use
+the short SHA. Both land in the same repository — `aws ecr list-images
+--repository-name rockship-profile` shows everything available to roll back to.
+
+## How it fits together
+
+**`output: 'standalone'`** (next.config.js) makes Next emit `.next/standalone/`
+— `server.js` plus only the `node_modules` actually reached by the server. The
+build step also copies in the two things standalone deliberately omits,
+`.next/static` and `public/`.
+
+**The runtime image is `oven/bun:alpine`** — there is no Node.js in it. The
+container runs `bun run server.js` as the unprivileged `bun` user. (`node` does
+resolve inside the image, but it is bun's own compatibility shim, not Node.)
+
+**Not a compiled binary.** `bun build --compile` on the standalone entrypoint
+produces a binary that immediately fails: Next's `server.js` calls
+`process.chdir(__dirname)`, which inside a compiled binary is the virtual path
+`/$bunfs/root/` and raises ENOENT. Even patched, `next-server` reads the
+`.next/server/**` chunks from disk per request, so `.next/` and `public/` have to
+ship as real files. A single self-contained executable isn't achievable for a
+Next.js server; the image is the unit of deployment instead.
+
+**sharp** is the one native dependency. Its binaries are platform-specific, so
+the build step deletes the host's copy from `.deploy/` and the Dockerfile
+reinstalls it in a separate stage where the target platform is known. Without it
+`next/image` does not fail loudly — it serves the original file. A 452 KB PNG
+comes back as 452 KB instead of a 22 KB WebP, still with HTTP 200.
+
+**Multi-arch** builds require the `docker-container` buildx driver (the default
+`docker` driver cannot produce multi-platform manifests). The script creates a
+builder named `rockship-builder` on first run. Because a multi-arch manifest
+can't be loaded into the local daemon, `push` builds and pushes in one step;
+use `image` when you want something you can actually run locally.
+
+**Zero-ish downtime.** `release` pulls the new image *before* removing the old
+container, so a failed pull leaves the running version serving traffic. The gap
+between `docker rm` and the new container passing its health check is a few
+seconds. If you need true zero-downtime, put nginx or an ALB in front and run
+two containers on alternating ports.
+
+## Troubleshooting
+
+**`bun X is older than the pinned Y`** — run `bun upgrade`. The pin exists
+because bun 1.1.x cannot run the Next.js build: it fails with
+`worker_threads.Worker option "stdout" is not yet implemented in Bun`.
+
+**`You are using Node.js 16.x. For Next.js, Node.js version ">=20.9.0" is
+required`** — this appears if you run `bun run build` by hand. Plain `bun run`
+honours the `next` shebang and delegates to whatever `node` is on your PATH. The
+deploy script passes `--bun` to force the bun runtime, sidestepping Node
+entirely; do the same by hand with `bun --bun run build`.
+
+**A dependency's install script didn't run** — bun only runs postinstall scripts
+for packages listed in `trustedDependencies` in `package.json`. `sharp`,
+`unrs-resolver` and `@tsparticles/engine` are already listed; add new native
+dependencies there.
+
+**Container is unhealthy** — `./scripts/deploy.sh logs`. Most often the
+`--env-file` on the server is missing a variable the app reads at boot.
+
+**Health check never settles** — the app listens on `HOSTNAME=0.0.0.0` inside the
+container (set in the Dockerfile). If you override `PORT`, `CONTAINER_PORT` in
+`deploy.config` must match.

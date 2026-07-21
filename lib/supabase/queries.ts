@@ -1,4 +1,10 @@
-import { createClient as createServerClient, createAdminClient } from "./server"
+import {
+  createPublicClient,
+  createAdminClient,
+  isSupabaseConfigured,
+  isSupabaseAdminConfigured,
+  warnOnce,
+} from "./server"
 import { createClient as createBrowserClient } from "./client"
 import type { BlogPostWithTags, BlogTagRow } from "./types"
 import type { BlogPost, TopicTag } from "@/types/blog"
@@ -39,14 +45,13 @@ function extractTags(tagData: any[] | null): string[] {
  * Uses single query with join to avoid N+1 problem
  */
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  // Skip if Supabase not configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.warn("Supabase not configured, returning empty posts")
+  if (!isSupabaseConfigured()) {
+    warnOnce("Supabase is not configured — the blog will render as empty.")
     return []
   }
 
   try {
-    const supabase = await createServerClient()
+    const supabase = createPublicClient()
 
     // Single query with tags join - much faster than N+1
     const { data: posts, error } = await supabase
@@ -95,13 +100,12 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
  * Uses single query with aggregation to avoid N+1 problem
  */
 export async function getAllTags(): Promise<TopicTag[]> {
-  // Skip if Supabase not configured
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  if (!isSupabaseConfigured()) {
     return []
   }
 
   try {
-    const supabase = await createServerClient()
+    const supabase = createPublicClient()
 
     // Use RPC for optimized single-query tag count
     const { data, error } = await supabase.rpc("get_tags_with_post_counts")
@@ -152,7 +156,9 @@ export async function getAllTags(): Promise<TopicTag[]> {
  * Uses single query with join to avoid N+1 problem
  */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  const supabase = await createServerClient()
+  if (!isSupabaseConfigured()) return null
+
+  const supabase = createPublicClient()
 
   const { data: post, error } = await supabase
     .from("blog_posts")
@@ -192,8 +198,8 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
  */
 export async function getAllSlugs(): Promise<string[]> {
   // Skip if Supabase env vars not configured (build without database)
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.warn("Supabase not configured, skipping slug generation")
+  if (!isSupabaseAdminConfigured()) {
+    warnOnce("Supabase admin is not configured — no blog slugs will be prerendered.")
     return []
   }
 
@@ -223,7 +229,9 @@ export async function getAllSlugs(): Promise<string[]> {
  * so we fall back to ILIKE for those cases
  */
 export async function searchPosts(query: string): Promise<BlogPost[]> {
-  const supabase = await createServerClient()
+  if (!isSupabaseConfigured()) return []
+
+  const supabase = createPublicClient()
 
   // First try PostgreSQL full-text search
   const { data: posts, error } = await supabase
@@ -306,7 +314,9 @@ export async function searchPosts(query: string): Promise<BlogPost[]> {
  * Uses two-step query: first get tag_id, then get posts with that tag
  */
 export async function getPostsByTag(tagSlug: string): Promise<BlogPost[]> {
-  const supabase = await createServerClient()
+  if (!isSupabaseConfigured()) return []
+
+  const supabase = createPublicClient()
 
   // Step 1: Get the tag ID from slug
   const { data: tag, error: tagError } = await supabase
@@ -373,6 +383,8 @@ export async function getPostsByTag(tagSlug: string): Promise<BlogPost[]> {
  * Get all posts for admin (including drafts)
  */
 export async function getAllPostsForAdmin(): Promise<BlogPostWithTags[]> {
+  if (!isSupabaseAdminConfigured()) return []
+
   const supabase = createAdminClient()
 
   const { data: posts, error } = await supabase
@@ -413,6 +425,8 @@ export async function getAllPostsForAdmin(): Promise<BlogPostWithTags[]> {
  * Get a single post by ID for admin (including drafts)
  */
 export async function getPostById(id: string): Promise<BlogPostWithTags | null> {
+  if (!isSupabaseAdminConfigured()) return null
+
   const supabase = createAdminClient()
 
   const { data: post, error } = await supabase
@@ -443,6 +457,8 @@ export async function getPostById(id: string): Promise<BlogPostWithTags | null> 
  * Get all tags for admin (with all tags, not just those with posts)
  */
 export async function getAllTagsForAdmin(): Promise<BlogTagRow[]> {
+  if (!isSupabaseAdminConfigured()) return []
+
   const supabase = createAdminClient()
 
   const { data, error } = await supabase

@@ -3,6 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   reactCompiler: true,
 
+  // Emit a self-contained server bundle in .next/standalone for the Docker image
+  output: 'standalone',
+
   // Image optimization configuration
   images: {
     domains: [],

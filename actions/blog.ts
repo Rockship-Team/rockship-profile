@@ -3,8 +3,16 @@
 import { revalidatePath } from "next/cache"
 import { createClient } from "@supabase/supabase-js"
 import { searchPosts, getPostsByTag, getPublishedPosts } from "@/lib/supabase/queries"
+import { isSupabaseAdminConfigured } from "@/lib/supabase/server"
 import type { BlogPost } from "@/types/blog"
 import type { BlogSection, Database } from "@/lib/supabase/types"
+
+// Supabase is optional. Mutations cannot degrade to "empty" the way reads can,
+// so they return a failed ActionResult the UI can surface instead of throwing.
+const NOT_CONFIGURED: ActionResult = {
+  success: false,
+  error: "Supabase is not configured on this deployment.",
+}
 
 // Admin client with service role for CRUD operations
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,6 +131,8 @@ function calculateReadingTime(content: string): number {
  * Create a new blog post
  */
 export async function createPost(input: CreatePostInput): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {
@@ -188,6 +198,8 @@ export async function createPost(input: CreatePostInput): Promise<ActionResult> 
  */
 export async function updatePost(input: UpdatePostInput): Promise<ActionResult> {
   console.log("updatePost called with:", { id: input.id, slug: input.slug, title: input.title, contentLength: input.content?.length })
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {
@@ -281,6 +293,8 @@ export async function updatePost(input: UpdatePostInput): Promise<ActionResult> 
  * Delete a blog post
  */
 export async function deletePost(id: string): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {
@@ -377,6 +391,8 @@ export interface UpdateTagInput extends CreateTagInput {
  * Create a new tag
  */
 export async function createTag(input: CreateTagInput): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {
@@ -426,6 +442,8 @@ export async function createTag(input: CreateTagInput): Promise<ActionResult> {
  * Update an existing tag
  */
 export async function updateTag(input: UpdateTagInput): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {
@@ -475,6 +493,8 @@ export async function updateTag(input: UpdateTagInput): Promise<ActionResult> {
  * Delete a tag
  */
 export async function deleteTag(id: string): Promise<ActionResult> {
+  if (!isSupabaseAdminConfigured()) return NOT_CONFIGURED
+
   const supabase = getAdminClient()
 
   try {

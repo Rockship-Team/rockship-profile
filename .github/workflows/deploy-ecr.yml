@@ -1,0 +1,190 @@
+# Builds the Next.js standalone bundle on the runner with bun, packages it into
+# a multi-arch Docker image, pushes to ECR, and swaps the container on the EC2
+# host over SSH.
+#
+# This reuses ./scripts/deploy.sh rather than reimplementing the steps, so CI
+# and a local `bun run deploy` cannot drift apart. The workflow's only job is to
+# synthesise deploy.config from repo variables and hand off.
+#
+# Setup: docs/deployment.md ("Deploying from GitHub Actions").
+
+name: Deploy to ECR
+
+on:
+  # Fires on every merge into main — merge commit, squash or rebase all arrive
+  # as a push to the branch. Also fires on a direct push to main; to deploy only
+  # merged pull requests, swap this for:
+  #   pull_request:
+  #     types: [closed]
+  #     branches: [main]
+  # and gate the job with: if: github.event.pull_request.merged == true
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Existing ECR tag to release (rollback). Leave empty to build this commit."
+        required: false
+        type: string
+
+# Never let two deploys race for the same container. Deploys are not cancelled
+# mid-flight — that could leave the server with no running container.
+concurrency:
+  group: deploy-ecr
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, push and release
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: read
+      id-token: write # required for OIDC role assumption
+
+    env:
+      # Explicit so scripts/deploy.sh does not derive it from git state.
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+      ROLLBACK: ${{ inputs.image_tag != '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # bun runs both the install and the Next build, so no Node setup is needed.
+      # The version comes from .bun-version — older bun cannot run the build.
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Set up QEMU
+        if: env.ROLLBACK != 'true'
+        uses: docker/setup-qemu-action@v3 # arm64 emulation for the multi-arch build
+
+      - name: Set up Docker Buildx
+        if: env.ROLLBACK != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      # Values arrive as env vars rather than being pasted into the script text,
+      # so a value containing $(...) or a quote cannot alter the commands here.
+      # printf %q emits shell-safe literals, and deploy.config is sourced by bash.
+      - name: Write deploy.config
+        env:
+          CFG_AWS_REGION: ${{ vars.AWS_REGION }}
+          CFG_AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          CFG_ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          CFG_PLATFORMS: ${{ vars.PLATFORMS }}
+          CFG_SSH_HOST: ${{ vars.SSH_HOST }}
+          CFG_SSH_USER: ${{ vars.SSH_USER }}
+          CFG_SSH_PORT: ${{ vars.SSH_PORT }}
+          CFG_CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+          CFG_DOCKER_NETWORK: ${{ vars.DOCKER_NETWORK }}
+          CFG_HOST_PORT: ${{ vars.HOST_PORT }}
+          CFG_CONTAINER_PORT: ${{ vars.CONTAINER_PORT }}
+          CFG_REMOTE_ENV_FILE: ${{ vars.REMOTE_ENV_FILE }}
+        run: |
+          # Fail here with a readable message rather than deep inside the script.
+          : "${CFG_AWS_REGION:?set the AWS_REGION repository variable}"
+          : "${CFG_AWS_ACCOUNT_ID:?set the AWS_ACCOUNT_ID repository variable}"
+          : "${CFG_ECR_REPOSITORY:?set the ECR_REPOSITORY repository variable}"
+          : "${CFG_SSH_HOST:?set the SSH_HOST repository variable}"
+          : "${CFG_SSH_USER:?set the SSH_USER repository variable}"
+          : "${CFG_REMOTE_ENV_FILE:?set the REMOTE_ENV_FILE repository variable}"
+
+          {
+            printf 'AWS_REGION=%q\n'      "$CFG_AWS_REGION"
+            printf 'AWS_ACCOUNT_ID=%q\n'  "$CFG_AWS_ACCOUNT_ID"
+            printf 'ECR_REPOSITORY=%q\n'  "$CFG_ECR_REPOSITORY"
+            printf 'AWS_PROFILE=%q\n'     ""
+            printf 'PLATFORMS=%q\n'       "${CFG_PLATFORMS:-linux/amd64,linux/arm64}"
+            printf 'SSH_HOST=%q\n'        "$CFG_SSH_HOST"
+            printf 'SSH_USER=%q\n'        "$CFG_SSH_USER"
+            printf 'SSH_PORT=%q\n'        "${CFG_SSH_PORT:-22}"
+            printf 'SSH_KEY=%q\n'         "$HOME/.ssh/deploy_key"
+            printf 'CONTAINER_NAME=%q\n'  "${CFG_CONTAINER_NAME:-rockship-profile}"
+            printf 'DOCKER_NETWORK=%q\n'  "${CFG_DOCKER_NETWORK:-nginx}"
+            printf 'CONTAINER_PORT=%q\n'  "${CFG_CONTAINER_PORT:-3000}"
+            printf 'REMOTE_ENV_FILE=%q\n' "$CFG_REMOTE_ENV_FILE"
+            # Normally empty: the host's port 3000 belongs to another app, so the
+            # container is reached over DOCKER_NETWORK instead of a published port.
+            printf 'HOST_PORT=%q\n'       "${CFG_HOST_PORT:-}"
+          } > deploy.config
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_PORT: ${{ vars.SSH_PORT }}
+        run: |
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "::error::SSH_PRIVATE_KEY secret is not set."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::SSH_KNOWN_HOSTS is not set; trusting the host key on first use (vulnerable to MITM). Populate it with: ssh-keyscan -p ${SSH_PORT:-22} $SSH_HOST"
+            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Build Next.js standalone bundle
+        if: env.ROLLBACK != 'true'
+        run: ./scripts/deploy.sh build
+
+      - name: Build multi-arch image and push to ECR
+        if: env.ROLLBACK != 'true'
+        run: ./scripts/deploy.sh push
+
+      - name: Release on server
+        run: ./scripts/deploy.sh release
+
+      - name: Summary
+        if: always()
+        env:
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+          DOCKER_NETWORK: ${{ vars.DOCKER_NETWORK }}
+          CONTAINER_PORT: ${{ vars.CONTAINER_PORT }}
+          HOST_PORT: ${{ vars.HOST_PORT }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ -n "$HOST_PORT" ]; then
+            reachable="http://${SSH_HOST}:${HOST_PORT}"
+          else
+            reachable="${DOCKER_NETWORK:-nginx} network → ${CONTAINER_NAME:-rockship-profile}:${CONTAINER_PORT:-3000}"
+          fi
+
+          if [ "$ROLLBACK" = 'true' ]; then
+            mode='rollback (no rebuild)'
+          else
+            mode='build from commit'
+          fi
+
+          {
+            echo "### Deploy $JOB_STATUS"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Image tag | \`$IMAGE_TAG\` |"
+            echo "| Mode | $mode |"
+            echo "| Server | \`$SSH_HOST\` |"
+            echo "| Reachable at | \`$reachable\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f ~/.ssh/deploy_key ~/.ssh/known_hosts deploy.config .env.production
