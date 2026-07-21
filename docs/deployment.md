@@ -16,6 +16,212 @@ dependency tree in the container.
 └──────────────────────────┘            └───────┘            └──────────────┘
 ```
 
+## Getting access (new developer, start here)
+
+You need two things before you can deploy: AWS credentials that can push to ECR,
+and an SSH key the server trusts. Neither is in the repo — both are granted by an
+admin (**@axing**).
+
+### 1. Install the AWS CLI
+
+```bash
+brew install awscli          # macOS
+aws --version                # must report aws-cli/2.x
+```
+
+If you get `aws-cli/1.x`, upgrade — v1 cannot log in to ECR the way the deploy
+script expects.
+
+### 2. Ask @axing for AWS credentials
+
+Ask for an IAM user in account **471112636744** with permission to push to the
+`rockship-profile` ECR repository. You'll be given an **Access Key ID** and a
+**Secret Access Key**.
+
+> The secret is shown exactly once, at creation. If you lose it, you need a new
+> key pair — it cannot be recovered.
+
+<details>
+<summary>For @axing: the policy that user needs</summary>
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeRepositories",
+        "ecr:InitiateLayerUpload",
+        "ecr:ListImages",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "arn:aws:ecr:ap-southeast-1:471112636744:repository/rockship-profile"
+    }
+  ]
+}
+```
+</details>
+
+### 3. Configure an AWS profile
+
+A *profile* is a named set of credentials stored on your machine. Create one:
+
+```bash
+aws configure --profile rockship
+```
+
+Answer the four prompts:
+
+```
+AWS Access Key ID [None]: AKIA................
+AWS Secret Access Key [None]: ....................................
+Default region name [None]: ap-southeast-1
+Default output format [None]: json
+```
+
+This writes to `~/.aws/credentials` (the keys) and `~/.aws/config` (region and
+output). Verify it works and points at the right account:
+
+```bash
+aws sts get-caller-identity --profile rockship
+```
+
+```json
+{
+  "UserId": "AIDA................",
+  "Account": "471112636744",
+  "Arn": "arn:aws:iam::471112636744:user/your-name"
+}
+```
+
+The `Account` **must** be `471112636744`. The deploy script refuses to push if it
+isn't, so a wrong profile fails loudly rather than pushing to someone else's
+registry.
+
+Then point the deploy config at it:
+
+```bash
+# deploy.config
+AWS_PROFILE="rockship"
+```
+
+> **Profile name ≠ IAM user name.** The profile is the label you chose in
+> `aws configure --profile <name>`, not the username in the ARN. Run
+> `aws configure list-profiles` to see valid values. Leave `AWS_PROFILE=""` to
+> use the `[default]` profile.
+
+<details>
+<summary>If your org uses AWS SSO instead of access keys</summary>
+
+```bash
+aws configure sso --profile rockship
+aws sso login --profile rockship        # repeat when the session expires
+```
+
+Everything else is identical. Expired SSO sessions show up as
+`Could not authenticate to AWS` from the deploy script.
+</details>
+
+### 4. Generate an SSH key
+
+Make a key dedicated to this server rather than reusing a personal one:
+
+```bash
+ssh-keygen -t ed25519 -C "your.name@rockship.co" -f ~/.ssh/rockship-profile
+```
+
+Press Enter twice to skip the passphrase, or set one and add the key to your
+agent (`ssh-add ~/.ssh/rockship-profile`).
+
+This produces two files:
+
+| File | What it is | Share it? |
+|---|---|---|
+| `~/.ssh/rockship-profile` | **Private key** | **Never.** Anyone holding it can log in as you |
+| `~/.ssh/rockship-profile.pub` | Public key | Yes — this is what you send |
+
+> Older guides say `ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa`. That still works
+> and the server accepts it; ed25519 is just shorter and faster. Use rsa only if
+> something rejects ed25519.
+
+### 5. Send the **public** key to @axing
+
+```bash
+cat ~/.ssh/rockship-profile.pub | pbcopy    # macOS: copies to clipboard
+```
+
+Paste that into your message to @axing. It's a single line starting with
+`ssh-ed25519 AAAA...` and ending with your email. It is safe to send over Slack —
+publishing a public key grants nothing on its own.
+
+<details>
+<summary>For @axing: installing it on the server</summary>
+
+```bash
+ssh ubuntu@13.251.100.184
+echo "ssh-ed25519 AAAA... their.name@rockship.co" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Append — don't overwrite, or you'll lock out everyone else.
+</details>
+
+### 6. Test the connection
+
+```bash
+ssh -i ~/.ssh/rockship-profile ubuntu@13.251.100.184 'docker ps --format "{{.Names}}"'
+```
+
+The first connection asks you to trust the host key — type `yes`. A list of
+running containers means you're in.
+
+### 7. Fill in `deploy.config`
+
+```bash
+cp deploy.config.example deploy.config    # gitignored; never commit it
+```
+
+Set the four values specific to you and the server:
+
+```bash
+AWS_PROFILE="rockship"                    # from step 3
+SSH_KEY="$HOME/.ssh/rockship-profile"     # from step 4 — the PRIVATE key
+SSH_HOST="13.251.100.184"
+SSH_USER="ubuntu"
+```
+
+Leave the rest at their defaults. In particular `HOST_PORT=""` is deliberate:
+the server's host port 3000 already belongs to `prod-rockship-fe-1`, so this
+container publishes nothing and is reached over the `nginx` Docker network
+instead, as `http://rockship-profile:3000`. Setting `HOST_PORT` reintroduces the
+collision.
+
+Confirm everything resolves before deploying anything:
+
+```bash
+./scripts/deploy.sh build
+```
+
+### Access troubleshooting
+
+| Error | Fix |
+|---|---|
+| `The config profile (x) could not be found` | `AWS_PROFILE` names a profile that doesn't exist. Check `aws configure list-profiles`; it is not your IAM username |
+| `Credentials resolve to account X, but deploy.config says Y` | Wrong profile selected — you're pointed at a different AWS account |
+| `Could not authenticate to AWS` | Keys are wrong, or an SSO session expired (`aws sso login --profile rockship`) |
+| `Permissions 0644 for '...' are too open` | `chmod 600 ~/.ssh/rockship-profile` — SSH refuses world-readable private keys |
+| `Permission denied (publickey)` | @axing hasn't installed your key yet, or `SSH_KEY` points at the `.pub` instead of the private key |
+| `Host key verification failed` | The server was rebuilt. Remove the stale entry: `ssh-keygen -R 13.251.100.184` |
+
 ## One-time setup
 
 ### Local
