@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import ContactCtaLink from "@/components/ContactCtaLink";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -25,14 +26,14 @@ export function CaseStudyNav({ logoText }: CaseStudyNavProps) {
         </div>
 
         {/* Right Side: CTA Button */}
-        <Link href="/contact" className="ml-0 md:ml-auto">
+        <ContactCtaLink location="case_study_nav" className="ml-0 md:ml-auto">
           <Button
             size="sm"
             className="bg-[#FF4D00] text-white hover:opacity-85 font-medium px-6 h-10 rounded-full transition-all duration-300 active:scale-[0.98]"
           >
             Book a Consultation
           </Button>
-        </Link>
+        </ContactCtaLink>
       </div>
     </nav>
   );

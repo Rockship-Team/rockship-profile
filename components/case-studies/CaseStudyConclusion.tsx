@@ -1,5 +1,6 @@
 import { FadeIn } from "@/components/FadeIn";
 import { Button } from "@/components/ui/button";
+import ContactCtaLink from "@/components/ContactCtaLink";
 import { Target } from "lucide-react";
 import Link from "next/link";
 
@@ -19,11 +20,11 @@ export function CaseStudyConclusion({ conclusion }: CaseStudyConclusionProps) {
             "{conclusion}"
           </h2>
           <div className="flex justify-center gap-4">
-            <Link href="/contact">
+            <ContactCtaLink location="case_study_conclusion">
               <Button className="bg-[#FF4D00] hover:opacity-85 text-white rounded-full px-8 py-5 text-base font-normal h-auto">
                 Start Your Project
               </Button>
-            </Link>
+            </ContactCtaLink>
             <Link href="/case-studies">
               <Button
                 variant="outline"

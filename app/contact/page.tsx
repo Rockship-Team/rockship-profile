@@ -2,6 +2,7 @@
 
 import { ArrowRight, CheckCircle2, Loader2, Mail, MapPin } from "lucide-react";
 import { useState } from "react";
+import { trackContactError, trackContactSubmit } from "@/lib/analytics";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -46,13 +47,15 @@ export default function ContactPage() {
       }
 
       setStatus("success");
+      trackContactSubmit("contact_page");
       setFormData({ firstName: "", lastName: "", email: "", message: "" });
     } catch (error) {
       console.error("Submission error:", error);
       setStatus("error");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Failed to send message"
-      );
+      const reason =
+        error instanceof Error ? error.message : "Failed to send message";
+      trackContactError("contact_page", reason);
+      setErrorMessage(reason);
     }
   };
 

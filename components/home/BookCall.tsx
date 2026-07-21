@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { CONTACT } from "@/lib/home-content";
+import { trackContactError, trackContactSubmit } from "@/lib/analytics";
 
 type Status = "idle" | "sending" | "done" | "error";
 
@@ -128,8 +129,13 @@ export function BookCallProvider({ children }: { children: ReactNode }) {
       });
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
       setStatus("done");
-    } catch {
+      trackContactSubmit("book_call_modal");
+    } catch (error) {
       setStatus("error");
+      trackContactError(
+        "book_call_modal",
+        error instanceof Error ? error.message : "unknown"
+      );
     }
   }
 

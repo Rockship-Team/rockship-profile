@@ -62,6 +62,40 @@ Type errors still fail the build: `next build` streams diagnostics from the
 
 [vercel/next.js#95639]: https://github.com/vercel/next.js/pull/95639
 
+## Analytics
+
+GA4 loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set. Leave it unset
+locally and in preview so dev sessions do not report into production numbers —
+with no value, no GA script is requested at all.
+
+Three things about this setup are not obvious from the code:
+
+**Admin routes are excluded.** `/admin` and `/admin/*` render no GA scripts, so
+CMS editing sessions never reach the property. Verified in a real browser, not
+assumed.
+
+**Pageviews on client-side navigation are sent by us.** `gtag('config')` only
+fires a pageview for the route the browser actually loaded; it knows nothing
+about App Router navigations. `components/GoogleAnalytics.tsx` watches
+`usePathname()` and sends `page_view` itself for every subsequent route.
+
+> **Required GA property setting.** In Admin → Data Streams → Enhanced
+> Measurement, turn **off** "page changes based on browser history events".
+> Leaving it on means GA counts SPA navigations *and* our manual event, so
+> every client-side pageview is counted twice.
+
+**Consent Mode v2 defaults to denied.** `analytics_storage`, `ad_storage`,
+`ad_user_data` and `ad_personalization` are all set to `denied` before gtag.js
+loads, so no analytics cookie is written and no identifier persists between
+visits. GA still receives cookieless pings; sessions and users are modelled
+rather than measured. There is no consent banner — to add one later, call
+`gtag('consent', 'update', {...})` on accept; nothing else needs to change.
+
+Conversion events live in `lib/analytics.ts`: `contact_submit`,
+`contact_error`, `contact_cta_click` and `blog_to_case_study`. Add new ones
+there rather than calling `window.gtag`, so the dataLayer name stays in sync
+with the component.
+
 ## Environment variables
 
 `.env.local.example` covers Supabase and admin auth. The AI and email keys are
@@ -74,6 +108,7 @@ Type errors still fail the build: `next build` streams diagnostics from the
 | `SUPABASE_SERVICE_ROLE_KEY` | Admin writes | Server-side only |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `/admin` login | Single shared credential |
 | `RESEND_API_KEY` | Contact form email | |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 | Production only — unset means GA does not load |
 | `NEXT_PUBLIC_GEMINI_API_KEY` | AI assistant, editor AI | |
 | `NEXT_PUBLIC_GROQ_API_KEY` | AI assistant | |
 
