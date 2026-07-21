@@ -1,130 +1,72 @@
-import Groq from "groq-sdk";
-import { knowledgeBase } from "./knowledgeBaseService";
+/**
+ * Browser-side assistant client.
+ *
+ * Every provider call goes through our own API routes — no API key is
+ * referenced here, so none is inlined into the client bundle. The system
+ * prompt, knowledge-base retrieval and scope enforcement all live server-side
+ * in app/api/chat/route.ts.
+ */
 
-const SYSTEM_PROMPT = `You are RockshipAI Assistant. Help users learn about RockshipAI Solutions.
-
-RULES:
-- Always reply in English (default), unless user writes in Vietnamese
-- Be concise: 2-4 sentences max
-- For lists, put each item on a NEW LINE starting with dash (-). Example:
-  Here are our services:
-  - AI automation
-  - Data analytics
-
-CASE STUDY CARDS:
-When user asks about case studies, include JSON for EACH matching case study (copy values EXACTLY from knowledge base):
-{"type":"case_study","data":{"slug":"exact-slug","type":"Case Studies","title":"exact title","logoText":"exact logoText","partner":"exact partner"}}
-
-For MULTIPLE case studies (when listing all or showing related ones), include MULTIPLE JSON objects:
-Example response for "show all case studies":
-Here are our case studies:
-{"type":"case_study","data":{"slug":"ai-loan-automation","type":"Case Studies","title":"Automated borrower engagement...","logoText":"AI Loan Automation for Microfinance","partner":""}}
-{"type":"case_study","data":{"slug":"ai-conversational-commerce","type":"Case Studies","title":"...","logoText":"AI Conversational Commerce","partner":""}}
-`;
-
-type ChatMessage = {
-  role: "system" | "user" | "assistant";
+/** Mirrors the server's HistoryMessage in app/api/chat/route.ts. */
+type HistoryMessage = {
+  role: "user" | "assistant";
   content: string;
 };
 
-let groq: Groq | null = null;
-let conversationHistory: ChatMessage[] = [];
+// Kept in the browser because the chat route is stateless. Only plain messages
+// go in here — retrieved knowledge is attached per-turn by the server and must
+// never accumulate across turns.
+let conversationHistory: HistoryMessage[] = [];
 
 export const clearConversation = (): void => {
-  conversationHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+  conversationHistory = [];
 };
 
-export const initGroq = (): boolean => {
-  if (!process.env.NEXT_PUBLIC_GROQ_API_KEY) {
-    console.warn("Groq API Key missing.");
-    return false;
-  }
-  try {
-    groq = new Groq({
-      apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-      dangerouslyAllowBrowser: true,
-    });
-    conversationHistory = [{ role: "system", content: SYSTEM_PROMPT }];
-    return true;
-  } catch (e) {
-    console.error("Failed to init Groq", e);
-    return false;
-  }
-};
-
-// Speech-to-text transcription using Groq Whisper API with fallback signal
+// Speech-to-text via our /api/voice/transcribe proxy, with fallback signal
 export const transcribeAudio = async (
   audioBlob: Blob,
   language: string = "en",
 ): Promise<string | null> => {
-  const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  try {
+    const formData = new FormData();
+    formData.append("file", audioBlob, "audio.webm");
+    formData.append("language", language);
 
-  if (apiKey) {
-    try {
-      const formData = new FormData();
-      formData.append("file", audioBlob, "audio.webm");
-      formData.append("model", "whisper-large-v3-turbo");
-      formData.append("response_format", "json");
-      formData.append("language", language);
+    const response = await fetch("/api/voice/transcribe", {
+      method: "POST",
+      body: formData,
+    });
 
-      const response = await fetch(
-        "https://api.groq.com/openai/v1/audio/transcriptions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: formData,
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.text || "";
-      }
-      console.warn("Groq Whisper failed, signaling fallback");
-    } catch (error) {
-      console.warn("Groq Whisper error:", error);
+    if (response.ok) {
+      const data = await response.json();
+      return data.text || "";
     }
+    console.warn("Transcription failed, signaling fallback");
+  } catch (error) {
+    console.warn("Transcription error:", error);
   }
 
   // Return null to signal that fallback should be used for next recording
   return null;
 };
 
-// Text-to-Speech using TTS API (Orpheus model) with Web Speech API fallback
+// Text-to-Speech via our /api/voice/speech proxy, with Web Speech API fallback
 export const textToSpeech = async (
   text: string,
 ): Promise<ArrayBuffer | null> => {
-  const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  try {
+    const response = await fetch("/api/voice/speech", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
 
-  // Try TTS first
-  if (apiKey) {
-    try {
-      const response = await fetch(
-        "https://api.groq.com/openai/v1/audio/speech",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "canopylabs/orpheus-v1-english",
-            input: text,
-            voice: "autumn",
-            response_format: "wav",
-          }),
-        },
-      );
-
-      if (response.ok) {
-        return response.arrayBuffer();
-      }
-      console.warn("TTS failed, falling back to Web Speech API");
-    } catch (error) {
-      console.warn("TTS error, falling back to Web Speech API:", error);
+    if (response.ok) {
+      return response.arrayBuffer();
     }
+    console.warn("TTS failed, falling back to Web Speech API");
+  } catch (error) {
+    console.warn("TTS error, falling back to Web Speech API:", error);
   }
 
   // Return null to signal fallback to Web Speech API
@@ -343,69 +285,66 @@ export const stopSpeechFallback = (): void => {
   }
 };
 
+const MAX_HISTORY = 20;
+
 // Streaming version with callback for real-time UI updates
 export const getChatResponseStream = async (
   userMessage: string,
   onChunk: (chunk: string) => void,
   onComplete: (fullResponse: string) => void,
-  onError: (error: string) => void,
+  onError: (error: string, isUnavailable: boolean) => void,
 ): Promise<void> => {
-  if (!process.env.NEXT_PUBLIC_GROQ_API_KEY || !groq) {
-    onError("error");
-    return;
-  }
-
   try {
-    // Keep conversation history manageable (max 20 messages + system)
-    if (conversationHistory.length > 21) {
-      conversationHistory = [
-        conversationHistory[0], // system prompt
-        ...conversationHistory.slice(-20), // last 20 messages
-      ];
-    }
-
-    // Search knowledge base for relevant information
-    const relevantKnowledge = knowledgeBase.searchKnowledge(userMessage);
-    const knowledgeContext =
-      knowledgeBase.formatKnowledgeForLLM(relevantKnowledge);
-
-    // Create enhanced prompt with knowledge base
-    const enhancedPrompt = `${knowledgeContext}
-
-USER: ${userMessage}`;
-
-    // Add user message to history
-    conversationHistory.push({ role: "user", content: enhancedPrompt });
-
-    // Create chat completion with streaming
-    const chatCompletion = await groq.chat.completions.create({
-      messages: conversationHistory,
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.5,
-      max_tokens: 4096,
-      top_p: 0.9,
-      stream: true,
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: userMessage,
+        history: conversationHistory.slice(-MAX_HISTORY),
+      }),
     });
 
-    // Stream response with callbacks
-    let fullResponse = "";
-    for await (const chunk of chatCompletion) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      if (content) {
-        fullResponse += content;
-        onChunk(content);
-      }
+    if (!response.ok || !response.body) {
+      // 503 means the server has no provider credentials — a configuration
+      // problem, not a transient one, so the UI shows itself as offline.
+      onError(
+        "Sorry, the assistant is unavailable right now. Please try again later.",
+        response.status === 503,
+      );
+      return;
     }
 
-    // Add assistant response to history
-    conversationHistory.push({ role: "assistant", content: fullResponse });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      if (chunk) {
+        fullResponse += chunk;
+        onChunk(chunk);
+      }
+    }
+    fullResponse += decoder.decode();
+
+    // Only plain messages are retained; the server attaches retrieved
+    // knowledge itself, per turn.
+    conversationHistory.push(
+      { role: "user", content: userMessage },
+      { role: "assistant", content: fullResponse },
+    );
+    if (conversationHistory.length > MAX_HISTORY) {
+      conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+    }
 
     onComplete(
       fullResponse ||
         "I processed that, but couldn't generate a text response.",
     );
   } catch (error: unknown) {
-    console.error("Groq Chat Error:", error);
-    onError("error");
+    console.error("Chat Error:", error);
+    onError("Sorry, something went wrong. Please try again.", false);
   }
 };
