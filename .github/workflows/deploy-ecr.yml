@@ -110,48 +110,6 @@ jobs:
             # container is reached over DOCKER_NETWORK instead of a published port.
             printf 'HOST_PORT=%q\n'       "${CFG_HOST_PORT:-}"
           } > deploy.config
-
-      # NEXT_PUBLIC_* is compiled into the client bundle by `next build`, so it
-      # must be correct HERE. Setting it on the server has no effect, and a wrong
-      # value fails silently at runtime — an empty blog, not an error.
-      - name: Write .env.production
-        if: env.ROLLBACK != 'true'
-        env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
-        run: |
-          # Supabase is optional: the site builds and runs without it, with an
-          # empty blog. Warn loudly rather than failing, since that is almost
-          # never what you want in production.
-          case "$SUPABASE_URL" in
-            *your-project-ref*|*xxxx*|*example.com*)
-              echo "::warning::NEXT_PUBLIC_SUPABASE_URL is a placeholder ($SUPABASE_URL); treating Supabase as unconfigured. The deployed blog will be empty."
-              SUPABASE_URL=""
-              SUPABASE_ANON_KEY=""
-              ;;
-          esac
-
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::warning::Supabase secrets are not set, so the deployed blog will be empty. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable it — they are compiled in at build time and cannot be added on the server."
-          fi
-
-          {
-            if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
-              printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "$SUPABASE_URL"
-              printf 'NEXT_PUBLIC_SUPABASE_ANON_KEY=%s\n' "$SUPABASE_ANON_KEY"
-            fi
-            # Optional. NOTE: these reach the browser — see "Exposed AI keys" in
-            # docs/deployment.md. Omitting them disables the assistants cleanly.
-            if [ -n "$GROQ_API_KEY" ]; then
-              printf 'NEXT_PUBLIC_GROQ_API_KEY=%s\n' "$GROQ_API_KEY"
-            fi
-            if [ -n "$GEMINI_API_KEY" ]; then
-              printf 'NEXT_PUBLIC_GEMINI_API_KEY=%s\n' "$GEMINI_API_KEY"
-            fi
-          } > .env.production
-
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

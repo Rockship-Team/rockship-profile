@@ -360,39 +360,95 @@ laptop cannot drift apart.
 
 ### Repository variables
 
-Settings → Secrets and variables → Actions → **Variables**:
+Settings → Secrets and variables → Actions → **Variables** tab. These are not
+secret; they are the same values as your local `deploy.config`.
 
-| Variable | Example |
+**Required — the workflow fails immediately without them:**
+
+| Variable | Value for this project |
 |---|---|
 | `AWS_REGION` | `ap-southeast-1` |
-| `AWS_ACCOUNT_ID` | `123456789012` |
+| `AWS_ACCOUNT_ID` | `471112636744` |
 | `ECR_REPOSITORY` | `rockship-profile` |
-| `SSH_HOST` | `1.2.3.4` |
+| `SSH_HOST` | `13.251.100.184` |
 | `SSH_USER` | `ubuntu` |
-| `REMOTE_ENV_FILE` | `/etc/rockship-profile/.env.production` |
+| `REMOTE_ENV_FILE` | `/home/ubuntu/rockship-profile/.env.production` |
 
-Optional, with defaults: `PLATFORMS`, `SSH_PORT`, `CONTAINER_NAME`,
-`CONTAINER_PORT`, `DOCKER_NETWORK` (default `nginx`).
+**Optional — sensible defaults if unset:**
 
-Leave `HOST_PORT` unset — the container is reached over `DOCKER_NETWORK` rather
-than a published host port. Setting it collides with the app that already owns
-port 3000 on that server.
+| Variable | Default | Set it only if |
+|---|---|---|
+| `DOCKER_NETWORK` | `nginx` | the proxy network is renamed |
+| `CONTAINER_NAME` | `rockship-profile` | you rename the container (nginx-proxy-manager routes to this name) |
+| `CONTAINER_PORT` | `3000` | the app listens elsewhere |
+| `PLATFORMS` | `linux/amd64,linux/arm64` | you want a single-arch build |
+| `SSH_PORT` | `22` | sshd is on another port |
+| `HOST_PORT` | *(empty)* | **leave unset** — see below |
+
+Do not set `HOST_PORT`. Host port 3000 on that server belongs to
+`prod-rockship-fe-1`; the container is reached over `DOCKER_NETWORK` instead, and
+publishing a port recreates the collision.
 
 ### Repository secrets
 
-| Secret | Purpose |
+Same page, **Secrets** tab.
+
+**Required:**
+
+| Secret | How to get it |
 |---|---|
-| `AWS_DEPLOY_ROLE_ARN` | IAM role the runner assumes via OIDC |
-| `SSH_PRIVATE_KEY` | Private key for `SSH_USER@SSH_HOST` |
-| `SSH_KNOWN_HOSTS` | Output of `ssh-keyscan <host>`. Strongly recommended — without it the workflow trusts the host key on first use and logs a warning |
-| `NEXT_PUBLIC_SUPABASE_URL` | Required. Inlined into the client bundle at build time; the workflow fails if it is missing or still a placeholder |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Required. Inlined into the client bundle at build time |
-| `NEXT_PUBLIC_GROQ_API_KEY` | Optional. Omit to disable the Groq assistant. Reaches the browser — see "Known security issues" |
-| `NEXT_PUBLIC_GEMINI_API_KEY` | Optional. Omit to disable the Gemini assistant. Reaches the browser |
+| `AWS_DEPLOY_ROLE_ARN` | The IAM role ARN from "One-time AWS OIDC setup" below, e.g. `arn:aws:iam::471112636744:role/github-actions-rockship-profile` |
+| `SSH_PRIVATE_KEY` | Contents of the private key whose public half is in the server's `~/.ssh/authorized_keys`. Paste the **whole file**, including the `-----BEGIN...` and `-----END...` lines |
+
+**Recommended:**
+
+| Secret | How to get it |
+|---|---|
+| `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 13.251.100.184`. Without it the workflow trusts the host key on first use and logs a warning — that window is MITM-able |
+
+**Optional — all four are build-time values compiled into the client bundle:**
+
+| Secret | Effect if unset |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Blog renders empty; rest of the site unaffected |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | As above — both are needed together |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Groq assistant disables itself |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Gemini assistant disables itself |
+
+The workflow warns but does not fail when these are missing or still a
+placeholder. Note the two AI keys reach the browser — see "Known security
+issues".
 
 Server-only secrets (`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`,
 `ADMIN_PASSWORD`, `RESEND_API_KEY`) are **not** GitHub secrets — they live only
 in `REMOTE_ENV_FILE` on the server and are never seen by CI.
+
+### Setting them from the CLI
+
+```bash
+gh auth login
+REPO=Rockship-Team/rockship-profile
+
+gh variable set AWS_REGION      --repo "$REPO" --body "ap-southeast-1"
+gh variable set AWS_ACCOUNT_ID  --repo "$REPO" --body "471112636744"
+gh variable set ECR_REPOSITORY  --repo "$REPO" --body "rockship-profile"
+gh variable set SSH_HOST        --repo "$REPO" --body "13.251.100.184"
+gh variable set SSH_USER        --repo "$REPO" --body "ubuntu"
+gh variable set REMOTE_ENV_FILE --repo "$REPO" --body "/home/ubuntu/rockship-profile/.env.production"
+
+gh secret set AWS_DEPLOY_ROLE_ARN --repo "$REPO"          # paste the role ARN
+gh secret set SSH_PRIVATE_KEY     --repo "$REPO" < ~/Desktop/aws/rockitflow
+ssh-keyscan -p 22 13.251.100.184 2>/dev/null \
+  | gh secret set SSH_KNOWN_HOSTS --repo "$REPO"
+
+# Optional
+gh secret set NEXT_PUBLIC_SUPABASE_URL      --repo "$REPO"
+gh secret set NEXT_PUBLIC_SUPABASE_ANON_KEY --repo "$REPO"
+```
+
+The workflow targets `environment: production`. If that environment does not
+exist yet, create it under Settings → Environments (add required reviewers there
+if you want deploys to wait for approval).
 
 ### One-time AWS OIDC setup
 
