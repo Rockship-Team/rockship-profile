@@ -40,7 +40,27 @@ project standardises on, including the Vercel build command in
 `.github/workflows/ci-cd.yml`.
 
 There is no test suite in the repo. `bunx tsc --noEmit` is the quickest
-correctness check before committing.
+correctness check before committing (~0.8s on TypeScript 7).
+
+### TypeScript 7
+
+This project runs **TypeScript 7**, the native Go compiler. Two consequences
+worth knowing before you change versions:
+
+- **TS 7 removed `lib/typescript.js`**, the JS Compiler API. Next's default
+  type-check backend calls into it, so without the opt-out below Next decides
+  TypeScript is not installed, shells out to `npm install` (in a Bun repo) and
+  then crashes. `experimental.useTypeScriptCli: true` in `next.config.js` makes
+  Next run the local `tsc` CLI instead.
+- **That flag requires Next >= 16.3** ([vercel/next.js#95639]). Next is pinned
+  to `16.3.0-preview.6` — a **pre-release** — because no stable release carries
+  the flag yet. Move to 16.3 stable as soon as it ships; the pin is exact so it
+  cannot drift on its own.
+
+Type errors still fail the build: `next build` streams diagnostics from the
+`tsc` CLI and exits non-zero, verified with a deliberate type error.
+
+[vercel/next.js#95639]: https://github.com/vercel/next.js/pull/95639
 
 ## Environment variables
 

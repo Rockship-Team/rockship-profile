@@ -13,7 +13,7 @@
 
 ### Detected Tech Stack
 - **Framework**: Next.js 16 with React 19 (App Router)
-- **Language**: TypeScript
+- **Language**: TypeScript 7 (the native Go compiler)
 - **Styling**: Tailwind CSS v4 (alpha), shadcn/ui components
 - **Animation**: GSAP, Framer Motion
 - **3D Graphics**: React Three Fiber, Three.js

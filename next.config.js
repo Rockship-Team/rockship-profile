@@ -13,6 +13,13 @@ const nextConfig = {
 
   // Optimize package imports for better tree-shaking
   experimental: {
+    // TypeScript 7 ships the Go compiler and dropped lib/typescript.js, the JS
+    // Compiler API that Next's default type-check backend calls into. Without
+    // this flag Next concludes TypeScript is not installed, shells out to
+    // `npm install` (in a Bun repo) and then crashes. This runs the local `tsc`
+    // CLI instead. Requires Next >= 16.3 — see vercel/next.js#95639.
+    useTypeScriptCli: true,
+
     optimizePackageImports: [
       'framer-motion',
       'lucide-react',
