@@ -28,10 +28,12 @@ fi
 if [ -n "$VERCEL_PROJECT_ID" ]; then
   echo "🔧 Setting environment variables for Vercel..."
 
-  # List of environment variables to set
+  # List of environment variables to set. Vars with an empty value are skipped
+  # below, so listing one that is only set for production deploys is safe.
   ENV_VARS=(
     "NEXT_PUBLIC_GEMINI_API_KEY"
     "NEXT_PUBLIC_RESEND_API_KEY"
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID"
   )
 
   # Set environment variables using Vercel CLI
