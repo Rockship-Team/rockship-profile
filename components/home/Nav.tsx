@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Logo from "./Logo";
 import { BookCallButton } from "./BookCall";
@@ -17,9 +18,16 @@ const TABS = [
 ];
 
 export default function Nav() {
+  const pathname = usePathname();
+  // The tabs are anchors into the homepage. On any other route those sections
+  // do not exist, so the bare "#services" hrefs did nothing and the whole nav
+  // was a dead end — link back to "/#services" instead.
+  const onHome = pathname === "/";
   const [current, setCurrent] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!onHome) return;
+
     const sections = TABS.map((tab) => document.querySelector(tab.href)).filter(
       (el): el is HTMLElement => el instanceof HTMLElement
     );
@@ -41,7 +49,7 @@ export default function Nav() {
       window.removeEventListener("scroll", spy);
       window.removeEventListener("resize", spy);
     };
-  }, []);
+  }, [onHome]);
 
   return (
     <nav
@@ -58,26 +66,31 @@ export default function Nav() {
 
         <div className="hidden gap-px overflow-x-auto lg:flex">
           {TABS.map((tab) => {
-            const active = current === tab.href;
+            const active = onHome && current === tab.href;
             return (
-              <a
+              <Link
                 key={tab.href}
-                href={tab.href}
+                href={onHome ? tab.href : `/${tab.href}`}
                 aria-current={active ? "true" : undefined}
-                className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors"
+                className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
                 style={{
                   color: active ? "var(--rk-accent)" : "var(--rk-sec)",
                   background: active ? "var(--rk-alt)" : "transparent",
                 }}
               >
                 {tab.label}
-              </a>
+              </Link>
             );
           })}
           <Link
             href="/events"
+            aria-current={pathname === "/events" ? "page" : undefined}
             className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
-            style={{ color: "var(--rk-sec)" }}
+            style={
+              pathname === "/events"
+                ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }
+                : { color: "var(--rk-sec)" }
+            }
           >
             Events
           </Link>
