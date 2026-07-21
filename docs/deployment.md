@@ -358,6 +358,44 @@ laptop cannot drift apart.
 > Note: the existing `ci-cd.yml` (Vercel) still runs alongside this. Both deploy
 > on pushes to `main`, to two different places.
 
+### Self-hosted runner requirements
+
+All workflows run on `runs-on: self-hosted`, so the runner machine — not GitHub —
+must provide the toolchain. Register a runner with the default `self-hosted`
+label (add more labels and list them as `runs-on: [self-hosted, linux, x64]` if
+you run several).
+
+The deploy needs these on the runner's PATH:
+
+| Tool | Used for | Check |
+|---|---|---|
+| `docker` + `buildx` | building and pushing the image | `docker buildx version` |
+| `aws` (v2) | ECR login and repository checks in `scripts/deploy.sh` | `aws --version` |
+| `ssh`, `ssh-keyscan` | releasing on the server | `ssh -V` |
+| `git` | checkout | `git --version` |
+
+`bun` is installed per-run by `oven-sh/setup-bun`, so it does not need to be
+preinstalled. QEMU for the arm64 half of the multi-arch build is set up by
+`docker/setup-qemu-action`, which needs a working Docker daemon.
+
+The runner user must be able to talk to Docker without `sudo` — normally by
+being in the `docker` group.
+
+**A self-hosted runner persists between jobs.** Two consequences the workflows
+already account for, worth preserving in any edit:
+
+- SSH material is written to `$RUNNER_TEMP`, never `~/.ssh`. The shared `~/.ssh`
+  belongs to every job on the box; writing the deploy key there would expose it
+  to other workflows, and the cleanup step would delete a `known_hosts` other
+  jobs rely on. `SSH_KNOWN_HOSTS_FILE` in `deploy.config` points `ssh` at the
+  job-scoped copy.
+- Docker images accumulate. `deploy.sh` prunes dangling images on the *server*,
+  not on the runner, so schedule a `docker system prune` there if disk grows.
+
+Do not register the runner on the deploy target (`13.251.100.184`) unless you
+intend it: image builds are CPU- and disk-heavy, and that box already runs
+sixteen production containers.
+
 ### Repository variables
 
 Settings → Secrets and variables → Actions → **Variables** tab. These are not
