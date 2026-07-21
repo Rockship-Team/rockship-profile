@@ -206,11 +206,10 @@ export const TEAM: Person[] = [
     previously: null,
   },
   {
-    name: "Ngoc",
-    role: "Role to confirm",
-    photo: "/Ngoc.png",
+    name: "Hung Tran",
+    role: "CEO",
+    photo: "/Hung.png",
     previously: null,
-    unverified: true,
   },
   {
     name: "Quan",
