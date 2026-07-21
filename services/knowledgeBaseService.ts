@@ -15,6 +15,57 @@ export interface KnowledgeItem {
   keywords: string[];
 }
 
+export interface KnowledgeMatch {
+  /** Total score, used only for ranking. */
+  relevance: number;
+  /**
+   * Score from category-name and keyword hits. Content hits are deliberately
+   * excluded: a stray substring inside a serialised blob is not evidence that
+   * the question is about us, so it must not be able to open the scope gate on
+   * its own. `anchor > 0` is what `isOnTopic` tests.
+   */
+  anchor: number;
+  item: KnowledgeItem;
+}
+
+// Tokens shorter than the minimum length that still carry meaning here.
+const SHORT_TOKENS = new Set(["ai", "ml", "ui", "ux", "vn"]);
+const MIN_TOKEN_LENGTH = 3;
+
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Count whole-word occurrences of `needle` in `haystack`.
+ *
+ * `needle` comes from user input, so it is escaped before reaching the RegExp
+ * constructor — unescaped it lets `(` throw a SyntaxError and `a{99999}` pin
+ * the thread, on every message.
+ */
+const countWholeWord = (haystack: string, needle: string): number => {
+  if (!needle) return 0;
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(needle)}(?![\\p{L}\\p{N}])`, "gu");
+  return (haystack.match(pattern) || []).length;
+};
+
+/**
+ * Lowercase, strip punctuation, collapse whitespace. Keeps Unicode letters so
+ * Vietnamese diacritics survive.
+ */
+const normalize = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** Tolerate a two-character suffix difference: office/offices, solution/solutions. */
+const looseWordMatch = (a: string, b: string): boolean => {
+  if (a === b) return true;
+  const [shorter, longer] = a.length < b.length ? [a, b] : [b, a];
+  return longer.startsWith(shorter) && longer.length - shorter.length <= 2;
+};
+
 class KnowledgeBaseService {
   private knowledgeBase: KnowledgeItem[] = [];
 
@@ -40,6 +91,25 @@ class KnowledgeBaseService {
         "offices",
         "clients",
         "partners",
+        "rockship",
+        "contact",
+        "email",
+        "hiring",
+        "careers",
+        "jobs",
+        // Vietnamese — the assistant answers in the user's language, so the
+        // retrieval gate has to recognise both or Vietnamese questions get
+        // refused as off-topic.
+        "công ty",
+        "về rockship",
+        "văn phòng",
+        "địa chỉ",
+        "đội ngũ",
+        "nhân sự",
+        "liên hệ",
+        "tuyển dụng",
+        "khách hàng",
+        "đối tác",
       ],
     });
 
@@ -60,6 +130,9 @@ class KnowledgeBaseService {
         "deployment",
         "api",
         "uptime",
+        "nền tảng",
+        "hạ tầng",
+        "triển khai",
       ],
     });
 
@@ -73,12 +146,19 @@ class KnowledgeBaseService {
       },
       keywords: [
         "solutions",
+        "services",
         "llm",
+        "ai",
         "ai agents",
+        "chatbot",
         "computer vision",
         "workflow",
         "automation",
         "multimodal",
+        "giải pháp",
+        "dịch vụ",
+        "tự động hóa",
+        "trí tuệ nhân tạo",
       ],
     });
 
@@ -98,6 +178,7 @@ class KnowledgeBaseService {
         "frontend",
         "devops",
         "tools",
+        "công nghệ",
       ],
     });
 
@@ -124,6 +205,12 @@ class KnowledgeBaseService {
         "technology",
         "infrastructure",
         "generative ai",
+        "portfolio",
+        "projects",
+        "loan",
+        "dự án",
+        "tình huống",
+        "câu chuyện",
       ],
     });
 
@@ -142,6 +229,7 @@ class KnowledgeBaseService {
         "protein folding",
         "ai safety",
         "rlhf",
+        "nghiên cứu",
       ],
     });
 
@@ -160,6 +248,8 @@ class KnowledgeBaseService {
         "mark zuckerberg",
         "demis hassabis",
         "andrej karpathy",
+        "đánh giá",
+        "nhận xét",
       ],
     });
 
@@ -183,55 +273,63 @@ class KnowledgeBaseService {
     });
   }
 
-  public searchKnowledge(
-    query: string
-  ): { relevance: number; item: KnowledgeItem }[] {
-    const queryLower = query.toLowerCase();
-    const queryWords = queryLower
-      .split(/\s+/)
-      .filter((word) => word.length > 2);
+  public searchKnowledge(query: string): KnowledgeMatch[] {
+    const normalizedQuery = normalize(query);
+    const queryWords = normalizedQuery
+      .split(" ")
+      .filter(
+        (word) => word.length >= MIN_TOKEN_LENGTH || SHORT_TOKENS.has(word)
+      );
 
     const results = this.knowledgeBase.map((item) => {
-      let relevanceScore = 0;
+      let anchor = 0;
+      let contentScore = 0;
 
-      // Check category match
-      if (queryLower.includes(item.category)) {
-        relevanceScore += 3;
+      // Category name appearing in the question, e.g. "platform", "research".
+      if (countWholeWord(normalizedQuery, item.category) > 0) {
+        anchor += 3;
       }
 
-      // Check keyword matches
-      queryWords.forEach((word) => {
-        if (
-          item.keywords.some((keyword) => keyword.toLowerCase().includes(word))
-        ) {
-          relevanceScore += 2;
-        }
-      });
+      // Keyword hits. Multi-word keywords ("case studies", "văn phòng") must
+      // appear as a phrase — matching them word-by-word makes unrelated
+      // questions anchor on a shared syllable ("công thức nấu phở" vs
+      // "công ty").
+      for (const keyword of item.keywords) {
+        const normalizedKeyword = normalize(keyword);
+        const isPhrase = normalizedKeyword.includes(" ");
+        const hit = isPhrase
+          ? countWholeWord(normalizedQuery, normalizedKeyword) > 0
+          : queryWords.some((word) => looseWordMatch(word, normalizedKeyword));
+        if (hit) anchor += 2;
+      }
 
-      // Check content matches
-      const contentStr = JSON.stringify(item.content).toLowerCase();
-      queryWords.forEach((word) => {
-        const occurrences = (contentStr.match(new RegExp(word, "g")) || [])
-          .length;
-        relevanceScore += Math.min(occurrences * 0.5, 2);
-      });
+      // Content hits break ties between categories that already anchored. They
+      // never contribute to `anchor`, so they cannot make an off-topic
+      // question look relevant.
+      const contentStr = normalize(JSON.stringify(item.content));
+      for (const word of queryWords) {
+        contentScore += Math.min(countWholeWord(contentStr, word) * 0.5, 2);
+      }
 
-      return {
-        relevance: relevanceScore,
-        item,
-      };
+      return { relevance: anchor + contentScore, anchor, item };
     });
 
-    // Sort by relevance and filter out irrelevant results
     return results
-      .filter((result) => result.relevance > 0)
+      .filter((result) => result.anchor > 0)
       .sort((a, b) => b.relevance - a.relevance)
       .slice(0, 3); // Return top 3 most relevant items
   }
 
-  public formatKnowledgeForLLM(
-    items: { relevance: number; item: KnowledgeItem }[]
-  ): string {
+  /**
+   * Whether a question is about Rockship at all. Callers use this to refuse
+   * off-topic questions in code, before any model call — a scope rule that
+   * lives only in the system prompt can be argued away by the user.
+   */
+  public isOnTopic(query: string): boolean {
+    return this.searchKnowledge(query).length > 0;
+  }
+
+  public formatKnowledgeForLLM(items: KnowledgeMatch[]): string {
     if (items.length === 0) return "";
 
     let formatted = "\n\nRelevant Knowledge Base Information:\n";

@@ -6,12 +6,11 @@ import remarkGfm from "remark-gfm";
 import {
   clearConversation,
   getChatResponseStream,
-  initGroq,
   stopSpeechFallback,
   textToSpeech,
   textToSpeechFallback,
   transcribeAudio,
-} from "../services/groqService";
+} from "../services/assistantService";
 import { ChatMessage, ChatRole } from "../types";
 import { CaseStudyCard } from "./CaseStudyCard";
 
@@ -171,11 +170,6 @@ export const GroqAssistant: React.FC = () => {
     NonNullable<typeof window.SpeechRecognition>
   > | null>(null);
   const hasSpokenGreetingRef = useRef(false);
-
-  useEffect(() => {
-    const success = initGroq();
-    setIsOnline(success);
-  }, []);
 
   // Cleanup audio analysis on unmount
   useEffect(() => {
@@ -525,11 +519,10 @@ export const GroqAssistant: React.FC = () => {
           speakText(fullResponse);
         },
         // onError: show error message
-        (error) => {
+        (error, isUnavailable) => {
           updateMessage(error);
           setIsLoading(false);
-          // Check if it's an API key issue
-          if (error.includes("offline") || error.includes("API Key")) {
+          if (isUnavailable) {
             setIsOnline(false);
           }
         },
