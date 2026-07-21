@@ -36,7 +36,10 @@ concurrency:
 jobs:
   deploy:
     name: Build, push and release
-    runs-on: ubuntu-latest
+    # Self-hosted runner. Unlike a GitHub-hosted VM this box persists between
+    # jobs, so nothing here may write to shared locations (~/.ssh, ~/.aws) or
+    # assume a clean workspace.
+    runs-on: self-hosted
     environment: production
 
     permissions:
@@ -120,7 +123,8 @@ jobs:
             printf 'SSH_HOST=%q\n'        "$CFG_SSH_HOST"
             printf 'SSH_USER=%q\n'        "$CFG_SSH_USER"
             printf 'SSH_PORT=%q\n'        "${CFG_SSH_PORT:-22}"
-            printf 'SSH_KEY=%q\n'         "$HOME/.ssh/deploy_key"
+            printf 'SSH_KEY=%q\n'         "$RUNNER_TEMP/deploy_key"
+            printf 'SSH_KNOWN_HOSTS_FILE=%q\n' "$RUNNER_TEMP/known_hosts"
             printf 'CONTAINER_NAME=%q\n'  "${CFG_CONTAINER_NAME:-rockship-profile}"
             printf 'DOCKER_NETWORK=%q\n'  "${CFG_DOCKER_NETWORK:-nginx}"
             printf 'CONTAINER_PORT=%q\n'  "${CFG_CONTAINER_PORT:-3000}"
@@ -141,17 +145,19 @@ jobs:
             exit 1
           fi
 
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          # Everything lands in RUNNER_TEMP, which is per-job and wiped by the
+          # runner. Writing to the shared ~/.ssh would leak the key to other
+          # jobs on this machine and let concurrent runs clobber each other.
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$RUNNER_TEMP/deploy_key"
+          chmod 600 "$RUNNER_TEMP/deploy_key"
 
           if [ -n "$SSH_KNOWN_HOSTS" ]; then
-            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/known_hosts"
           else
             echo "::warning::SSH_KNOWN_HOSTS is not set; trusting the host key on first use (vulnerable to MITM). Populate it with: ssh-keyscan -p ${SSH_PORT:-22} $SSH_HOST"
-            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+            ssh-keyscan -p "${SSH_PORT:-22}" "$SSH_HOST" > "$RUNNER_TEMP/known_hosts" 2>/dev/null
           fi
-          chmod 600 ~/.ssh/known_hosts
+          chmod 600 "$RUNNER_TEMP/known_hosts"
 
       - name: Build Next.js standalone bundle
         if: env.ROLLBACK != 'true'
@@ -199,4 +205,8 @@ jobs:
 
       - name: Clean up credentials
         if: always()
-        run: rm -f ~/.ssh/deploy_key ~/.ssh/known_hosts deploy.config .env.production
+        run: |
+          # Never remove ~/.ssh/* here: on a self-hosted runner that directory is
+          # shared with every other job on the machine.
+          rm -f "$RUNNER_TEMP/deploy_key" "$RUNNER_TEMP/known_hosts"
+          rm -f deploy.config .env.production

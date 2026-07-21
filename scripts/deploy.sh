@@ -46,8 +46,8 @@ need() { command -v "$1" >/dev/null 2>&1 || die "\`$1\` is not installed or not 
 [ -f deploy.config ] || die "deploy.config not found. Run: cp deploy.config.example deploy.config"
 
 SETTINGS="AWS_REGION AWS_ACCOUNT_ID ECR_REPOSITORY AWS_PROFILE IMAGE_TAG PLATFORMS
-          SSH_HOST SSH_USER SSH_PORT SSH_KEY CONTAINER_NAME DOCKER_NETWORK
-          HOST_PORT CONTAINER_PORT LOCAL_PORT REMOTE_ENV_FILE"
+          SSH_HOST SSH_USER SSH_PORT SSH_KEY SSH_KNOWN_HOSTS_FILE CONTAINER_NAME
+          DOCKER_NETWORK HOST_PORT CONTAINER_PORT LOCAL_PORT REMOTE_ENV_FILE"
 
 # An environment variable beats deploy.config (`IMAGE_TAG=v1.2.3 ./scripts/deploy.sh`).
 # `source` would clobber it, so snapshot the overrides first and reapply after.
@@ -106,7 +106,20 @@ aws_cli() {
 
 ssh_cmd() {
   local args=(-p "$SSH_PORT" -o StrictHostKeyChecking=accept-new)
-  [ -n "${SSH_KEY:-}" ] && args+=(-i "$SSH_KEY")
+
+  if [ -n "${SSH_KEY:-}" ]; then
+    # IdentitiesOnly stops ssh offering unrelated keys from an agent, which a
+    # shared runner is likely to have loaded.
+    args+=(-i "$SSH_KEY" -o IdentitiesOnly=yes)
+  fi
+
+  # Lets a caller keep known_hosts in a job-scoped file instead of ~/.ssh. On a
+  # self-hosted runner the shared ~/.ssh belongs to every job on the box, so a
+  # deploy must neither depend on it nor clean it up.
+  if [ -n "${SSH_KNOWN_HOSTS_FILE:-}" ]; then
+    args+=(-o UserKnownHostsFile="$SSH_KNOWN_HOSTS_FILE")
+  fi
+
   ssh "${args[@]}" "${SSH_USER}@${SSH_HOST}" "$@"
 }
 
