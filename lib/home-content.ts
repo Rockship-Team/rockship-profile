@@ -49,7 +49,7 @@ export const HERO = {
   headlineLead: "Senior engineers who",
   headlineAccent: "ship outcomes",
   headlineTail: ", not tickets.",
-  sub: "We place vetted senior product engineers with teams in the US, Europe, Singapore and Japan — and stay through production.",
+  sub: "We place AI-native senior product engineers — fluent in Spec-Driven Development, Harness Engineering, and the rest of the modern AI toolchain — to build your production-ready idea in weeks, not months.",
   meta: "30 minutes, with an engineer — not a salesperson.",
 } as const;
 
