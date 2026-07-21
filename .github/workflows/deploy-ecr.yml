@@ -11,6 +11,13 @@
 name: Deploy to ECR
 
 on:
+  # Fires on every merge into main — merge commit, squash or rebase all arrive
+  # as a push to the branch. Also fires on a direct push to main; to deploy only
+  # merged pull requests, swap this for:
+  #   pull_request:
+  #     types: [closed]
+  #     branches: [main]
+  # and gate the job with: if: github.event.pull_request.merged == true
   push:
     branches: [main]
   workflow_dispatch:
