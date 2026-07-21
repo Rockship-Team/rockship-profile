@@ -690,3 +690,129 @@ article.prose blockquote {
   font-style: italic;
   color: var(--color-rockship-400);
 }
+/* ============================================================
+   Rockship international rebrand — scoped light theme
+   Palette and type scale measured from apple.com.
+   Scoped to .rk so the dark blog/admin surfaces are unaffected.
+   See docs/rebrand/research-v2.md
+   ============================================================ */
+.rk {
+  --rk-paper: #ffffff;
+  --rk-alt: #f5f5f7;
+  --rk-ink: #1d1d1f;
+  --rk-sec: #6e6e73;
+  --rk-ter: #86868b;
+  --rk-hair: #d2d2d7;
+
+  /* The single accent. Brief: "one single accent color". Used on one phrase
+     in the hero, the primary CTA, and functional state (active nav, live
+     overlap). Nowhere else. */
+  --rk-accent: #ff4d00;
+  --rk-accent-ink: #ffffff;
+
+  color-scheme: light;
+  background-color: var(--rk-paper);
+  color: var(--rk-ink);
+  font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.4705882353;
+  letter-spacing: -0.022em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Type ladder. Tracking flips sign with size, as Apple does. */
+.rk-hero  { font-size: clamp(40px, 6.4vw, 72px); line-height: 1.05;   letter-spacing: -0.015em; font-weight: 600; text-wrap: balance; }
+.rk-head  { font-size: clamp(32px, 4.2vw, 48px); line-height: 1.0834; letter-spacing: -0.003em; font-weight: 600; text-wrap: balance; }
+.rk-item  { font-size: 24px;                     line-height: 1.1667; letter-spacing:  0.009em; font-weight: 600; }
+.rk-intro { font-size: 21px;                     line-height: 1.381;  letter-spacing:  0.011em; font-weight: 400; color: var(--rk-sec); }
+.rk-cap   { font-size: 14px;                     line-height: 1.43;   letter-spacing: -0.016em; color: var(--rk-sec); }
+.rk-num   { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+            font-size: 15px; letter-spacing: 0.05em; color: var(--rk-ter); font-weight: 400; }
+
+/* Pill buttons — Apple keeps the label at weight 400 */
+.rk-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-size: 17px; font-weight: 400; letter-spacing: -0.022em;
+  padding: 12px 22px; border-radius: 980px; cursor: pointer;
+  background: var(--rk-accent); color: var(--rk-accent-ink);
+  border: 1px solid var(--rk-accent); transition: opacity 0.2s, transform 0.2s;
+}
+.rk-btn:active { transform: translateY(1px); }
+.rk-btn:hover { opacity: 0.85; }
+.rk-btn-sm { font-size: 14px; padding: 8px 16px; }
+.rk-btn-line { background: transparent; color: var(--rk-ink); border-color: var(--rk-hair); }
+.rk-btn-line:hover { border-color: var(--rk-ink); opacity: 1; }
+
+.rk :focus-visible { outline: 2px solid var(--rk-accent); outline-offset: 4px; border-radius: 4px; }
+
+/* Sections: no borders — background swap plus generous padding */
+.rk-sec { padding: clamp(88px, 11vw, 144px) 0 clamp(96px, 13vw, 168px); }
+.rk-alt { background: var(--rk-alt); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rk *, .rk *::before, .rk *::after {
+    animation-duration: 0.01ms !important; transition-duration: 0.01ms !important;
+  }
+}
+
+/* Cards: hairline + lift on hover. Depth is what stops a monochrome page
+   reading as a spec sheet. */
+.rk-card {
+  background: var(--rk-paper);
+  border: 1px solid var(--rk-hair);
+  border-radius: 20px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+.rk-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--rk-ink) 22%, transparent);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.22);
+}
+.rk-alt .rk-card { background: var(--rk-paper); }
+
+/* Case-study imagery: desaturated by default so the page stays monochrome,
+   full colour on hover. */
+.rk-shot img {
+  filter: grayscale(1) contrast(1.04);
+  transform: scale(1.01);
+  transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rk-card:hover .rk-shot img,
+.rk-shot:hover img {
+  filter: grayscale(0);
+  transform: scale(1.045);
+}
+
+/* Marquee for the markets strip */
+@keyframes rk-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.rk-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: rk-marquee 38s linear infinite;
+}
+.rk-marquee:hover .rk-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .rk-marquee-track { animation: none; }
+}
+.rk-fade-x {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* The accent phrase in the hero headline. */
+.rk-accent { color: var(--rk-accent); }
+
+/* Anchor targets must clear the sticky nav (68px) or every nav click lands
+   with the section heading hidden behind the bar. */
+html {
+  scroll-padding-top: 84px;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

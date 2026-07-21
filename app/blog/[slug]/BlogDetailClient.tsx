@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Clock, Calendar, User } from "lucide-react"
 import { FadeIn } from "@/components/FadeIn"
 import { TableOfContents } from "@/components/blog/TableOfContents"
+import { trackBlogToCaseStudy } from "@/lib/analytics"
 import { BlogPost, BlogSection } from "@/types/blog"
 import { formatDate } from "@/lib/utils"
 import { BlogContentRenderer } from "@/components/blog/BlogContentRenderer"
@@ -107,6 +108,19 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
   const router = useRouter()
   const [activeSection, setActiveSection] = useState<string>("")
   const isClickScrolling = useRef(false)
+
+  // Post bodies are authored HTML rendered through dangerouslySetInnerHTML, so
+  // links out to case studies are not components we can attach an onClick to.
+  // Catch them by delegation instead.
+  const handleContentClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const anchor = (event.target as HTMLElement).closest("a")
+      const href = anchor?.getAttribute("href")
+      if (!href?.startsWith("/case-studies")) return
+      trackBlogToCaseStudy(post.slug, href)
+    },
+    [post.slug]
+  )
 
 
   // Use provided sections or auto-extract from content
@@ -235,7 +249,10 @@ export default function BlogDetailClient({ post }: BlogDetailClientProps) {
           <div className="flex flex-col lg:flex-row gap-12">
             {/* Main Content */}
             <FadeIn direction="up" delay={200} className="flex-1 min-w-0">
-              <BlogContentRenderer content={post.content} />
+              {/* onClickCapture so it still fires if something below stops propagation. */}
+              <div onClickCapture={handleContentClick}>
+                <BlogContentRenderer content={post.content} />
+              </div>
             </FadeIn>
 
             {/* Sidebar - Table of Contents */}

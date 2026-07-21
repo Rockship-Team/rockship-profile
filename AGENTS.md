@@ -1,4 +1,4 @@
-- Always use pnpm instead of npm
+- Always use bun instead of npm or pnpm (`bun install`, `bun run <script>`, `bun add`)
 - The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 - Always write components in the "components" folder.
 - Always write pages in the "app" folder.

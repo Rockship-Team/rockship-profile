@@ -1,0 +1,220 @@
+# Rockship — company site
+
+Marketing site for Rockship: homepage, case studies, events, a Supabase-backed
+blog, and a small admin area for authoring posts.
+
+Built with Next.js 16 (App Router) and React 19, TypeScript, and Tailwind CSS v4.
+
+## Getting started
+
+This project uses **Bun** as both package manager and runtime. npm, pnpm and
+yarn are not supported — `bun.lock` is the only lockfile, and the postinstall
+allow-list lives in `trustedDependencies` in `package.json`.
+
+```bash
+curl -fsSL https://bun.sh/install | bash   # if you don't have it
+bun install
+cp .env.local.example .env.local           # then fill in the values below
+bun --bun run dev                          # http://localhost:3000
+```
+
+The Bun version is pinned in `.bun-version` (currently 1.3.14); CI reads it via
+`oven-sh/setup-bun`.
+
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `bun --bun run dev` | Dev server with Turbopack |
+| `bun --bun run build` | Production build |
+| `bun --bun run start` | Serve the production build |
+| `bun run lint` | ESLint via `next lint` |
+| `bun run analyze` | Bundle analysis — builds with webpack and writes `analyze-client.html` |
+
+### Why `--bun`
+
+Next.js ships a `#!/usr/bin/env node` shebang, so a plain `bun run dev` hands
+execution to **Node** — Bun only acts as the task runner. The `--bun` flag
+forces the Bun runtime to execute Next itself. Both work; `--bun` is what this
+project standardises on, including the Vercel build command in
+`.github/workflows/ci-cd.yml`.
+
+There is no test suite in the repo. `bunx tsc --noEmit` is the quickest
+correctness check before committing (~0.8s on TypeScript 7).
+
+### TypeScript 7
+
+This project runs **TypeScript 7**, the native Go compiler. Two consequences
+worth knowing before you change versions:
+
+- **TS 7 removed `lib/typescript.js`**, the JS Compiler API. Next's default
+  type-check backend calls into it, so without the opt-out below Next decides
+  TypeScript is not installed, shells out to `npm install` (in a Bun repo) and
+  then crashes. `experimental.useTypeScriptCli: true` in `next.config.js` makes
+  Next run the local `tsc` CLI instead.
+- **That flag requires Next >= 16.3** ([vercel/next.js#95639]). Next is pinned
+  to `16.3.0-preview.6` — a **pre-release** — because no stable release carries
+  the flag yet. Move to 16.3 stable as soon as it ships; the pin is exact so it
+  cannot drift on its own.
+
+Type errors still fail the build: `next build` streams diagnostics from the
+`tsc` CLI and exits non-zero, verified with a deliberate type error.
+
+[vercel/next.js#95639]: https://github.com/vercel/next.js/pull/95639
+
+## Analytics
+
+GA4 loads only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set. Leave it unset
+locally and in preview so dev sessions do not report into production numbers —
+with no value, no GA script is requested at all.
+
+Three things about this setup are not obvious from the code:
+
+**Admin routes are excluded.** `/admin` and `/admin/*` render no GA scripts, so
+CMS editing sessions never reach the property. Verified in a real browser, not
+assumed.
+
+**Pageviews on client-side navigation are sent by us.** `gtag('config')` only
+fires a pageview for the route the browser actually loaded; it knows nothing
+about App Router navigations. `components/GoogleAnalytics.tsx` watches
+`usePathname()` and sends `page_view` itself for every subsequent route.
+
+> **Required GA property setting.** In Admin → Data Streams → Enhanced
+> Measurement, turn **off** "page changes based on browser history events".
+> Leaving it on means GA counts SPA navigations *and* our manual event, so
+> every client-side pageview is counted twice.
+
+**Consent Mode v2 defaults to denied.** `analytics_storage`, `ad_storage`,
+`ad_user_data` and `ad_personalization` are all set to `denied` before gtag.js
+loads, so no analytics cookie is written and no identifier persists between
+visits. GA still receives cookieless pings; sessions and users are modelled
+rather than measured. There is no consent banner — to add one later, call
+`gtag('consent', 'update', {...})` on accept; nothing else needs to change.
+
+Conversion events live in `lib/analytics.ts`: `contact_submit`,
+`contact_error`, `contact_cta_click` and `blog_to_case_study`. Add new ones
+there rather than calling `window.gtag`, so the dataLayer name stays in sync
+with the component.
+
+## Environment variables
+
+`.env.local.example` covers Supabase and admin auth. The AI and email keys are
+**not** in that file yet but are read at runtime:
+
+| Variable | Required for | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Blog, admin | |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Blog, admin | Client-safe, RLS-protected |
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin writes | Server-side only |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `/admin` login | Single shared credential |
+| `RESEND_API_KEY` | Contact form email | |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 | Production only — unset means GA does not load |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | AI assistant, editor AI | |
+| `NEXT_PUBLIC_GROQ_API_KEY` | AI assistant | |
+
+Everything is optional for local development — the blog and admin degrade
+without Supabase, the contact form logs an error without a Resend key, and the
+AI services no-op without their keys.
+
+Two things worth knowing about the keys:
+
+- `app/api/contact/route.ts` still falls back to `NEXT_PUBLIC_RESEND_API_KEY`
+  so existing deploys keep working. That name exposes the key to the browser.
+  Rename the deploy variable to `RESEND_API_KEY`, rotate the key, then drop the
+  fallback.
+- The Gemini and Groq keys are `NEXT_PUBLIC_*` because their services run
+  client-side. They are shipped to the browser. Scope and rate-limit them
+  accordingly, or move those calls behind a route handler.
+
+## Layout
+
+Conventions are enforced by `CLAUDE.md` / `AGENTS.md`: pages in `app/`, API
+routes in `app/api/`, server actions in `actions/`, components in `components/`,
+docs in `docs/`, types in `types/`.
+
+```
+app/                    Routes (App Router)
+  page.tsx              Homepage — composed from components/home/*
+  events/               Events listing
+  case-studies/         Index, five hand-written pages, plus a [slug] route
+  blog/                 Blog index and [slug], read from Supabase
+  contact/              Standalone contact page
+  admin/                Post authoring, cookie-gated by proxy.ts
+  api/contact           Contact form → Resend
+  api/chat              AI assistant endpoint
+components/
+  home/                 The current homepage: Nav, Hero, Services, Team, …
+  blog/ case-studies/ admin/ ui/
+  landing/ pages/       Legacy pre-rebrand components — unreferenced, kept for
+                        reference only. Do not build on these.
+lib/
+  home-content.ts       All homepage/events copy and data (TEAM, EVENTS, …)
+  data.ts               Legacy landing-page content
+  supabase/             Browser client, server client, queries, storage, types
+actions/                auth.ts, blog.ts
+services/               Gemini, Groq, editor AI, knowledge base
+hooks/                  Performance, motion, feature-flag, scroll helpers
+supabase/migrations/    Blog tables and RLS policies
+docs/                   Optimization guide, rebrand research and copy
+specs/                  Spec-kit feature specs (001–003)
+```
+
+### Routing note
+
+This project uses Next.js's **`proxy.ts`**, not `middleware.ts` — the middleware
+file convention is deprecated. `proxy.ts` gates `/admin/*` on an `admin_session`
+cookie and redirects to `/admin/login`.
+
+## The homepage
+
+`app/page.tsx` composes `components/home/*` in order: Hero, Marquee, Services,
+WhyRockship, Selection, CaseStudies, Career, Team, Faq, FinalCTA.
+
+Two things to know when editing it:
+
+- **Copy lives in `lib/home-content.ts`**, not in the components. Team members,
+  events, case study summaries, FAQ entries and contact details are all there.
+  `EVENTS_ARE_PLACEHOLDER` gates a warning banner on `/events`.
+- **Styling is scoped to `.rk`**, defined near the bottom of `app/globals.css`.
+  It is a light theme (`--rk-paper`, `--rk-ink`, `--rk-hair`, and a single
+  accent `--rk-accent`) deliberately isolated from the dark blog/admin surfaces.
+  The rebrand rationale is in `docs/rebrand/research-v2.md`.
+
+`components/home/Nav.tsx` is shared by the homepage and `/events`. Its tabs are
+homepage section anchors, so it checks `usePathname()` and emits `/#services`
+rather than `#services` when rendered off the homepage. Add a route that reuses
+this nav and it will keep working; add a section to the homepage and you need a
+matching entry in `TABS`.
+
+## Blog and admin
+
+Posts live in Supabase. Apply `supabase/migrations/` to a project, optionally
+seed with `supabase/seed.sql`, and set the three Supabase variables. RLS policies
+in `002_blog_rls_policies.sql` allow anonymous reads of published posts only.
+
+`/admin` is protected by a single username/password pair checked against env
+vars, with a base64 session cookie. It is deliberately simple and is not a
+multi-user auth system — treat the credentials as a shared secret.
+
+## Feature flags
+
+`FeatureFlagProvider` reads flags from the URL and persists them to
+localStorage:
+
+```
+?featureFlag=blog          enable
+?disableFlag=blog          disable
+?clearFlags=true           clear all
+```
+
+Wrap gated UI in `components/FeatureFlag.tsx`.
+
+## Performance
+
+`next.config.js` enables the React Compiler, `optimizePackageImports` for
+framer-motion / lucide-react / radix, and AVIF+WebP image output. The 3D and
+animation work adapts to device capability via `hooks/use3DPerformance.ts` and
+`hooks/useAnimationTier.ts`, and honours `prefers-reduced-motion` throughout —
+`components/home/Reveal.tsx` disables its scroll reveals outright when set.
+
+`docs/OPTIMIZATION_GUIDE.md` has the detail.

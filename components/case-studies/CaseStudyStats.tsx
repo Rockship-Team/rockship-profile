@@ -35,20 +35,20 @@ export function CaseStudyStats({ stats }: CaseStudyStatsProps) {
           {/* Highlight Stats */}
           <FadeIn
             delay={200}
-            className="lg:col-span-2 p-4 rounded-3xl bg-rockship-900/50 border border-white/10 backdrop-blur-2xl shadow-2xl overflow-hidden h-full"
+            className="lg:col-span-2 p-4 rounded-3xl bg-[#F5F5F7] border border-black/10 backdrop-blur-2xl shadow-2xl overflow-hidden h-full"
           >
-            <div className="p-6 lg:p-8 flex flex-col justify-center bg-gradient-to-br from-rockship-accent/20 to-transparent rounded-2xl border border-white/5 h-full relative overflow-hidden group">
-              <div className="absolute inset-0 bg-rockship-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <h3 className="text-rockship-200 font-medium mb-1 relative">
+            <div className="p-6 lg:p-8 flex flex-col justify-center bg-gradient-to-br from-[#FF4D00]/20 to-transparent rounded-2xl border border-black/[0.06] h-full relative overflow-hidden group">
+              <div className="absolute inset-0 bg-[#FF4D00]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <h3 className="text-[#3A3D42] font-medium mb-1 relative">
                 Key Impact
               </h3>
-              <div className="text-5xl lg:text-6xl font-display font-bold text-white mb-2 relative tracking-tight">
+              <div className="text-5xl lg:text-6xl font-display font-bold text-[#1D1D1F] mb-2 relative tracking-tight">
                 {displayStats.mainValue}
-                <span className="text-lg font-sans font-normal text-rockship-300 ml-2 align-middle">
+                <span className="text-lg font-sans font-normal text-[#6E6E73] ml-2 align-middle">
                   {displayStats.mainLabel}
                 </span>
               </div>
-              <p className="text-sm text-rockship-300 leading-relaxed max-w-sm relative">
+              <p className="text-sm text-[#6E6E73] leading-relaxed max-w-sm relative">
                 {displayStats.mainDesc}
               </p>
             </div>
@@ -64,18 +64,18 @@ export function CaseStudyStats({ stats }: CaseStudyStatsProps) {
                 distance={20}
                 className="h-full"
               >
-                <div className="p-6 lg:p-8 flex flex-col justify-center bg-rockship-900/50 border border-white/10 backdrop-blur-2xl rounded-2xl hover:bg-white/[0.04] transition-colors gap-2 h-full">
+                <div className="p-6 lg:p-8 flex flex-col justify-center bg-[#F5F5F7] border border-black/10 backdrop-blur-2xl rounded-2xl hover:bg-white/[0.04] transition-colors gap-2 h-full">
                   {stat.icon === "trophy" ? (
                     <Trophy className="w-6 h-6 text-yellow-500 mb-2" />
                   ) : stat.icon === "zap" ? (
                     <Zap className="w-6 h-6 text-green-500 mb-2" />
                   ) : (
-                    <Target className="w-6 h-6 text-rockship-accent mb-2" />
+                    <Target className="w-6 h-6 text-[#FF4D00] mb-2" />
                   )}
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold text-[#1D1D1F]">
                     {stat.value}
                   </div>
-                  <div className="text-xs text-rockship-400 uppercase tracking-wider font-semibold">
+                  <div className="text-xs text-[#86868B] uppercase tracking-wider font-semibold">
                     {stat.label}
                   </div>
                 </div>

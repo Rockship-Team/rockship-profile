@@ -1,26 +1,90 @@
 "use client";
 
+import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { trackPageView } from "@/lib/analytics";
 
-const GA_MEASUREMENT_ID = "G-TG4YELPMWK";
+/**
+ * GA4, wired for three things the previous hand-rolled version got wrong:
+ * the ID is configurable, admin routes are excluded, and client-side
+ * navigations are counted.
+ *
+ * The measurement ID is read at module scope because Next inlines
+ * NEXT_PUBLIC_* at build time — it is not readable from a runtime env file.
+ */
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+/** Routes that must never reach analytics. Our own CMS sessions are not traffic. */
+function isExcluded(pathname: string) {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
 
 export default function GoogleAnalytics() {
+  const pathname = usePathname();
+
+  // Hooks run unconditionally; the *render* is what gets gated. Returning
+  // early before the hooks would break the rules of hooks on navigation
+  // between an excluded and an included route.
+  const enabled = Boolean(GA_MEASUREMENT_ID) && !isExcluded(pathname);
+
+  // gtag('config') fires its own page_view for whichever route the browser
+  // loaded. Sending ours as well would double-count that first view, so the
+  // first enabled path is recorded and skipped.
+  const initialPathTracked = useRef(false);
+  const lastTrackedPath = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    if (!initialPathTracked.current) {
+      initialPathTracked.current = true;
+      lastTrackedPath.current = pathname;
+      return;
+    }
+
+    if (lastTrackedPath.current === pathname) return;
+    lastTrackedPath.current = pathname;
+    trackPageView(pathname);
+  }, [enabled, pathname]);
+
+  if (!enabled) return null;
+
   return (
     <>
-      {/* Use lazyOnload to defer analytics until page is fully loaded
-          This prevents blocking the main thread during initial render */}
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="lazyOnload"
-      />
-      <Script id="google-analytics" strategy="lazyOnload">
+      {/*
+        Consent Mode v2, denied by default. This must execute before gtag.js
+        loads and before the gtag('config') call, or the first hit is sent
+        under the implicit "granted" default — which is the thing we are
+        avoiding. beforeInteractive puts it in the document head, ahead of the
+        afterInteractive scripts that <GoogleAnalytics /> injects.
+
+        With storage denied, GA still receives cookieless pings: no analytics
+        cookie is written and no identifier persists between visits. Sessions
+        and users are modelled rather than measured. That is the trade for not
+        shipping a consent banner — see docs and the PR description.
+
+        To later add a banner, call gtag('consent','update',{...}) on accept.
+        Nothing else here needs to change.
+      */}
+      <Script id="ga-consent-default" strategy="beforeInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}');
+          gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'denied',
+            'personalization_storage': 'denied',
+            'security_storage': 'granted'
+          });
         `}
       </Script>
+
+      <NextGoogleAnalytics gaId={GA_MEASUREMENT_ID!} />
     </>
   );
 }

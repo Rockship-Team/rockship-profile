@@ -20,9 +20,9 @@ export function CaseStudyImplementation({
   return (
     <FadeIn>
       <div className="relative">
-        <div className="absolute -left-4 -top-4 w-20 h-20 bg-white/5 rounded-full blur-2xl" />
+        <div className="absolute -left-4 -top-4 w-20 h-20 bg-black/[0.03] rounded-full blur-2xl" />
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-12 flex items-center gap-4 relative">
-          <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-xl text-rockship-300">
+          <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-black/[0.03] border border-black/10 text-xl text-[#6E6E73]">
             03
           </span>
           Implementation
@@ -34,7 +34,7 @@ export function CaseStudyImplementation({
           {images.map((img, idx) => (
             <div
               key={idx}
-              className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 p-1"
+              className="rounded-2xl overflow-hidden border border-[#D2D2D7] bg-white p-1"
             >
               <div className="rounded-xl overflow-hidden relative">
                 <img
@@ -42,8 +42,8 @@ export function CaseStudyImplementation({
                   alt={`Process ${idx === 0 ? "Before" : "After"}`}
                   className="w-full h-auto transition-transform duration-700 hover:scale-105"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 pt-16">
-                  <span className="inline-block px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-white backdrop-blur-md">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/95 to-transparent p-4 pt-16">
+                  <span className="inline-block px-3 py-1 rounded-full bg-black/[0.05] border border-black/10 text-xs font-medium text-[#1D1D1F] backdrop-blur-md">
                     {idx === 0 ? "Before AI" : "After AI"}
                   </span>
                 </div>
@@ -53,34 +53,34 @@ export function CaseStudyImplementation({
         </div>
       )}
 
-      <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 md:p-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Clock className="w-24 h-24 text-white" />
+      <div className="bg-[#F5F5F7] border border-[#D2D2D7] rounded-3xl p-8 md:p-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-6 opacity-[0.07]">
+          <Clock className="w-10 h-10 text-[#1D1D1F]" />
         </div>
-        <div className="flex items-center gap-3 mb-10 text-rockship-accent border border-rockship-accent/20 bg-rockship-accent/10 w-fit px-4 py-1.5 rounded-full">
+        <div className="flex items-center gap-3 mb-10 text-[#FF4D00] border border-[#FF4D00]/20 bg-[#FF4D00]/10 w-fit px-4 py-1.5 rounded-full">
           <Clock className="w-4 h-4" />
           <span className="font-mono text-sm font-bold">
             {implementation.totalTime} Timeline
           </span>
         </div>
 
-        <FadeInStagger className="relative border-l border-white/10 ml-3 space-y-12">
+        <FadeInStagger className="relative border-l-2 border-[#D2D2D7] ml-3 space-y-12">
           {implementation.phases.map((phase, i) => (
             <FadeIn key={i} delay={i * 200} direction="right" distance={20}>
               <div className="relative pl-12 group">
                 {/* Timeline Dot */}
-                <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-rockship-800 ring-2 ring-white/20 group-hover:bg-rockship-accent group-hover:ring-rockship-accent/50 transition-all" />
+                <div className="absolute -left-[7px] top-2 w-3 h-3 rounded-full bg-white ring-2 ring-[#86868B] group-hover:bg-[#FF4D00] group-hover:ring-[#FF4D00] transition-all" />
 
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-rockship-accent transition-colors">
+                <h3 className="text-xl font-semibold text-[#1D1D1F] mb-3 group-hover:text-[#FF4D00] transition-colors">
                   {phase.phase}
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-1 gap-3">
                   {phase.details.map((detail, j) => (
                     <div
                       key={j}
-                      className="flex items-center gap-3 text-rockship-300 text-sm bg-black/20 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
+                      className="flex items-center gap-3 text-[#3A3D42] text-sm bg-white p-3 rounded-lg border border-[#D2D2D7] hover:border-[#86868B] transition-colors"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#86868B] shrink-0" />
                       <span>{detail}</span>
                     </div>
                   ))}

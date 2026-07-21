@@ -532,13 +532,13 @@ useEffect(() => {
 
 ```bash
 # Run development server
-pnpm dev
+bun --bun run dev
 
 # Run production build
-pnpm build
+bun --bun run build
 
 # Start production server
-pnpm start
+bun --bun run start
 
 # Check for any CSS errors in browser console
 ```
@@ -547,7 +547,7 @@ pnpm start
 
 ```bash
 # Analyze bundle size (if needed)
-ANALYZE=true pnpm build
+ANALYZE=true bun run build
 
 # Check CSS output in .next/static/chunks
 ```
