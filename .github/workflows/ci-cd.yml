@@ -80,4 +80,10 @@ jobs:
         # Application environment variables
         NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
         NEXT_PUBLIC_RESEND_API_KEY: ${{ secrets.NEXT_PUBLIC_RESEND_API_KEY }}
+        # GA4. Production only — deliberately absent from the preview job, so
+        # preview deploys do not report into production numbers. A measurement
+        # ID is not a secret (it is readable in the page source of any site
+        # using it), so the property's ID is committed as the default; set the
+        # repository secret to point a deploy at a different property.
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-J3SEQ1RW1S' }}
 
