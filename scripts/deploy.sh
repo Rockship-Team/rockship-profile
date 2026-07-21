@@ -110,62 +110,30 @@ ssh_cmd() {
   ssh "${args[@]}" "${SSH_USER}@${SSH_HOST}" "$@"
 }
 
-# -------------------------------------------------------- node toolchain ----
+# --------------------------------------------------------- bun toolchain ----
 
-# Next.js 16 needs Node >= 20, but pnpm 11 needs >= 22.13 — and below that it
-# dies inside its own bundle with `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`
-# (node:sqlite landed in 22.13) instead of naming the real problem. Enforce the
-# stricter bound.
-node_is_current() {
-  local v major minor
-  command -v node >/dev/null 2>&1 || return 1
-  v="$(node -p 'process.versions.node' 2>/dev/null)" || return 1
-  major="${v%%.*}"
-  minor="$(printf '%s' "$v" | cut -d. -f2)"
-  [ "$major" -gt 22 ] && return 0
-  [ "$major" -eq 22 ] && [ "$minor" -ge 13 ] && return 0
-  return 1
-}
+# bun both installs dependencies and runs `next build` — Node is not required on
+# the build machine at all. The version is pinned in .bun-version because older
+# bun cannot run the Next build: 1.1.x dies with
+# `worker_threads.Worker option "stdout" is not yet implemented in Bun`.
+ensure_bun() {
+  need bun
 
-# Switch Node via nvm rather than making the caller remember `nvm use`. nvm is a
-# shell function, so it has to be sourced — it is not on PATH for scripts.
-ensure_node() {
-  node_is_current && return 0
+  local required current lowest
+  required="$(tr -d '[:space:]' < .bun-version)"
+  current="$(bun --version)"
 
-  local current nvm_sh
-  current="$(node -v 2>/dev/null || echo none)"
-  nvm_sh="${NVM_DIR:-$HOME/.nvm}/nvm.sh"
+  # `sort -V` orders versions properly; if the older of the two is not the
+  # required one, the installed bun is behind.
+  lowest="$(printf '%s\n%s\n' "$required" "$current" | sort -V | head -1)"
+  if [ "$current" != "$required" ] && [ "$lowest" != "$required" ]; then
+    die "bun ${current} is older than the pinned ${required} (.bun-version).
+       Older bun cannot run the Next.js build. Upgrade, then retry:
 
-  if [ -s "$nvm_sh" ]; then
-    info "Node ${current} is too old — switching to $(cat .nvmrc) via nvm…"
-    # nvm.sh trips over `set -u` and returns non-zero on benign paths.
-    set +eu
-    # shellcheck disable=SC1090
-    . "$nvm_sh" >/dev/null 2>&1
-    nvm use >/dev/null 2>&1 || { nvm install >/dev/null 2>&1; nvm use >/dev/null 2>&1; }
-    set -eu
+         bun upgrade"
   fi
 
-  node_is_current || die "Node ${current} detected; pnpm 11 requires Node >= 22.13.
-       This repo pins the version in .nvmrc, but switching automatically failed.
-       Run it yourself, then retry:
-
-         nvm install && nvm use"
-
-  ok "Using node $(node -v)"
-}
-
-# After an nvm switch the old `pnpm` shim may be gone or point at the wrong
-# Node, so resolve pnpm through corepack when a direct binary is unusable.
-# `packageManager` in package.json pins the version either way.
-pnpm_cmd() {
-  if command -v pnpm >/dev/null 2>&1 && pnpm --version >/dev/null 2>&1; then
-    pnpm "$@"
-  elif command -v corepack >/dev/null 2>&1; then
-    corepack pnpm "$@"
-  else
-    die "Neither \`pnpm\` nor \`corepack\` is usable. Install pnpm: npm i -g pnpm"
-  fi
+  dim "bun ${current}"
 }
 
 # ------------------------------------------------------- 1. local build ----
@@ -173,20 +141,37 @@ pnpm_cmd() {
 cmd_build() {
   step "1/4  Building Next.js standalone bundle locally"
 
-  ensure_node
-  dim "node $(node -v) · pnpm $(pnpm_cmd --version)"
+  ensure_bun
 
-  if [ ! -f .env.production ] && [ ! -f .env.production.local ]; then
+  # NEXT_PUBLIC_* is compiled into the bundle by `next build`, so a wrong value
+  # here cannot be corrected on the server. A placeholder does not fail the
+  # build — it yields a site whose blog is silently empty — so catch it now.
+  # Mirrors the same check in .github/workflows/deploy-ecr.yml.
+  local env_file=""
+  for f in .env.production.local .env.production; do
+    [ -f "$f" ] && env_file="$f" && break
+  done
+
+  if [ -z "$env_file" ]; then
     warn "No .env.production found. NEXT_PUBLIC_* vars are inlined at BUILD time —"
     warn "without them the client bundle ships with undefined Supabase config."
+  elif grep -qE '^NEXT_PUBLIC_SUPABASE_URL=.*(your-project-ref|xxxx|example\.com)' "$env_file"; then
+    # Supabase is optional, so this is a warning rather than a failure — the app
+    # treats a placeholder as "not configured" and the blog renders empty.
+    warn "${env_file} has a placeholder NEXT_PUBLIC_SUPABASE_URL, so the blog"
+    warn "will be empty in this build. Set the real project URL and anon key"
+    warn "(Supabase dashboard → Project Settings → API) if you want blog content."
   fi
 
   info "Installing dependencies…"
-  pnpm_cmd install --frozen-lockfile
+  bun install --frozen-lockfile
 
   info "Running next build…"
-  # Subshell so the export cannot leak into later steps.
-  ( export NODE_ENV=production; pnpm_cmd build )
+  # `--bun` forces the bun runtime. Without it, bun honours the `next` shebang
+  # and delegates to whatever `node` happens to be on PATH — so a stale Node 16
+  # in the shell fails the build even though bun alone can do it. Subshell keeps
+  # the export from leaking into later steps.
+  ( export NODE_ENV=production; bun --bun run build )
 
   [ -f .next/standalone/server.js ] || die "Standalone output missing. Is output:'standalone' set in next.config.js?"
 

@@ -8,7 +8,7 @@ dependency tree in the container.
 ```
  laptop                                    ECR                    server
 ┌──────────────────────────┐            ┌───────┐            ┌──────────────┐
-│ 1. pnpm build            │            │       │            │              │
+│ 1. bun run build         │            │       │            │              │
 │    → .next/standalone    │            │       │            │              │
 │    → staged in .deploy/  │            │       │            │              │
 │ 2. docker buildx         │──push──▶   │ image │  ──pull──▶ │ docker run   │
@@ -231,8 +231,10 @@ cp deploy.config.example deploy.config   # then fill it in (gitignored)
 aws sso login                            # or however you authenticate
 ```
 
-Node is handled for you: the build step reads `.nvmrc` and switches via nvm if
-your shell is on an older version.
+Install bun if you don't have it (`curl -fsSL https://bun.sh/install | bash`).
+Node is not needed on the build machine — bun both installs dependencies and
+runs the Next.js build. The required bun version is pinned in `.bun-version`;
+the build step refuses to run on an older one.
 
 Create `.env.production` for **build-time** values. Anything named
 `NEXT_PUBLIC_*` is inlined into the client bundle when `next build` runs on your
@@ -279,22 +281,28 @@ bundle during `next build`, so a runtime value is silently ignored.
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | server | `/admin` credentials |
 | `RESEND_API_KEY` | server | Contact form; 503 without it |
 
-Nothing is required for the app to boot — Supabase queries return empty, the
-assistants disable themselves, and the contact form 503s. It will start and
-serve pages with an empty env file, which is worth knowing when debugging: a
-healthy container does not mean a correctly configured one.
+**Every one of these is optional.** The app boots and serves every page with an
+empty env file: Supabase queries short-circuit to empty, the assistants disable
+themselves, and the contact form returns 503. Placeholder values (`your-project-ref`,
+`xxxx`, `example.com`) count as unconfigured, so a half-filled `.env` degrades
+the same way instead of failing DNS at build time.
+
+The build and CI both warn when Supabase is unset or still a placeholder, but
+neither fails. That is worth remembering when debugging: a healthy container
+does not mean a correctly configured one — check the build log for
+`Supabase is not configured` if the blog is unexpectedly empty.
 
 ## Deploying
 
 ```bash
-pnpm deploy          # build → push → release
+bun run deploy       # build → push → release
 ```
 
 Or one step at a time:
 
 | Command | Step | What it does |
 |---|---|---|
-| `./scripts/deploy.sh build` | 1 | `pnpm install` + `next build`, stages output into `.deploy/` |
+| `./scripts/deploy.sh build` | 1 | `bun install` + `next build`, stages output into `.deploy/` |
 | `./scripts/deploy.sh image` | 2 | Builds the image for *your* arch only, for local testing |
 | `./scripts/deploy.sh push` | 2+3 | Multi-arch `buildx` build, pushes to ECR |
 | `./scripts/deploy.sh release` | 4 | SSH: pull, remove old container, run new one, wait for healthy |
@@ -363,8 +371,12 @@ Settings → Secrets and variables → Actions → **Variables**:
 | `SSH_USER` | `ubuntu` |
 | `REMOTE_ENV_FILE` | `/etc/rockship-profile/.env.production` |
 
-Optional, with defaults: `PLATFORMS`, `SSH_PORT`, `CONTAINER_NAME`, `HOST_PORT`,
-`CONTAINER_PORT`.
+Optional, with defaults: `PLATFORMS`, `SSH_PORT`, `CONTAINER_NAME`,
+`CONTAINER_PORT`, `DOCKER_NETWORK` (default `nginx`).
+
+Leave `HOST_PORT` unset — the container is reached over `DOCKER_NETWORK` rather
+than a published host port. Setting it collides with the app that already owns
+port 3000 on that server.
 
 ### Repository secrets
 
@@ -373,12 +385,14 @@ Optional, with defaults: `PLATFORMS`, `SSH_PORT`, `CONTAINER_NAME`, `HOST_PORT`,
 | `AWS_DEPLOY_ROLE_ARN` | IAM role the runner assumes via OIDC |
 | `SSH_PRIVATE_KEY` | Private key for `SSH_USER@SSH_HOST` |
 | `SSH_KNOWN_HOSTS` | Output of `ssh-keyscan <host>`. Strongly recommended — without it the workflow trusts the host key on first use and logs a warning |
-| `NEXT_PUBLIC_SUPABASE_URL` | Inlined into the client bundle at build time |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Inlined into the client bundle at build time |
+| `NEXT_PUBLIC_SUPABASE_URL` | Required. Inlined into the client bundle at build time; the workflow fails if it is missing or still a placeholder |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Required. Inlined into the client bundle at build time |
+| `NEXT_PUBLIC_GROQ_API_KEY` | Optional. Omit to disable the Groq assistant. Reaches the browser — see "Known security issues" |
+| `NEXT_PUBLIC_GEMINI_API_KEY` | Optional. Omit to disable the Gemini assistant. Reaches the browser |
 
-Server-only secrets (`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`,
-`RESEND_API_KEY`, `GROQ_API_KEY`) are **not** GitHub secrets — they live only in
-`REMOTE_ENV_FILE` on the server and are never seen by CI.
+Server-only secrets (`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`,
+`ADMIN_PASSWORD`, `RESEND_API_KEY`) are **not** GitHub secrets — they live only
+in `REMOTE_ENV_FILE` on the server and are never seen by CI.
 
 ### One-time AWS OIDC setup
 
@@ -434,11 +448,23 @@ the short SHA. Both land in the same repository — `aws ecr list-images
 build step also copies in the two things standalone deliberately omits,
 `.next/static` and `public/`.
 
+**The runtime image is `oven/bun:alpine`** — there is no Node.js in it. The
+container runs `bun run server.js` as the unprivileged `bun` user. (`node` does
+resolve inside the image, but it is bun's own compatibility shim, not Node.)
+
+**Not a compiled binary.** `bun build --compile` on the standalone entrypoint
+produces a binary that immediately fails: Next's `server.js` calls
+`process.chdir(__dirname)`, which inside a compiled binary is the virtual path
+`/$bunfs/root/` and raises ENOENT. Even patched, `next-server` reads the
+`.next/server/**` chunks from disk per request, so `.next/` and `public/` have to
+ship as real files. A single self-contained executable isn't achievable for a
+Next.js server; the image is the unit of deployment instead.
+
 **sharp** is the one native dependency. Its binaries are platform-specific, so
 the build step deletes the host's copy from `.deploy/` and the Dockerfile
-reinstalls it in a separate stage where the target platform is known. Without
-this, an arm64 laptop would ship arm64 `.node` files into an amd64 image and
-`next/image` would fail at runtime.
+reinstalls it in a separate stage where the target platform is known. Without it
+`next/image` does not fail loudly — it serves the original file. A 452 KB PNG
+comes back as 452 KB instead of a 22 KB WebP, still with HTTP 200.
 
 **Multi-arch** builds require the `docker-container` buildx driver (the default
 `docker` driver cannot produce multi-platform manifests). The script creates a
@@ -454,20 +480,20 @@ two containers on alternating ports.
 
 ## Troubleshooting
 
-**`ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`** or
-**`ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING`** — both mean the wrong Node version.
-pnpm 11 requires Node **>= 22.13** and crashes inside its own bundle rather than
-saying so.
+**`bun X is older than the pinned Y`** — run `bun upgrade`. The pin exists
+because bun 1.1.x cannot run the Next.js build: it fails with
+`worker_threads.Worker option "stdout" is not yet implemented in Bun`.
 
-The build step handles this: it detects an old Node, sources nvm and switches to
-the `.nvmrc` version automatically. You should only see the error if nvm is not
-installed, in which case install Node >= 22.13 by whatever means you prefer.
+**`You are using Node.js 16.x. For Next.js, Node.js version ">=20.9.0" is
+required`** — this appears if you run `bun run build` by hand. Plain `bun run`
+honours the `next` shebang and delegates to whatever `node` is on your PATH. The
+deploy script passes `--bun` to force the bun runtime, sidestepping Node
+entirely; do the same by hand with `bun --bun run build`.
 
-Note this only applies to the deploy script. Running `pnpm dev` by hand still
-needs the right Node in your shell — `nvm use`.
-
-**`ERR_PNPM_IGNORED_BUILDS`** — a new native dependency needs approval. Add it to
-`allowBuilds` in `pnpm-workspace.yaml`.
+**A dependency's install script didn't run** — bun only runs postinstall scripts
+for packages listed in `trustedDependencies` in `package.json`. `sharp`,
+`unrs-resolver` and `@tsparticles/engine` are already listed; add new native
+dependencies there.
 
 **Container is unhealthy** — `./scripts/deploy.sh logs`. Most often the
 `--env-file` on the server is missing a variable the app reads at boot.
