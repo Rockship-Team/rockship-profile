@@ -94,6 +94,18 @@ export default function Nav() {
           >
             Events
           </Link>
+          <Link
+            href="/demos"
+            aria-current={pathname.startsWith("/demos") ? "page" : undefined}
+            className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
+            style={
+              pathname.startsWith("/demos")
+                ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }
+                : { color: "var(--rk-sec)" }
+            }
+          >
+            Demos
+          </Link>
         </div>
 
         <div className="ml-auto shrink-0">

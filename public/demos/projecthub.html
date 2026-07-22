@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE ProjectHub — prototype placeholder</title>
+<style>
+  :root { --stone:#F7F5F2; --ink:#1A1714; --ink-3:#6B6560; --brass:#9C7B3F; --border:rgba(26,23,20,.12); }
+  *{box-sizing:border-box;margin:0;}
+  body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--stone);color:var(--ink);
+       min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;-webkit-font-smoothing:antialiased;}
+  .card{max-width:560px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 36px;
+        box-shadow:0 8px 32px rgba(26,23,20,.08);}
+  .mark{width:44px;height:44px;border-radius:11px;background:var(--brass);color:#fff;display:flex;align-items:center;
+        justify-content:center;font-size:22px;font-weight:700;margin-bottom:20px;}
+  h1{font-size:22px;letter-spacing:-.01em;margin-bottom:8px;}
+  p{font-size:14.5px;line-height:1.6;color:var(--ink-3);margin-bottom:14px;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--stone);
+       border:1px solid var(--border);border-radius:6px;padding:2px 7px;color:var(--ink);}
+  .steps{background:var(--stone);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:8px;}
+  .steps code{background:#fff;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+       color:var(--brass);margin-bottom:16px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark">R</div>
+    <div class="tag">Prototype placeholder</div>
+    <h1>RE ProjectHub prototype loads here</h1>
+    <p>This iframe is wired up and working — it's just showing a placeholder. Drop
+       the real <strong>RE ProjectHub</strong> prototype in to replace it, keeping
+       the same filename:</p>
+    <div class="steps">
+      <p style="margin-bottom:6px;color:var(--ink);font-weight:600;">Replace this file:</p>
+      <code>public/demos/projecthub.html</code>
+      <p style="margin:12px 0 6px;color:var(--ink);font-weight:600;">e.g.</p>
+      <code>cp RE_ProjectHubNew.html public/demos/projecthub.html</code>
+    </div>
+    <p style="margin-top:16px;">Use the original file from disk — the copy pasted
+       into chat had an encoding problem. No code change needed.</p>
+  </div>
+</body>
+</html>
