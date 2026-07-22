@@ -37,6 +37,8 @@ export interface CaseStudy {
   href: string;
   /** Hero artwork from public/images/case-studies/<slug>/ */
   image: string;
+  /** Real-world 16:9 card thumbnail from public/images/case-studies/<slug>/thumb.jpg */
+  thumb: string;
   market: string;
   title: string;
   stat: string;

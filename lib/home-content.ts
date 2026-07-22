@@ -137,6 +137,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     href: "/case-studies/ai-resident-support-automation",
     image: "/images/case-studies/ai-resident-support-automation/hero-main.png",
+    thumb: "/images/case-studies/ai-resident-support-automation/thumb.jpg",
     market: "Property management",
     title: "Resident support automation",
     stat: "92.5%",
@@ -145,6 +146,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     href: "/case-studies/ai-finance-automation",
     image: "/images/case-studies/ai-finance-automation/hero-main.png",
+    thumb: "/images/case-studies/ai-finance-automation/thumb.jpg",
     market: "Singapore · Healthcare",
     title: "Finance automation for a clinic group",
     stat: "95%",
@@ -153,6 +155,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     href: "/case-studies/ai-conversational-commerce",
     image: "/images/case-studies/ai-conversational-commerce/hero-main.png",
+    thumb: "/images/case-studies/ai-conversational-commerce/thumb.jpg",
     market: "Vietnam · B2B distribution",
     title: "Conversational commerce",
     stat: "+35%",
@@ -161,6 +164,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     href: "/case-studies/ai-loan-automation",
     image: "/images/case-studies/ai-loan-automation/hero-main.png",
+    thumb: "/images/case-studies/ai-loan-automation/thumb.jpg",
     market: "Indonesia · Microfinance",
     title: "Loan origination automation",
     stat: "2.5×",
@@ -254,55 +258,50 @@ export const FAQ: FaqItem[] = [
 ];
 
 /**
- * Placeholder events. Recommendation in research-v2.md Part 5 is a standalone
- * /events page rather than a homepage section — none of the four researched
- * companies puts events on the homepage, and Toptal firewalls theirs off the
- * client funnel entirely. Replace with real events before launch.
+ * Real events, most recent first. Recommendation in research-v2.md Part 5 is a
+ * standalone /events page rather than a homepage section — none of the four
+ * researched companies puts events on the homepage, and Toptal firewalls theirs
+ * off the client funnel entirely.
+ *
+ * No upcoming events are listed for now; when the next one is scheduled, add it
+ * with status "upcoming" and the /events page surfaces the Upcoming section
+ * automatically.
  */
 export const EVENTS: RockshipEvent[] = [
   {
-    status: "upcoming",
-    date: "Thu, 13 Aug",
+    status: "past",
+    date: "Tue, 14 Apr",
     year: "2026",
-    time: "18:30",
-    title: "Evals in production: what actually breaks",
-    location: "Ho Chi Minh City · District 1",
+    time: "20:00",
+    title: "OpenClaw — AI agents thực chiến cho Solo Founder & SME",
+    location: "Online · Zoom",
     description:
-      "Building evaluation harnesses for LLM features that already have users, and the failure modes that only appear at scale.",
-    href: "https://lu.ma/",
-  },
-  {
-    status: "upcoming",
-    date: "Wed, 3 Sep",
-    year: "2026",
-    time: "17:00",
-    title: "Forward-deployed engineering: an open session",
-    location: "Online",
-    description:
-      "How the role works day to day, who it suits, and how we train for it. Open to engineers considering the track.",
-    href: "https://lu.ma/",
+      "A 90-minute session on putting AI agents to work for solo founders and small teams — inbound leads, support, internal reporting and workflow automation, with live demos and a 30-day rollout plan.",
+    href: "https://luma.com/fl0bhbdp",
   },
   {
     status: "past",
-    date: "Sat, 21 Jun",
+    date: "Sun, 12 Apr",
     year: "2026",
-    title: "AI-native engineering workshop",
-    location: "Ho Chi Minh City · 40 attendees",
+    time: "14:00",
+    title: "Raise Your Lobster: The OpenClaw Setup Day",
+    location: "The Joi Factory, Ho Chi Minh City · 25 attendees",
     description:
-      "A hands-on afternoon taking a prototype to a deployed service with guardrails and monitoring.",
-    href: "/events",
+      "An intimate, hands-on afternoon: a small group installing and configuring OpenClaw and leaving with a working AI agent wired to their own workflow — install, API keys and one real integration each.",
+    href: "https://luma.com/ubpqor38",
   },
   {
     status: "past",
-    date: "Thu, 15 May",
+    date: "Sat, 4 Apr",
     year: "2026",
-    title: "Shipping to Singapore: engineering for regulated clients",
-    location: "Online · with a guest speaker",
+    time: "09:30",
+    title: "Raise Your Lobster: The OpenClaw Setup Day",
+    location: "The Joi Factory, Ho Chi Minh City · 99 attendees",
     description:
-      "What changes when your client is in a regulated industry — data residency, audit trails and review cycles.",
-    href: "/events",
+      "A hands-on setup morning with AI Builders Vietnam — no talks, no slides, just building. Attendees left with a working outreach, research or content agent running on their own laptop.",
+    href: "https://luma.com/2ygp3sqn",
   },
 ];
 
-/** Every event above is invented. Gates the placeholder banner on /events. */
-export const EVENTS_ARE_PLACEHOLDER = true;
+/** All events above are real. Keeps the /events placeholder banner hidden. */
+export const EVENTS_ARE_PLACEHOLDER = false;
