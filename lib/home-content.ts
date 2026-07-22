@@ -216,7 +216,7 @@ export const TEAM: Person[] = [
     previously: null,
   },
   {
-    name: "Quan",
+    name: "Quan Do",
     role: "CTO",
     photo: "/Quan.png",
     previously: null,
