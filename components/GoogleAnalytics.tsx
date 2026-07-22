@@ -54,19 +54,20 @@ export default function GoogleAnalytics() {
   return (
     <>
       {/*
-        Consent Mode v2, denied by default. This must execute before gtag.js
-        loads and before the gtag('config') call, or the first hit is sent
-        under the implicit "granted" default — which is the thing we are
-        avoiding. beforeInteractive puts it in the document head, ahead of the
+        Consent Mode v2. This must execute before gtag.js loads and before the
+        gtag('config') call, so the first hit is sent under these defaults.
+        beforeInteractive puts it in the document head, ahead of the
         afterInteractive scripts that <GoogleAnalytics /> injects.
 
-        With storage denied, GA still receives cookieless pings: no analytics
-        cookie is written and no identifier persists between visits. Sessions
-        and users are modelled rather than measured. That is the trade for not
-        shipping a consent banner — see docs and the PR description.
+        analytics_storage is 'granted': GA writes its _ga cookie and performs
+        full, standard measurement — real (not modelled) sessions and users,
+        visible in Realtime immediately. Ad storage stays denied because we do
+        not run ads; this is analytics only.
 
-        To later add a banner, call gtag('consent','update',{...}) on accept.
-        Nothing else here needs to change.
+        Because this sets an analytics cookie, GDPR/ePrivacy jurisdictions expect
+        a cookie notice. To gate it, flip analytics_storage back to 'denied' here
+        and call gtag('consent','update',{analytics_storage:'granted'}) when the
+        visitor accepts. Nothing else needs to change.
       */}
       <Script id="ga-consent-default" strategy="beforeInteractive">
         {`
@@ -76,8 +77,8 @@ export default function GoogleAnalytics() {
             'ad_storage': 'denied',
             'ad_user_data': 'denied',
             'ad_personalization': 'denied',
-            'analytics_storage': 'denied',
-            'functionality_storage': 'denied',
+            'analytics_storage': 'granted',
+            'functionality_storage': 'granted',
             'personalization_storage': 'denied',
             'security_storage': 'granted'
           });
