@@ -28,7 +28,7 @@ export default function WhyRockship() {
         {DIFFERENTIATORS.map((item) => (
           <RevealItem
             key={item.title}
-            className="h-full w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+            className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
           >
             <article className="rk-card h-full p-8">
               <h3 className="rk-item">{item.title}</h3>
