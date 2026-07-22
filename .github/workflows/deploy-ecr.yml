@@ -159,6 +159,21 @@ jobs:
           fi
           chmod 600 "$RUNNER_TEMP/known_hosts"
 
+      # NEXT_PUBLIC_* is inlined by `next build`, so the GA measurement ID has to
+      # exist on this runner at build time — setting it on the server is too late,
+      # the value is already compiled into the bundle. Next loads .env.production
+      # automatically, and scripts/deploy.sh build reads it too, so write it there
+      # before the build. Not a secret (it is readable in the page source of any
+      # site using it): the property's ID is the committed default, overridable
+      # with the NEXT_PUBLIC_GA_MEASUREMENT_ID repo variable to point a build at a
+      # different property. Mirrors the Vercel pipeline in ci-cd.yml.
+      - name: Write build-time public env
+        if: env.ROLLBACK != 'true'
+        env:
+          GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-J3SEQ1RW1S' }}
+        run: |
+          printf 'NEXT_PUBLIC_GA_MEASUREMENT_ID=%s\n' "$GA_MEASUREMENT_ID" >> .env.production
+
       - name: Build Next.js standalone bundle
         if: env.ROLLBACK != 'true'
         run: ./scripts/deploy.sh build
