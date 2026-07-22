@@ -38,11 +38,7 @@ export default function Selection() {
             </div>
             {stage.rate ? (
               <span className="text-[21px] font-semibold tabular-nums">{stage.rate}</span>
-            ) : (
-              <span className="text-[15px] max-[700px]:col-start-2" style={{ color: "var(--rk-ter)" }}>
-                <TK>pass rate to confirm</TK>
-              </span>
-            )}
+            ) : null}
           </div>
         ))}
       </div>
