@@ -1,8 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CASE_STUDIES } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
 import Reveal, { RevealGroup, RevealItem } from "./Reveal";
-import { CASE_ART } from "./CaseArt";
 
 export default function CaseStudies() {
   return (
@@ -18,16 +18,20 @@ export default function CaseStudies() {
 
       <RevealGroup className="mt-[clamp(48px,6vw,80px)] grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
         {CASE_STUDIES.map((study) => {
-          const Art = CASE_ART[study.href as keyof typeof CASE_ART];
-
           return (
             <RevealItem key={study.href} className="h-full">
               <Link href={study.href} className="rk-card group flex h-full flex-col overflow-hidden">
                 <div
-                  className="relative aspect-[16/9] overflow-hidden p-6 transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="relative aspect-[16/9] overflow-hidden"
                   style={{ background: "var(--rk-alt)" }}
                 >
-                  {Art ? <Art className="h-full w-full" /> : null}
+                  <Image
+                    src={study.thumb}
+                    alt={study.title}
+                    fill
+                    sizes="(max-width: 720px) 100vw, (max-width: 1120px) 50vw, 360px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
                 </div>
 
                 <div className="flex flex-1 flex-col p-7">
