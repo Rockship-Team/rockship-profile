@@ -217,10 +217,9 @@ export const TEAM: Person[] = [
   },
   {
     name: "Quan",
-    role: "Role to confirm",
+    role: "CTO",
     photo: "/Quan.png",
     previously: null,
-    unverified: true,
   },
 ];
 
