@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE ProjectHub  Quản lý gói thầu</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');
+
+:root {
+  --stone:    #F7F5F2;
+  --stone-2:  #EDE9E3;
+  --stone-3:  #D8D2C8;
+  --ink:      #1A1714;
+  --ink-2:    #3D3830;
+  --ink-3:    #6B6560;
+  --brass:    #9C7B3F;
+  --brass-lt: #F5EDD9;
+  --brass-dk: #7A5F2A;
+  --sage:     #3D6B57;
+  --sage-lt:  #D9EDE5;
+  --rose:     #9C3F3F;
+  --rose-lt:  #F5D9D9;
+  --sky:      #2A5A8C;
+  --sky-lt:   #D9E8F5;
+  --border:   rgba(26,23,20,.1);
+  --shadow:   0 1px 3px rgba(26,23,20,.06), 0 4px 16px rgba(26,23,20,.06);
+  --shadow-lg:0 8px 32px rgba(26,23,20,.12);
+  --r:        10px;
+  --font:     'Inter', -apple-system, sans-serif;
+  --serif:    'DM Serif Display', Georgia, serif;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{ font-family:var(--font); background:var(--stone); color:var(--ink); font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+
+/*  LAYOUT  */
+.shell{ display:flex; min-height:100vh; }
+
+/*  SIDEBAR  */
+.aside{
+  width:228px; flex-shrink:0;
+  background:var(--ink); color:#C8C1B8;
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.aside-brand{
+  padding:22px 18px 18px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex; align-items:center; gap:10px;
+}
+.brand-mark{
+  width:34px; height:34px; border-radius:8px;
+  background:var(--brass); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-size:18px; flex-shrink:0;
+}
+.brand-name{ font-size:13.5px; font-weight:600; color:#fff; line-height:1.25; }
+.brand-sub{ font-size:10px; color:#7A7268; letter-spacing:.04em; margin-top:1px; }
+
+.aside-proj{
+  margin:14px 12px 0;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:8px; padding:10px 12px;
+}
+.aside-proj label{ font-size:10px; color:#7A7268; text-transform:uppercase; letter-spacing:.07em; display:block; margin-bottom:4px; }
+.aside-proj select{
+  width:100%; background:none; border:none; color:#E8E2DA;
+  font-family:var(--font); font-size:13px; cursor:pointer; outline:none;
+}
+.aside-proj select option{ background:var(--ink-2); color:var(--ink); }
+
+.nav-section{ padding:18px 12px 0; }
+.nav-label{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#4A4540; font-weight:600; margin-bottom:6px; padding-left:4px; }
+.nav-item{
+  display:flex; align-items:center; gap:10px; width:100%;
+  background:none; border:none; cursor:pointer;
+  color:#8A8278; padding:8px 10px; border-radius:7px;
+  font-size:13px; font-family:var(--font); text-align:left;
+  border-left:2px solid transparent; transition:.12s;
+}
+.nav-item:hover{ background:rgba(255,255,255,.05); color:#C8C1B8; }
+.nav-item.active{ background:rgba(156,123,63,.15); color:#E8D89C; border-left-color:var(--brass); font-weight:500; }
+.nav-item .n-ico{ font-size:15px; width:18px; text-align:center; flex-shrink:0; }
+.nav-item .n-badge{ margin-left:auto; background:var(--brass); color:#fff; font-size:10px; font-weight:700; padding:1px 6px; border-radius:99px; }
+
+.aside-budget{
+  margin:auto 12px 16px;
+  background:rgba(156,123,63,.12);
+  border:1px solid rgba(156,123,63,.2);
+  border-radius:8px; padding:12px;
+}
+.aside-budget .ab-label{ font-size:10px; color:#9C7B3F; text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:6px; }
+.aside-budget .ab-total{ font-size:18px; font-weight:700; color:#E8D89C; line-height:1; }
+.aside-budget .ab-sub{ font-size:11px; color:#7A7268; margin-top:3px; }
+.ab-bar-wrap{ margin-top:8px; height:5px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+.ab-bar{ height:100%; border-radius:99px; background:linear-gradient(90deg,var(--sage),#5EAA88); }
+
+/*  MAIN  */
+.main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:rgba(247,245,242,.92); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+  padding:12px 24px;
+}
+.tb-crumb{ font-size:13px; }
+.tb-crumb span{ color:var(--ink-3); }
+.tb-crumb b{ color:var(--ink); font-weight:600; }
+.tb-right{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+.tb-search{
+  display:flex; align-items:center; gap:8px;
+  background:#fff; border:1px solid var(--border);
+  border-radius:7px; padding:6px 10px; width:220px;
+  font-size:13px; color:var(--ink-3);
+}
+.tb-search input{ border:none; background:none; outline:none; font-size:13px; font-family:var(--font); color:var(--ink); width:100%; }
+.avatar{ width:32px; height:32px; border-radius:50%; background:var(--brass); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+
+.content{ padding:24px 24px 80px; max-width:1280px; width:100%; margin:0 auto; }
+.screen{ display:none; }
+.screen.active{ display:block; animation:fadein .2s ease; }
+@keyframes fadein{ from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+/*  PAGE HEADER  */
+.page-hdr{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; }
+.page-hdr h1{ font-family:var(--serif); font-size:26px; color:var(--ink); font-weight:400; letter-spacing:-.01em; }
+.page-hdr p{ font-size:13px; color:var(--ink-3); margin-top:3px; max-width:560px; }
+.ph-actions{ display:flex; gap:8px; flex-shrink:0; align-items:flex-start; }
+
+/*  BUTTONS  */
+.btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 16px; border-radius:7px; border:none;
+  font-size:13px; font-family:var(--font); font-weight:500;
+  cursor:pointer; transition:.12s; white-space:nowrap;
+}
+.btn-primary{ background:var(--ink); color:#fff; }
+.btn-primary:hover{ background:var(--ink-2); }
+.btn-outline{ background:#fff; border:1px solid var(--border); color:var(--ink-2); }
+.btn-outline:hover{ border-color:var(--stone-3); background:var(--stone); }
+.btn-brass{ background:var(--brass); color:#fff; }
+.btn-brass:hover{ background:var(--brass-dk); }
+.btn-sm{ padding:5px 12px; font-size:12px; }
+
+/*  CARDS / PANELS  */
+.card{ background:#fff; border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); }
+.card-pad{ padding:18px 20px; }
+.grid{ display:grid; gap:14px; }
+.g2{ grid-template-columns:repeat(2,1fr); }
+.g3{ grid-template-columns:repeat(3,1fr); }
+.g4{ grid-template-columns:repeat(4,1fr); }
+
+/*  KPI  */
+.kpi{ background:#fff; border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+.kpi::after{ content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:0 3px 3px 0; }
+.kpi.brass::after{ background:var(--brass); }
+.kpi.sage::after{ background:var(--sage); }
+.kpi.rose::after{ background:var(--rose); }
+.kpi.sky::after{ background:var(--sky); }
+.kpi-label{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); margin-bottom:6px; }
+.kpi-val{ font-size:24px; font-weight:700; color:var(--ink); line-height:1; }
+.kpi-val span{ font-size:13px; font-weight:400; color:var(--ink-3); margin-left:3px; }
+.kpi-sub{ font-size:12px; color:var(--ink-3); margin-top:5px; }
+
+/*  SECTION TITLE  */
+.sec-title{ font-size:14px; font-weight:700; color:var(--ink); margin:28px 0 12px; display:flex; align-items:center; gap:8px; }
+.sec-title .bar{ width:3px; height:16px; background:var(--brass); border-radius:2px; }
+.sec-title small{ font-size:12px; font-weight:400; color:var(--ink-3); margin-left:4px; }
+
+/*  BUDGET GUARDRAILS  */
+.guardrail-row{ display:grid; grid-template-columns:200px 1fr auto; align-items:center; gap:14px; padding:12px 16px; border-bottom:1px solid var(--stone-2); }
+.guardrail-row:last-child{ border-bottom:none; }
+.gr-label{ font-size:13px; font-weight:500; color:var(--ink); }
+.gr-sub{ font-size:11px; color:var(--ink-3); margin-top:1px; }
+.gr-bar-wrap{ height:8px; background:var(--stone-2); border-radius:99px; overflow:hidden; position:relative; }
+.gr-bar{ height:100%; border-radius:99px; transition:width .4s; }
+.gr-bar.ok{ background:linear-gradient(90deg,var(--sage),#5EAA88); }
+.gr-bar.warn{ background:linear-gradient(90deg,#C98A00,#E5A820); }
+.gr-bar.over{ background:linear-gradient(90deg,var(--rose),#C05050); }
+.gr-pct-mark{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--ink-3); border-radius:1px; opacity:.4; }
+.gr-nums{ text-align:right; white-space:nowrap; }
+.gr-nums .cur{ font-size:13px; font-weight:600; color:var(--ink); }
+.gr-nums .max{ font-size:11px; color:var(--ink-3); }
+.gr-badge{ font-size:11px; font-weight:600; padding:2px 8px; border-radius:99px; margin-top:3px; display:inline-block; }
+.gr-badge.ok{ background:var(--sage-lt); color:var(--sage); }
+.gr-badge.warn{ background:var(--brass-lt); color:var(--brass-dk); }
+.gr-badge.over{ background:var(--rose-lt); color:var(--rose); }
+
+/*  VENDOR TABLE  */
+.vtable{ width:100%; border-collapse:collapse; }
+.vtable th{ text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); padding:8px 14px; border-bottom:2px solid var(--stone-2); }
+.vtable td{ padding:12px 14px; border-bottom:1px solid var(--stone-2); font-size:13px; vertical-align:middle; }
+.vtable tr:last-child td{ border-bottom:none; }
+.vtable tr:hover td{ background:var(--stone); }
+.v-name{ font-weight:600; color:var(--ink); }
+.v-cat{ font-size:11px; color:var(--ink-3); margin-top:1px; }
+.tag{ display:inline-flex; align-items:center; font-size:11px; font-weight:500; padding:2px 9px; border-radius:99px; }
+.tag.glass{ background:#E3F0FA; color:#1A5A8C; }
+.tag.construction{ background:var(--brass-lt); color:var(--brass-dk); }
+.tag.landscape{ background:var(--sage-lt); color:var(--sage); }
+.tag.interior{ background:#F0E8F5; color:#6B3A8C; }
+.tag.mep{ background:#E8F5F0; color:#1A6B4A; }
+.tag.facade{ background:#F5EDE0; color:#8C5A1A; }
+.v-stars{ color:var(--brass); font-size:13px; }
+.v-status{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:500; }
+.v-status .dot{ width:7px; height:7px; border-radius:50%; }
+.dot-green{ background:var(--sage); }
+.dot-yellow{ background:#C98A00; }
+.dot-gray{ background:var(--ink-3); }
+.dot-red{ background:var(--rose); }
+.v-actions{ display:flex; gap:6px; }
+
+/*  TENDER KANBAN  */
+.kanban{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.kb-col{ background:var(--stone); border:1px solid var(--stone-2); border-radius:var(--r); padding:12px; min-height:300px; }
+.kb-col-hdr{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.kb-col-title{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+.kb-count{ background:var(--stone-2); color:var(--ink-3); font-size:11px; font-weight:700; padding:1px 7px; border-radius:99px; }
+.kb-card{ background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(26,23,20,.05); cursor:pointer; transition:box-shadow .12s; }
+.kb-card:hover{ box-shadow:var(--shadow); }
+.kb-card-title{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:5px; }
+.kb-card-vendor{ font-size:11px; color:var(--ink-3); margin-bottom:7px; }
+.kb-card-footer{ display:flex; align-items:center; justify-content:space-between; }
+.kb-card-val{ font-size:12px; font-weight:700; color:var(--ink); }
+.kb-card-date{ font-size:11px; color:var(--ink-3); }
+.kb-col-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+/*  COST SUMMARY  */
+.cost-table{ width:100%; border-collapse:collapse; }
+.cost-table th{ text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); padding:8px 14px; border-bottom:2px solid var(--stone-2); }
+.cost-table td{ padding:11px 14px; border-bottom:1px solid var(--stone-2); font-size:13px; vertical-align:middle; }
+.cost-table tr.total-row td{ background:var(--stone); font-weight:700; font-size:14px; border-top:2px solid var(--stone-3); border-bottom:none; }
+.cost-table tr.subtotal td{ background:var(--stone); font-weight:600; color:var(--ink-2); }
+.cost-cat{ font-weight:600; color:var(--ink); }
+.cost-sub{ font-size:11px; color:var(--ink-3); margin-top:1px; }
+.cost-num{ font-weight:600; text-align:right; }
+.pct-pill{ font-size:11px; font-weight:500; padding:2px 8px; border-radius:99px; }
+.pct-ok{ background:var(--sage-lt); color:var(--sage); }
+.pct-warn{ background:var(--brass-lt); color:var(--brass-dk); }
+.pct-over{ background:var(--rose-lt); color:var(--rose); }
+
+/*  AI CHAT  */
+.chat-wrap{ display:flex; flex-direction:column; height:calc(100vh - 140px); max-height:680px; }
+.chat-messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; }
+.msg{ display:flex; gap:10px; max-width:100%; }
+.msg.user{ flex-direction:row-reverse; }
+.msg-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+.msg-avatar.ai{ background:var(--brass); color:#fff; }
+.msg-avatar.user{ background:var(--ink-2); color:#fff; }
+.bubble{ padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.6; max-width:80%; }
+.bubble.ai{ background:#fff; border:1px solid var(--border); color:var(--ink); }
+.bubble.user{ background:var(--ink); color:#fff; }
+.bubble p{ margin-bottom:6px; }
+.bubble p:last-child{ margin-bottom:0; }
+.bubble strong{ font-weight:600; }
+.ai-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; }
+.ai-table th{ background:var(--stone); padding:5px 8px; text-align:left; font-weight:600; border:1px solid var(--stone-2); color:var(--ink-3); text-transform:uppercase; font-size:10px; letter-spacing:.05em; }
+.ai-table td{ padding:5px 8px; border:1px solid var(--stone-2); color:var(--ink); }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; padding:0 16px; }
+.chip{ font-size:12px; padding:5px 12px; background:#fff; border:1px solid var(--border); border-radius:99px; cursor:pointer; color:var(--ink-2); transition:.1s; }
+.chip:hover{ border-color:var(--brass); color:var(--brass); }
+.chat-input-row{ padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px; background:#fff; border-radius:0 0 var(--r) var(--r); }
+.chat-input{ flex:1; border:1px solid var(--border); border-radius:8px; padding:9px 14px; font-size:13px; font-family:var(--font); color:var(--ink); outline:none; background:var(--stone); resize:none; }
+.chat-input:focus{ border-color:var(--brass); background:#fff; }
+.chat-send{ width:38px; height:38px; border-radius:8px; background:var(--ink); border:none; cursor:pointer; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.chat-send:hover{ background:var(--brass); }
+
+/*  TABS  */
+.tabs{ display:flex; gap:2px; border-bottom:2px solid var(--stone-2); margin-bottom:18px; }
+.tab{ padding:8px 16px; font-size:13px; font-weight:500; color:var(--ink-3); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:.12s; }
+.tab.active{ color:var(--brass); border-bottom-color:var(--brass); font-weight:600; }
+.tab:hover:not(.active){ color:var(--ink-2); }
+
+/*  FILE DESIGN CARD  */
+.design-file-card{ background:#fff; border:1px solid var(--border); border-radius:var(--r); padding:16px; display:flex; gap:14px; align-items:flex-start; }
+.df-icon{ width:48px; height:48px; border-radius:8px; background:var(--brass-lt); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.df-info h4{ font-size:14px; font-weight:600; color:var(--ink); }
+.df-info p{ font-size:12px; color:var(--ink-3); margin-top:3px; }
+.df-tags{ display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
+
+/* helpers */
+.text-right{ text-align:right; }
+.text-muted{ color:var(--ink-3); }
+.fw-bold{ font-weight:700; }
+.mt-4{ margin-top:4px; }
+.mt-8{ margin-top:8px; }
+.flex{ display:flex; align-items:center; gap:8px; }
+.flex-between{ display:flex; align-items:center; justify-content:space-between; }
+.divider{ border:none; border-top:1px solid var(--stone-2); margin:20px 0; }
+
+/*  PROGRESS BAR  */
+.progress-wrap{ height:6px; background:var(--stone-2); border-radius:99px; overflow:hidden; }
+.progress-bar{ height:100%; border-radius:99px; }
+.prog-brass{ background:var(--brass); }
+.prog-sage{ background:var(--sage); }
+.prog-rose{ background:var(--rose); }
+.prog-sky{ background:var(--sky); }
+
+/*  PRICE INTELLIGENCE  */
+.pi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.pi-kpi{ background:#fff; border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; box-shadow:var(--shadow); }
+.pi-kpi-label{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); margin-bottom:6px; }
+.pi-kpi-val{ font-size:20px; font-weight:700; color:var(--ink); line-height:1; }
+.pi-kpi-unit{ font-size:11px; font-weight:400; color:var(--ink-3); margin-left:2px; }
+.pi-kpi-change{ display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; margin-top:5px; padding:1px 7px; border-radius:99px; }
+.pi-up{ background:var(--rose-lt); color:var(--rose); }
+.pi-down{ background:var(--sage-lt); color:var(--sage); }
+.pi-flat{ background:var(--stone-2); color:var(--ink-3); }
+.pi-forecast-badge{ font-size:10px; padding:1px 7px; border-radius:99px; font-weight:600; margin-left:6px; }
+.forecast-up{ background:#FDE8E8; color:#8C2020; }
+.forecast-stable{ background:var(--brass-lt); color:var(--brass-dk); }
+.forecast-down{ background:var(--sage-lt); color:var(--sage); }
+
+/* SVG chart area */
+.chart-container{ position:relative; width:100%; }
+.chart-svg{ width:100%; overflow:visible; }
+.chart-label{ font-family:'Inter',-apple-system,sans-serif; font-size:11px; fill:#6B6560; }
+.chart-label-bold{ font-family:'Inter',-apple-system,sans-serif; font-size:11px; fill:#1A1714; font-weight:600; }
+.chart-grid{ stroke:#EDE9E3; stroke-width:1; }
+.chart-axis{ stroke:#D8D2C8; stroke-width:1.5; }
+.chart-line{ fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.chart-area{ opacity:.12; }
+.chart-dot{ r:4; stroke:#fff; stroke-width:2; }
+.forecast-dashed{ stroke-dasharray:5 4; stroke-width:2; opacity:.7; }
+.forecast-zone{ opacity:.07; }
+
+/* material category selector */
+.cat-tabs{ display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.cat-tab{ padding:6px 14px; border-radius:99px; font-size:12px; font-weight:500; border:1px solid var(--border); background:#fff; color:var(--ink-3); cursor:pointer; transition:.12s; }
+.cat-tab.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.cat-tab:hover:not(.active){ border-color:var(--stone-3); color:var(--ink-2); }
+
+/* signal rows */
+.signal-row{ display:flex; gap:12px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--stone-2); }
+.signal-row:last-child{ border-bottom:none; }
+.signal-icon{ width:32px; height:32px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.signal-body{ flex:1; min-width:0; }
+.signal-title{ font-size:13px; font-weight:600; color:var(--ink); }
+.signal-sub{ font-size:12px; color:var(--ink-3); margin-top:2px; line-height:1.5; }
+.signal-time{ font-size:11px; color:var(--ink-3); white-space:nowrap; flex-shrink:0; }
+
+/* price table */
+.price-hist-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.price-hist-table th{ text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-3); padding:7px 12px; border-bottom:2px solid var(--stone-2); }
+.price-hist-table td{ padding:9px 12px; border-bottom:1px solid var(--stone-2); }
+.price-hist-table tr:last-child td{ border-bottom:none; }
+.price-hist-table tr:hover td{ background:var(--stone); }
+.price-up{ color:var(--rose); font-weight:600; }
+.price-dn{ color:var(--sage); font-weight:600; }
+.price-fl{ color:var(--ink-3); }
+.impact-chip{ font-size:11px; padding:2px 8px; border-radius:99px; font-weight:500; }
+.impact-high{ background:var(--rose-lt); color:var(--rose); }
+.impact-med{ background:var(--brass-lt); color:var(--brass-dk); }
+.impact-low{ background:var(--sage-lt); color:var(--sage); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!--  SIDEBAR  -->
+<aside class="aside">
+  <div class="aside-brand">
+    <div class="brand-mark">R</div>
+    <div>
+      <div class="brand-name">RE ProjectHub</div>
+      <div class="brand-sub">Quản lý gói thầu</div>
+    </div>
+  </div>
+
+  <div class="aside-proj">
+    <label>Dự án ang xem</label>
+    <select>
+      <option>The Meridian Residences</option>
+      <option>Green Valley Phase 2</option>
+      <option>Harbor Point Tower</option>
+    </select>
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Tng quan</div>
+    <button class="nav-item active" onclick="show('dashboard')">
+      <span class="n-ico"></span> Dashboard
+    </button>
+    <button class="nav-item" onclick="show('budget')">
+      <span class="n-ico"></span> Ngân sách & Tiêu chí
+    </button>
+
+    <div class="nav-label" style="margin-top:16px">Gói thầu</div>
+    <button class="nav-item" onclick="show('tenders')">
+      <span class="n-ico"></span> Tiến  gói thầu <span class="n-badge">9</span>
+    </button>
+    <button class="nav-item" onclick="show('vendors')">
+      <span class="n-ico"></span> Danh sách vendor
+    </button>
+    <button class="nav-item" onclick="show('prices')">
+      <span class="n-ico"></span> Lch sử & Dự báo giá
+    </button>
+    <button class="nav-item" onclick="show('costs')">
+      <span class="n-ico"></span> Tng hợp kinh phí
+    </button>
+
+    <div class="nav-label" style="margin-top:16px">Công cụ</div>
+    <button class="nav-item" onclick="show('chat')">
+      <span class="n-ico"></span> AI Assistant
+    </button>
+    <button class="nav-item" onclick="show('files')">
+      <span class="n-ico"></span> H sơ thiết kế
+    </button>
+  </nav>
+
+  <div class="aside-budget">
+    <div class="ab-label">Tng ngân sách dự án</div>
+    <div class="ab-total">850 <span style="font-size:13px;font-weight:400;color:#9C8050">tỷ VN</span></div>
+    <div class="ab-sub" style="margin-top:4px">ã cam kết: <b style="color:#E8D89C">523 tỷ</b> · 61.5%</div>
+    <div class="ab-bar-wrap" style="margin-top:8px">
+      <div class="ab-bar" style="width:61.5%"></div>
+    </div>
+  </div>
+</aside>
+
+<!--  MAIN  -->
+<div class="main">
+  <header class="topbar">
+    <div class="tb-crumb"><span>The Meridian Residences / </span><b id="crumb-title">Dashboard</b></div>
+    <div class="tb-right">
+      <div class="tb-search">
+        <span style="color:var(--ink-3)"></span>
+        <input placeholder="Tìm vendor, gói thầu" />
+      </div>
+      <div class="avatar">TN</div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!--  DASHBOARD  -->
+    <div class="screen active" id="screen-dashboard">
+      <div class="page-hdr">
+        <div>
+          <h1>The Meridian Residences</h1>
+          <p>Cập nhật lần cui: hôm nay 09:42 · Giai oạn: Thi công cấu trúc · Tiến  tng: 34%</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm"> Export PDF</button>
+          <button class="btn btn-brass btn-sm">+ Gói thầu mi</button>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="grid g4" style="margin-bottom:18px">
+        <div class="kpi brass">
+          <div class="kpi-label">Tng gói thầu</div>
+          <div class="kpi-val">24 <span>gói</span></div>
+          <div class="kpi-sub">9 ang xử lý · 6 ã ký</div>
+        </div>
+        <div class="kpi sage">
+          <div class="kpi-label">Kinh phí ã cam kết</div>
+          <div class="kpi-val">523 <span>tỷ</span></div>
+          <div class="kpi-sub" style="color:var(--sage)">61.5% tng ngân sách</div>
+        </div>
+        <div class="kpi sky">
+          <div class="kpi-label">Cần phê duyt</div>
+          <div class="kpi-val">3 <span>gói</span></div>
+          <div class="kpi-sub">Báo giá ang ch review</div>
+        </div>
+        <div class="kpi rose">
+          <div class="kpi-label">Vượt tiêu chí</div>
+          <div class="kpi-val">1 <span>hạng mục</span></div>
+          <div class="kpi-sub" style="color:var(--rose)">Ho n thin ni thất +4.2%</div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <!-- Tiến  gói thầu -->
+        <div class="card card-pad">
+          <div class="flex-between" style="margin-bottom:14px">
+            <div style="font-size:14px;font-weight:700;color:var(--ink)">Tiến  gói thầu</div>
+            <button class="btn btn-outline btn-sm" onclick="show('tenders')">Xem tất cả</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="flex-between" style="margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500">Xây dựng cơ bản</span>
+                <span style="font-size:12px;color:var(--ink-3)">6 / 8 gói</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar prog-sage" style="width:75%"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500">Mặt dựng & Kính</span>
+                <span style="font-size:12px;color:var(--ink-3)">2 / 5 gói</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar prog-sky" style="width:40%"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500">MEP (Cơ in nưc)</span>
+                <span style="font-size:12px;color:var(--ink-3)">1 / 4 gói</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar prog-brass" style="width:25%"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500">Cảnh quan & Ngoại thất</span>
+                <span style="font-size:12px;color:var(--ink-3)">0 / 3 gói</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar prog-rose" style="width:8%"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:5px">
+                <span style="font-size:13px;font-weight:500">Ho n thin ni thất</span>
+                <span style="font-size:12px;color:var(--ink-3)">1 / 4 gói</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar prog-rose" style="width:25%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiêu chí t i chính -->
+        <div class="card card-pad">
+          <div class="flex-between" style="margin-bottom:14px">
+            <div style="font-size:14px;font-weight:700;color:var(--ink)">Tiêu chí t i chính</div>
+            <button class="btn btn-outline btn-sm" onclick="show('budget')">Chi tiết</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div>
+              <div class="flex-between" style="margin-bottom:4px">
+                <span style="font-size:13px;font-weight:500">Xây dựng cơ bản</span>
+                <span class="pct-pill pct-ok">OK · 38.2% / 40%</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:95.5%;background:var(--sage)"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:4px">
+                <span style="font-size:13px;font-weight:500">Mặt dựng & Kính</span>
+                <span class="pct-pill pct-warn">Cần chú ý · 13.8% / 14%</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:98.5%;background:var(--brass)"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:4px">
+                <span style="font-size:13px;font-weight:500">Ho n thin ni thất</span>
+                <span class="pct-pill pct-over">Vượt · 12.2% / 11.7%</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:100%;background:var(--rose)"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="margin-bottom:4px">
+                <span style="font-size:13px;font-weight:500">MEP</span>
+                <span class="pct-pill pct-ok">OK · 9.1% / 12%</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:75.8%;background:var(--sage)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="sec-title"><span class="bar"></span>Hoạt ng gần ây</div>
+      <div class="card">
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 18px;border-bottom:1px solid var(--stone-2)">
+            <div style="width:34px;height:34px;border-radius:7px;background:var(--sage-lt);color:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px"></div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">Ký hợp ng gói thầu Kết cấu thép</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Minh Phương Steel Construction · 47.5 tỷ VN</div>
+            </div>
+            <div style="font-size:12px;color:var(--ink-3);white-space:nowrap">2 gi trưc</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 18px;border-bottom:1px solid var(--stone-2)">
+            <div style="width:34px;height:34px;border-radius:7px;background:var(--brass-lt);color:var(--brass);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">!</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">Báo giá mi từ Luxury Interior Co.</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Gói ho n thin ni thất cn h · 98.4 tỷ VN  vượt tiêu chí 4.2%</div>
+            </div>
+            <div style="font-size:12px;color:var(--ink-3);white-space:nowrap">Hôm nay</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 18px;border-bottom:1px solid var(--stone-2)">
+            <div style="width:34px;height:34px;border-radius:7px;background:var(--sky-lt);color:var(--sky);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px"></div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">Thêm vendor mi  Viết Glass Solutions</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Nh  cung cấp kính v  mặt dựng · ược mi tham gia gói thầu Facade</div>
+            </div>
+            <div style="font-size:12px;color:var(--ink-3);white-space:nowrap">Hôm qua</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 18px">
+            <div style="width:34px;height:34px;border-radius:7px;background:var(--rose-lt);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px"></div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">AI cảnh báo: gói MEP có th tr</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">3 vendor chưa np báo giá · Hạn chót: 20/07 · Còn 4 ng y</div>
+            </div>
+            <div style="font-size:12px;color:var(--ink-3);white-space:nowrap">Hôm qua</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  BUDGET & CRITERIA  -->
+    <div class="screen" id="screen-budget">
+      <div class="page-hdr">
+        <div>
+          <h1>Ngân sách & Tiêu chí t i chính</h1>
+          <p>Thiết lập ngưỡng chi phí ti a theo hạng mục. AI sẽ cảnh báo ngay khi báo giá có nguy cơ vượt.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm">Chnh sửa tiêu chí</button>
+        </div>
+      </div>
+
+      <!-- Summary KPI -->
+      <div class="grid g3" style="margin-bottom:20px">
+        <div class="kpi brass">
+          <div class="kpi-label">Tng ngân sách dự án</div>
+          <div class="kpi-val">850 <span>tỷ VN</span></div>
+          <div class="kpi-sub">Phê duyt bi HQT 15/01/2026</div>
+        </div>
+        <div class="kpi sage">
+          <div class="kpi-label">ã phân b (cam kết)</div>
+          <div class="kpi-val">523 <span>tỷ</span></div>
+          <div class="kpi-sub">61.5% · Còn dư: 327 tỷ</div>
+        </div>
+        <div class="kpi rose">
+          <div class="kpi-label">Dự phòng rủi ro</div>
+          <div class="kpi-val">42.5 <span>tỷ</span></div>
+          <div class="kpi-sub">5% ngân sách · ã dùng: 8.2 tỷ</div>
+        </div>
+      </div>
+
+      <div class="sec-title"><span class="bar"></span>Tiêu chí theo hạng mục <small> % so vi tng ngân sách 850 tỷ</small></div>
+      <div class="card">
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:220px 1fr 180px;gap:14px;padding:10px 16px;border-bottom:2px solid var(--stone-2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)">
+          <span>Hạng mục</span><span>Mức sử dụng</span><span style="text-align:right">Thực tế / Gii hạn</span>
+        </div>
+        <!-- Rows -->
+        <div class="guardrail-row">
+          <div><div class="gr-label">Xây dựng cơ bản</div><div class="gr-sub">Móng, kết cấu, thô</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar ok" style="width:95.5%"></div>
+              <div class="gr-pct-mark" style="left:100%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge ok">OK</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">324.7 tỷ</div><div class="max">gii hạn 340 tỷ (40%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">Mặt dựng & Kính</div><div class="gr-sub">Curtain wall, cửa kính, nhôm</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar warn" style="width:98.5%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge warn">Cần chú ý</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">117.3 tỷ</div><div class="max">gii hạn 119 tỷ (14%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">Ho n thin ni thất</div><div class="gr-sub">Cn h, lobby, khu chung</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar over" style="width:100%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge over">Vượt gii hạn +4.2%</span></div>
+          </div>
+          <div class="gr-nums" style="color:var(--rose)"><div class="cur" style="color:var(--rose)">103.7 tỷ</div><div class="max" style="color:var(--ink-3)">gii hạn 99.5 tỷ (11.7%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">MEP (Cơ in nưc)</div><div class="gr-sub">in, nưc, PCCC, HVAC</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar ok" style="width:75.8%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge ok">OK</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">77.3 tỷ</div><div class="max">gii hạn 102 tỷ (12%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">Cảnh quan & Ngoại thất</div><div class="gr-sub">Sân vưn, b bơi, hạ tầng</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar ok" style="width:28%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge ok">OK</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">18.6 tỷ</div><div class="max">gii hạn 59.5 tỷ (7%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">Thiết kế & Tư vấn</div><div class="gr-sub">Kiến trúc, QS, giám sát</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar ok" style="width:62%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge ok">OK</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">36.6 tỷ</div><div class="max">gii hạn 59.5 tỷ (7%)</div></div>
+        </div>
+        <div class="guardrail-row">
+          <div><div class="gr-label">Dự phòng rủi ro</div><div class="gr-sub">Phát sinh, trượt giá</div></div>
+          <div>
+            <div class="gr-bar-wrap">
+              <div class="gr-bar warn" style="width:19.3%"></div>
+            </div>
+            <div style="margin-top:4px"><span class="gr-badge ok">OK</span></div>
+          </div>
+          <div class="gr-nums"><div class="cur">8.2 tỷ</div><div class="max">gii hạn 42.5 tỷ (5%)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!--  TENDERS KANBAN  -->
+    <div class="screen" id="screen-tenders">
+      <div class="page-hdr">
+        <div>
+          <h1>Tiến  gói thầu</h1>
+          <p>Trạng thái tất cả gói thầu theo lung từ mi thầu ến ký hợp ng.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm"> Export</button>
+          <button class="btn btn-brass btn-sm">+ Gói thầu</button>
+        </div>
+      </div>
+
+      <div class="kanban">
+        <!-- Col 1: Mi thầu -->
+        <div class="kb-col">
+          <div class="kb-col-hdr">
+            <div class="kb-col-dot" style="background:var(--ink-3)"></div>
+            <span class="kb-col-title" style="color:var(--ink-3)">Mi thầu</span>
+            <span class="kb-count">3</span>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">Cảnh quan tầng 3 & rooftop</div>
+            <div class="kb-card-vendor">3 vendor ược mi</div>
+            <div style="margin-bottom:8px"><span class="tag landscape">Cảnh quan</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">Dự kiến: 24.5 tỷ</div>
+              <div class="kb-card-date">Hạn: 20/07</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">H thng HVAC to n nh </div>
+            <div class="kb-card-vendor">4 vendor ược mi</div>
+            <div style="margin-bottom:8px"><span class="tag mep">MEP</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">Dự kiến: 38 tỷ</div>
+              <div class="kb-card-date">Hạn: 25/07</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">Lắp ặt thang máy 6 cabin</div>
+            <div class="kb-card-vendor">2 vendor ược mi</div>
+            <div style="margin-bottom:8px"><span class="tag mep">MEP</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">Dự kiến: 18 tỷ</div>
+              <div class="kb-card-date">Hạn: 28/07</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Nhận báo giá -->
+        <div class="kb-col">
+          <div class="kb-col-hdr">
+            <div class="kb-col-dot" style="background:var(--sky)"></div>
+            <span class="kb-col-title" style="color:var(--sky)">Nhận báo giá</span>
+            <span class="kb-count">3</span>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">Ho n thin ni thất cn h</div>
+            <div class="kb-card-vendor" style="color:var(--rose)"> Vượt tiêu chí 4.2%</div>
+            <div style="margin-bottom:8px"><span class="tag interior">Ni thất</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val" style="color:var(--rose)">98.4 tỷ</div>
+              <div class="kb-card-date">2 báo giá</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">Mặt dựng kính curtain wall</div>
+            <div class="kb-card-vendor">3 báo giá · ang so sánh</div>
+            <div style="margin-bottom:8px"><span class="tag glass">Kính</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">Từ 5763 tỷ</div>
+              <div class="kb-card-date">3 báo giá</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">H thng phòng cháy PCCC</div>
+            <div class="kb-card-vendor">ang review kỹ thuật</div>
+            <div style="margin-bottom:8px"><span class="tag mep">MEP</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">22.1 tỷ</div>
+              <div class="kb-card-date">1 báo giá</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: Phê duyt -->
+        <div class="kb-col">
+          <div class="kb-col-hdr">
+            <div class="kb-col-dot" style="background:var(--brass)"></div>
+            <span class="kb-col-title" style="color:var(--brass)">Phê duyt</span>
+            <span class="kb-count">3</span>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">Kết cấu thép s n in hình</div>
+            <div class="kb-card-vendor">Minh Phương Steel</div>
+            <div style="margin-bottom:8px"><span class="tag construction">Xây dựng</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">47.5 tỷ</div>
+              <div class="kb-card-date">Ch G ký</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">H thng in trung thế</div>
+            <div class="kb-card-vendor">TechMEP Solutions</div>
+            <div style="margin-bottom:8px"><span class="tag mep">MEP</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">15.8 tỷ</div>
+              <div class="kb-card-date">Ch CFO</div>
+            </div>
+          </div>
+          <div class="kb-card">
+            <div class="kb-card-title">p á h nh lang & lobby</div>
+            <div class="kb-card-vendor">Stone & Marble VN</div>
+            <div style="margin-bottom:8px"><span class="tag interior">Ni thất</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val">8.3 tỷ</div>
+              <div class="kb-card-date">Ch QS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 4: ã ký H -->
+        <div class="kb-col">
+          <div class="kb-col-hdr">
+            <div class="kb-col-dot" style="background:var(--sage)"></div>
+            <span class="kb-col-title" style="color:var(--sage)">ã ký H</span>
+            <span class="kb-count">6</span>
+          </div>
+          <div class="kb-card" style="opacity:.8">
+            <div class="kb-card-title">Thi công phần móng & cc</div>
+            <div class="kb-card-vendor">Nn Vững Construction</div>
+            <div style="margin-bottom:8px"><span class="tag construction">Xây dựng</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val" style="color:var(--sage)">126.4 tỷ </div>
+              <div class="kb-card-date">Ký 10/03</div>
+            </div>
+          </div>
+          <div class="kb-card" style="opacity:.8">
+            <div class="kb-card-title">Kết cấu BTCT to n nh </div>
+            <div class="kb-card-vendor">Phúc An Civil Works</div>
+            <div style="margin-bottom:8px"><span class="tag construction">Xây dựng</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val" style="color:var(--sage)">198.3 tỷ </div>
+              <div class="kb-card-date">Ký 15/03</div>
+            </div>
+          </div>
+          <div class="kb-card" style="opacity:.8">
+            <div class="kb-card-title">Thiết kế cảnh quan tng th</div>
+            <div class="kb-card-vendor">Green Canvas Design</div>
+            <div style="margin-bottom:8px"><span class="tag landscape">Cảnh quan</span></div>
+            <div class="kb-card-footer">
+              <div class="kb-card-val" style="color:var(--sage)">5.2 tỷ </div>
+              <div class="kb-card-date">Ký 20/04</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  VENDORS  -->
+    <div class="screen" id="screen-vendors">
+      <div class="page-hdr">
+        <div>
+          <h1>Danh sách Vendor</h1>
+          <p>Tất cả nh  thầu v  nh  cung cấp ã ược duyt tham gia gói thầu dự án.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm"> Export</button>
+          <button class="btn btn-brass btn-sm">+ Thêm vendor</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active">Tất cả (14)</button>
+        <button class="tab">Xây dựng (4)</button>
+        <button class="tab">Kính & Mặt dựng (3)</button>
+        <button class="tab">MEP (3)</button>
+        <button class="tab">Cảnh quan (2)</button>
+        <button class="tab">Ni thất (2)</button>
+      </div>
+
+      <div class="card">
+        <table class="vtable">
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Chuyên ng nh</th>
+              <th>ánh giá</th>
+              <th>Gói thầu HT</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="v-name">Phúc An Civil Works</div><div class="v-cat">TP.HCM · Th nh lập 2008</div></td>
+              <td><span class="tag construction">Xây dựng cơ bản</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.8 / 5 · 12 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">3 gói <span style="font-weight:400;color:var(--ink-3)">· 283.5 tỷ</span></td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ang thi công</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button><button class="btn btn-outline btn-sm">Mi thầu</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">Viết Glass Solutions</div><div class="v-cat">H  Ni · ISO 9001</div></td>
+              <td><span class="tag glass">Kính & Mặt dựng</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.2 / 5 · 7 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">1 gói <span style="font-weight:400;color:var(--ink-3)">· ang báo giá</span></td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch báo giá</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button><button class="btn btn-outline btn-sm">Nhắc nh</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">Nn Vững Construction</div><div class="v-cat">TP.HCM · Th nh lập 2005</div></td>
+              <td><span class="tag construction">Xây dựng cơ bản</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.9 / 5 · 20 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">1 gói <span style="font-weight:400;color:var(--ink-3)">· 126.4 tỷ</span></td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ang thi công</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button><button class="btn btn-outline btn-sm">Mi thầu</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">Green Canvas Design</div><div class="v-cat">TP.HCM · Cảnh quan cao cấp</div></td>
+              <td><span class="tag landscape">Cảnh quan</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.5 / 5 · 9 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">2 gói <span style="font-weight:400;color:var(--ink-3)">· 5.2 tỷ + mi</span></td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ang thiết kế</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button><button class="btn btn-outline btn-sm">Mi thầu</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">Luxury Interior Co.</div><div class="v-cat">TP.HCM · Cao cấp & 5 sao</div></td>
+              <td><span class="tag interior">Ni thất</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.7 / 5 · 15 dự án</div></td>
+              <td style="font-size:13px;font-weight:600;color:var(--rose)">1 gói · 98.4 tỷ </td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Báo giá vượt hạn</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button><button class="btn btn-outline btn-sm"> m phán</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">TechMEP Solutions</div><div class="v-cat">TP.HCM · Chuyên MEP</div></td>
+              <td><span class="tag mep">MEP</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.3 / 5 · 11 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">2 gói <span style="font-weight:400;color:var(--ink-3)">· ch duyt</span></td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch phê duyt</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="v-name">Stone & Marble VN</div><div class="v-cat">Bình Dương · á tự nhiên</div></td>
+              <td><span class="tag facade">Ho n thin</span></td>
+              <td><span class="v-stars"></span><div style="font-size:11px;color:var(--ink-3)">4.1 / 5 · 6 dự án</div></td>
+              <td style="font-size:13px;font-weight:600">1 gói <span style="font-weight:400;color:var(--ink-3)">· 8.3 tỷ</span></td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch QS duyt</span></td>
+              <td><div class="v-actions"><button class="btn btn-outline btn-sm">Xem</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!--  COST SUMMARY  -->
+    <div class="screen" id="screen-costs">
+      <div class="page-hdr">
+        <div>
+          <h1>Tng hợp kinh phí</h1>
+          <p>Tất cả gói thầu ược tng hợp th nh tng kinh phí dự án. Cập nhật tự ng khi có báo giá mi.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm"> Export Excel</button>
+          <button class="btn btn-outline btn-sm"> PDF Report</button>
+        </div>
+      </div>
+
+      <div class="grid g3" style="margin-bottom:20px">
+        <div class="kpi sage">
+          <div class="kpi-label">Tng ã cam kết</div>
+          <div class="kpi-val">523.0 <span>tỷ</span></div>
+          <div class="kpi-sub">Từ 9 gói ã ký + duyt</div>
+        </div>
+        <div class="kpi brass">
+          <div class="kpi-label">ang thương lượng</div>
+          <div class="kpi-val">183.7 <span>tỷ</span></div>
+          <div class="kpi-sub">6 gói ang nhận báo giá</div>
+        </div>
+        <div class="kpi sky">
+          <div class="kpi-label">Chưa phân b</div>
+          <div class="kpi-val">143.3 <span>tỷ</span></div>
+          <div class="kpi-sub">9 gói chưa m thầu</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Hạng mục / Gói thầu</th>
+              <th>Vendor</th>
+              <th>Trạng thái</th>
+              <th style="text-align:right">Giá tr (tỷ VN)</th>
+              <th style="text-align:right">% dự án</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" class="cost-cat" style="background:var(--stone);padding:8px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">A  Xây dựng cơ bản</td></tr>
+            <tr>
+              <td><div>Thi công phần móng & cc</div><div class="cost-sub">Cc nhi D600D800,  i móng, giằng móng</div></td>
+              <td style="font-size:13px">Nn Vững Construction</td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ã ký H</span></td>
+              <td class="cost-num">126.40</td>
+              <td class="text-right"><span class="pct-pill pct-ok">14.9%</span></td>
+            </tr>
+            <tr>
+              <td><div>Kết cấu BTCT to n nh </div><div class="cost-sub">Tầng 128, vách lõi, s n in hình</div></td>
+              <td style="font-size:13px">Phúc An Civil Works</td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ã ký H</span></td>
+              <td class="cost-num">198.30</td>
+              <td class="text-right"><span class="pct-pill pct-ok">23.3%</span></td>
+            </tr>
+            <tr>
+              <td><div>Kết cấu thép s n in hình</div><div class="cost-sub">Dầm thép, s n deck, kết cấu phụ</div></td>
+              <td style="font-size:13px">Minh Phương Steel</td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch ký H</span></td>
+              <td class="cost-num">47.50</td>
+              <td class="text-right"><span class="pct-pill pct-ok">5.6%</span></td>
+            </tr>
+            <tr class="subtotal">
+              <td colspan="3" class="text-right" style="color:var(--ink-3);font-size:12px">Tng A  Xây dựng cơ bản</td>
+              <td class="cost-num">372.20</td>
+              <td class="text-right"><span class="pct-pill pct-ok">43.8%</span></td>
+            </tr>
+
+            <tr><td colspan="5" class="cost-cat" style="background:var(--stone);padding:8px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">B  Mặt dựng & Kính</td></tr>
+            <tr>
+              <td><div>Curtain wall kính to n nh </div><div class="cost-sub">Mặt dựng nhôm kính, tầng 228</div></td>
+              <td style="font-size:13px;color:var(--ink-3)">ang so sánh báo giá</td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Nhận báo giá</span></td>
+              <td class="cost-num text-muted">5763</td>
+              <td class="text-right"><span class="pct-pill pct-warn">6.77.4%</span></td>
+            </tr>
+
+            <tr><td colspan="5" class="cost-cat" style="background:var(--stone);padding:8px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">C  Ho n thin ni thất</td></tr>
+            <tr>
+              <td><div>Ho n thin cn h (all units)</div><div class="cost-sub">S n, trần, vách, thiết b v sinh</div></td>
+              <td style="font-size:13px">Luxury Interior Co.</td>
+              <td><span class="v-status"><span class="dot dot-red"></span>Vượt tiêu chí</span></td>
+              <td class="cost-num" style="color:var(--rose)">98.40</td>
+              <td class="text-right"><span class="pct-pill pct-over">11.6% / 11%</span></td>
+            </tr>
+            <tr>
+              <td><div>p á h nh lang & lobby</div><div class="cost-sub">á granite, marble nhập khẩu</div></td>
+              <td style="font-size:13px">Stone & Marble VN</td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch duyt</span></td>
+              <td class="cost-num">8.30</td>
+              <td class="text-right"><span class="pct-pill pct-ok">1.0%</span></td>
+            </tr>
+
+            <tr><td colspan="5" class="cost-cat" style="background:var(--stone);padding:8px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">D  MEP & Cơ in</td></tr>
+            <tr>
+              <td><div>H thng in trung thế & hạ thế</div></td>
+              <td style="font-size:13px">TechMEP Solutions</td>
+              <td><span class="v-status"><span class="dot dot-yellow"></span>Ch duyt</span></td>
+              <td class="cost-num">15.80</td>
+              <td class="text-right"><span class="pct-pill pct-ok">1.9%</span></td>
+            </tr>
+            <tr>
+              <td><div>H thng HVAC to n nh </div></td>
+              <td style="font-size:13px;color:var(--ink-3)">Ch báo giá</td>
+              <td><span class="v-status"><span class="dot dot-gray"></span>Mi thầu</span></td>
+              <td class="cost-num text-muted">~38.0</td>
+              <td class="text-right"><span class="pct-pill pct-ok">~4.5%</span></td>
+            </tr>
+
+            <tr><td colspan="5" class="cost-cat" style="background:var(--stone);padding:8px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">E  Thiết kế & Tư vấn</td></tr>
+            <tr>
+              <td><div>Thiết kế cảnh quan tng th</div></td>
+              <td style="font-size:13px">Green Canvas Design</td>
+              <td><span class="v-status"><span class="dot dot-green"></span>ã ký H</span></td>
+              <td class="cost-num">5.20</td>
+              <td class="text-right"><span class="pct-pill pct-ok">0.6%</span></td>
+            </tr>
+
+            <tr class="total-row">
+              <td colspan="3" class="text-right">TNG KINH PH DỰ N (ã xác nh)</td>
+              <td class="cost-num" style="font-size:15px">572.2 <span style="font-size:12px;font-weight:400;color:var(--ink-3)">tỷ</span></td>
+              <td class="text-right"><span class="pct-pill pct-warn">67.3%</span></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-right text-muted" style="font-size:12px">Ngân sách còn lại chưa phân b</td>
+              <td class="cost-num text-muted">277.8 tỷ</td>
+              <td class="text-right text-muted" style="font-size:12px">32.7%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!--  AI CHAT  -->
+    <div class="screen" id="screen-chat">
+      <div class="page-hdr">
+        <div>
+          <h1>AI Assistant</h1>
+          <p>Hi v báo giá, tiêu chí t i chính, hoặc tình trạng gói thầu bất kỳ.</p>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="chat-wrap">
+          <div class="chat-messages" id="chatMessages">
+            <div class="msg">
+              <div class="msg-avatar ai">AI</div>
+              <div class="bubble ai">
+                <p>Ch o bui sáng. Dự án <b>The Meridian Residences</b> hin có <b>1 cảnh báo cần xử lý ngay</b>:</p>
+                <table class="ai-table">
+                  <tr><th>Hạng mục</th><th>Báo giá</th><th>Tiêu chí</th><th>Chênh lch</th></tr>
+                  <tr><td>Ni thất cn h</td><td style="color:#9C3F3F;font-weight:600">98.4 tỷ</td><td>99.5 tỷ (11.7%)</td><td style="color:#9C3F3F">+4.2%</td></tr>
+                </table>
+                <p style="margin-top:6px">Tôi có th giúp bạn phân tích báo giá, so sánh vi dự án tương tự, hoặc soạn email  m phán lại vi vendor.</p>
+              </div>
+            </div>
+          </div>
+          <div class="chips" id="chatChips">
+            <span class="chip" onclick="sendChip(this,'So sánh báo giá ni thất vi dự án tương tự')">So sánh báo giá ni thất</span>
+            <span class="chip" onclick="sendChip(this,'Gói MEP n o ang chậm nhất?')">MEP ang chậm?</span>
+            <span class="chip" onclick="sendChip(this,'Tng kinh phí hin tại l  bao nhiêu?')">Tng kinh phí?</span>
+            <span class="chip" onclick="sendChip(this,'Vendor n o có th thay thế Luxury Interior Co.?')">Tìm vendor thay thế</span>
+          </div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" rows="1" id="chatInput" placeholder="Hi v gói thầu, vendor, hoặc tiêu chí t i chính" onkeydown="handleKey(event)"></textarea>
+            <button class="chat-send" onclick="sendMsg()"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  FILES  -->
+    <div class="screen" id="screen-files">
+      <div class="page-hdr">
+        <div><h1>H sơ thiết kế</h1><p>T i liu kỹ thuật v  bản vẽ thiết kế dùng l m cơ s mi thầu v  xác nh tiêu chí.</p></div>
+        <div class="ph-actions"><button class="btn btn-brass btn-sm"> Upload</button></div>
+      </div>
+      <div class="grid g2">
+        <div class="design-file-card"><div class="df-icon"></div><div class="df-info"><h4>Bản vẽ kiến trúc  Rev.3</h4><p>To n b 28 tầng + tầng hầm · PDF · 248 MB</p><div class="df-tags"><span class="tag construction">Xây dựng</span><span class="tag glass">Mặt dựng</span></div></div></div>
+        <div class="design-file-card"><div class="df-icon"></div><div class="df-info"><h4>Thiết kế cảnh quan tng th</h4><p>Rooftop garden, tầng 3, sân xe · PDF · 85 MB</p><div class="df-tags"><span class="tag landscape">Cảnh quan</span></div></div></div>
+        <div class="design-file-card"><div class="df-icon"></div><div class="df-info"><h4>H sơ MEP  Phiên bản IFC</h4><p>in, nưc, HVAC, PCCC · IFC + PDF · 420 MB</p><div class="df-tags"><span class="tag mep">MEP</span></div></div></div>
+        <div class="design-file-card"><div class="df-icon"> </div><div class="df-info"><h4>Thiết kế ni thất cn h mẫu</h4><p>3 loại cn h A/B/C · PDF + 3D · 156 MB</p><div class="df-tags"><span class="tag interior">Ni thất</span></div></div></div>
+        <div class="design-file-card"><div class="df-icon"></div><div class="df-info"><h4>Tiêu chí t i chính v2.1</h4><p>Ngân sách phân b theo hạng mục · Excel · 2.4 MB</p><div class="df-tags"><span class="tag construction">T i chính</span></div></div></div>
+        <div class="design-file-card"><div class="df-icon"></div><div class="df-info"><h4>Khảo sát a chất</h4><p>Báo cáo khoan khảo sát 25 l khoan · PDF · 67 MB</p><div class="df-tags"><span class="tag construction">Xây dựng</span></div></div></div>
+      </div>
+    </div>
+
+    <!--  PRICE INTELLIGENCE  -->
+    <div class="screen" id="screen-prices">
+      <div class="page-hdr">
+        <div>
+          <h1>Lch sử & Dự báo giá vật liu</h1>
+          <p>Theo dõi biến ng giá các hạng mục thi công. AI dự báo xu hưng 3 tháng ti dựa trên dữ liu th trưng v  thi vụ.</p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline btn-sm"> Export</button>
+          <button class="btn btn-outline btn-sm"> Ngun dữ liu</button>
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="pi-grid">
+        <div class="pi-kpi">
+          <div class="pi-kpi-label">Thi công thô (BTCT)</div>
+          <div class="pi-kpi-val">6.85<span class="pi-kpi-unit">tr/m²</span></div>
+          <div><span class="pi-kpi-change pi-up"> +3.2% MoM</span><span class="pi-forecast-badge forecast-up">Dự báo tng</span></div>
+        </div>
+        <div class="pi-kpi">
+          <div class="pi-kpi-label">Thép xây dựng (CB400)</div>
+          <div class="pi-kpi-val">16.4<span class="pi-kpi-unit">tr/tấn</span></div>
+          <div><span class="pi-kpi-change pi-down"> -1.8% MoM</span><span class="pi-forecast-badge forecast-stable">n nh</span></div>
+        </div>
+        <div class="pi-kpi">
+          <div class="pi-kpi-label">Kính & Mặt dựng</div>
+          <div class="pi-kpi-val">4.2<span class="pi-kpi-unit">tr/m²</span></div>
+          <div><span class="pi-kpi-change pi-up"> +5.6% MoM</span><span class="pi-forecast-badge forecast-up">Rủi ro cao</span></div>
+        </div>
+        <div class="pi-kpi">
+          <div class="pi-kpi-label">Nhân công xây dựng</div>
+          <div class="pi-kpi-val">420<span class="pi-kpi-unit">k/ng y</span></div>
+          <div><span class="pi-kpi-change pi-flat"> flat MoM</span><span class="pi-forecast-badge forecast-stable">n nh</span></div>
+        </div>
+      </div>
+
+      <!-- Category selector + Chart -->
+      <div class="cat-tabs">
+        <button class="cat-tab active" onclick="switchCat(this,'concrete')">Thi công thô / BTCT</button>
+        <button class="cat-tab" onclick="switchCat(this,'steel')">Thép xây dựng</button>
+        <button class="cat-tab" onclick="switchCat(this,'glass')">Kính & Mặt dựng</button>
+        <button class="cat-tab" onclick="switchCat(this,'labor')">Nhân công</button>
+        <button class="cat-tab" onclick="switchCat(this,'landscape')">Cảnh quan</button>
+        <button class="cat-tab" onclick="switchCat(this,'interior')">Ni thất</button>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:20px; align-items:start">
+        <!-- Chart card -->
+        <div class="card card-pad" style="grid-column: span 2">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink)" id="chart-title">Thi công thô (BTCT)  triu VN/m²</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Dữ liu thực 12 tháng · Dự báo AI 3 tháng ti (vùng m)</div>
+            </div>
+            <div style="display:flex;gap:12px;font-size:11px;color:var(--ink-3);align-items:center">
+              <span style="display:flex;align-items:center;gap:5px"><svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#9C7B3F" stroke-width="2.5"/></svg>Thực tế</span>
+              <span style="display:flex;align-items:center;gap:5px"><svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#9C7B3F" stroke-width="2" stroke-dasharray="5 3"/></svg>Dự báo AI</span>
+              <span style="display:flex;align-items:center;gap:5px"><svg width="14" height="14"><rect x="0" y="0" width="14" height="14" rx="3" fill="#9C7B3F" opacity=".15"/></svg>Vùng dự báo</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="priceChart" height="220" style="width:100%"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid g2" style="align-items:start">
+        <!-- Price history table -->
+        <div class="card">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--stone-2);font-size:14px;font-weight:700;color:var(--ink)">Lch sử giá  <span id="table-cat-label">Thi công thô (BTCT)</span></div>
+          <table class="price-hist-table" id="priceTable">
+            <thead>
+              <tr><th>Tháng</th><th>ơn giá</th><th>Thay i</th><th>Tác ng dự án</th></tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Right: signals + forecast -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- AI forecast card -->
+          <div class="card">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--stone-2)">
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">Dự báo AI  3 tháng ti</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Cập nhật: hôm nay · Ngun: giá th trưng + thi vụ + macro</div>
+            </div>
+            <div id="forecastPanel" style="padding:14px 16px"></div>
+          </div>
+
+          <!-- Market signals -->
+          <div class="card">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--stone-2);font-size:14px;font-weight:700;color:var(--ink)">Tín hiu th trưng</div>
+            <div>
+              <div class="signal-row">
+                <div class="signal-icon" style="background:var(--rose-lt)"></div>
+                <div class="signal-body">
+                  <div class="signal-title">Giá kính nhập khẩu tng mạnh</div>
+                  <div class="signal-sub">Thuế chng bán phá giá từ EU áp dụng tháng 8 · Ảnh hưng giá curtain wall +812% dự kiến Q3/2026</div>
+                </div>
+                <div class="signal-time">Hôm nay</div>
+              </div>
+              <div class="signal-row">
+                <div class="signal-icon" style="background:var(--brass-lt)"></div>
+                <div class="signal-body">
+                  <div class="signal-title">Thép CB400 có th giảm Q3</div>
+                  <div class="signal-sub">Trung Quc tng xuất khẩu thép xây dựng · p lực giảm giá 58% trong nưc dự báo tháng 910</div>
+                </div>
+                <div class="signal-time">Hôm qua</div>
+              </div>
+              <div class="signal-row">
+                <div class="signal-icon" style="background:var(--sage-lt)"></div>
+                <div class="signal-body">
+                  <div class="signal-title">Giá nhân công n nh ến cui nm</div>
+                  <div class="signal-sub">Ngun cung lao ng xây dựng cải thin · Không kỳ vng tng lương t biến trưc Tết 2027</div>
+                </div>
+                <div class="signal-time">3 ng y trưc</div>
+              </div>
+              <div class="signal-row">
+                <div class="signal-icon" style="background:var(--sky-lt)"></div>
+                <div class="signal-body">
+                  <div class="signal-title">Mùa xây dựng cao im T8T10</div>
+                  <div class="signal-sub">Giá vật liu v  nhân công thưng tng 37% trong quý 3 do nhu cầu cao. Nên lock giá hợp ng trưc tháng 7.</div>
+                </div>
+                <div class="signal-time">AI insight</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<script>
+//  Navigation 
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  const map = {dashboard:'Dashboard',budget:'Ngân sách & Tiêu chí',tenders:'Tiến  gói thầu',vendors:'Danh sách Vendor',prices:'Lch sử & Dự báo giá',costs:'Tng hợp kinh phí',chat:'AI Assistant',files:'H sơ thiết kế'};
+  document.getElementById('crumb-title').textContent = map[id] || id;
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'"+id+"'")) btn.classList.add('active');
+  });
+  if (id === 'prices') initChart('concrete');
+}
+
+//  Price data 
+const priceData = {
+  concrete: {
+    title: 'Thi công thô (BTCT)  triu VN/m²',
+    tableLabel: 'Thi công thô (BTCT)',
+    unit: 'tr/m²',
+    color: '#9C7B3F',
+    history: [
+      {m:'T7/25',v:6.10,chg:null},{m:'T8/25',v:6.15,chg:'+0.8%'},{m:'T9/25',v:6.32,chg:'+2.8%'},
+      {m:'T10/25',v:6.28,chg:'-0.6%'},{m:'T11/25',v:6.35,chg:'+1.1%'},{m:'T12/25',v:6.40,chg:'+0.8%'},
+      {m:'T1/26',v:6.38,chg:'-0.3%'},{m:'T2/26',v:6.45,chg:'+1.1%'},{m:'T3/26',v:6.55,chg:'+1.6%'},
+      {m:'T4/26',v:6.62,chg:'+1.1%'},{m:'T5/26',v:6.72,chg:'+1.5%'},{m:'T6/26',v:6.85,chg:'+1.9%'}
+    ],
+    forecast: [{m:'T7/26',v:6.98,lo:6.88,hi:7.10},{m:'T8/26',v:7.14,lo:6.95,hi:7.32},{m:'T9/26',v:7.22,lo:6.98,hi:7.50}],
+    forecastNote: 'Mùa xây dựng cao im T8T9 dự báo tiếp tục ẩy giá thi công thô tng 59% trong quý 3. Khuyến ngh ký hợp ng thi công trưc tháng 7.',
+    forecastDir: 'up',
+    impacts: ['medium','high','low','medium','medium','medium','low','medium','medium','medium','high','high']
+  },
+  steel: {
+    title: 'Thép xây dựng CB400  triu VN/tấn',
+    tableLabel: 'Thép xây dựng (CB400)',
+    unit: 'tr/tấn',
+    color: '#3D6B57',
+    history: [
+      {m:'T7/25',v:17.2,chg:null},{m:'T8/25',v:17.5,chg:'+1.7%'},{m:'T9/25',v:17.8,chg:'+1.7%'},
+      {m:'T10/25',v:17.6,chg:'-1.1%'},{m:'T11/25',v:17.3,chg:'-1.7%'},{m:'T12/25',v:17.1,chg:'-1.2%'},
+      {m:'T1/26',v:16.9,chg:'-1.2%'},{m:'T2/26',v:17.0,chg:'+0.6%'},{m:'T3/26',v:16.8,chg:'-1.2%'},
+      {m:'T4/26',v:16.6,chg:'-1.2%'},{m:'T5/26',v:16.5,chg:'-0.6%'},{m:'T6/26',v:16.4,chg:'-0.6%'}
+    ],
+    forecast: [{m:'T7/26',v:16.2,lo:15.8,hi:16.6},{m:'T8/26',v:15.9,lo:15.3,hi:16.5},{m:'T9/26',v:16.1,lo:15.4,hi:16.8}],
+    forecastNote: 'Trung Quc tng xuất khẩu thép tạo áp lực giảm giá 58% trong nưc tháng 910. ây l  cơ hi mua sắt thép  giá tt cho các gói thầu còn lại.',
+    forecastDir: 'down',
+    impacts: ['low','low','medium','low','low','low','low','low','low','low','low','low']
+  },
+  glass: {
+    title: 'Kính & Mặt dựng  triu VN/m²',
+    tableLabel: 'Kính & Mặt dựng',
+    unit: 'tr/m²',
+    color: '#2A5A8C',
+    history: [
+      {m:'T7/25',v:3.50,chg:null},{m:'T8/25',v:3.55,chg:'+1.4%'},{m:'T9/25',v:3.60,chg:'+1.4%'},
+      {m:'T10/25',v:3.65,chg:'+1.4%'},{m:'T11/25',v:3.72,chg:'+1.9%'},{m:'T12/25',v:3.78,chg:'+1.6%'},
+      {m:'T1/26',v:3.80,chg:'+0.5%'},{m:'T2/26',v:3.85,chg:'+1.3%'},{m:'T3/26',v:3.90,chg:'+1.3%'},
+      {m:'T4/26',v:3.98,chg:'+2.1%'},{m:'T5/26',v:4.08,chg:'+2.5%'},{m:'T6/26',v:4.20,chg:'+2.9%'}
+    ],
+    forecast: [{m:'T7/26',v:4.42,lo:4.28,hi:4.58},{m:'T8/26',v:4.65,lo:4.45,hi:4.88},{m:'T9/26',v:4.72,lo:4.50,hi:4.98}],
+    forecastNote: '  Rủi ro cao: Thuế chng bán phá giá EU tháng 8 + nhu cầu kính xây dựng tng mạnh trong khu vực. Giá curtain wall dự báo tng 812% Q3. Khuyến ngh cht giá ngay.',
+    forecastDir: 'up-risk',
+    impacts: ['low','low','medium','medium','high','high','medium','high','high','high','high','high']
+  },
+  labor: {
+    title: 'Nhân công xây dựng  nghìn VN/ng y',
+    tableLabel: 'Nhân công xây dựng',
+    unit: 'k/ng y',
+    color: '#6B3A8C',
+    history: [
+      {m:'T7/25',v:400,chg:null},{m:'T8/25',v:400,chg:'0%'},{m:'T9/25',v:405,chg:'+1.3%'},
+      {m:'T10/25',v:410,chg:'+1.2%'},{m:'T11/25',v:410,chg:'0%'},{m:'T12/25',v:415,chg:'+1.2%'},
+      {m:'T1/26',v:415,chg:'0%'},{m:'T2/26',v:415,chg:'0%'},{m:'T3/26',v:418,chg:'+0.7%'},
+      {m:'T4/26',v:420,chg:'+0.5%'},{m:'T5/26',v:420,chg:'0%'},{m:'T6/26',v:420,chg:'0%'}
+    ],
+    forecast: [{m:'T7/26',v:422,lo:415,hi:430},{m:'T8/26',v:425,lo:415,hi:435},{m:'T9/26',v:428,lo:415,hi:442}],
+    forecastNote: 'Nhân công xây dựng tương i n nh. Dự báo tng nhẹ 12% do mùa cao im T8T9. Không có rủi ro tng t biến trưc Tết 2027.',
+    forecastDir: 'stable',
+    impacts: ['low','low','low','low','low','low','low','low','low','low','low','low']
+  },
+  landscape: {
+    title: 'Cảnh quan  triu VN/m²',
+    tableLabel: 'Thi công cảnh quan',
+    unit: 'tr/m²',
+    color: '#3D6B57',
+    history: [
+      {m:'T7/25',v:1.80,chg:null},{m:'T8/25',v:1.82,chg:'+1.1%'},{m:'T9/25',v:1.85,chg:'+1.6%'},
+      {m:'T10/25',v:1.88,chg:'+1.6%'},{m:'T11/25',v:1.88,chg:'0%'},{m:'T12/25',v:1.90,chg:'+1.1%'},
+      {m:'T1/26',v:1.90,chg:'0%'},{m:'T2/26',v:1.92,chg:'+1.1%'},{m:'T3/26',v:1.95,chg:'+1.6%'},
+      {m:'T4/26',v:1.95,chg:'0%'},{m:'T5/26',v:1.98,chg:'+1.5%'},{m:'T6/26',v:2.00,chg:'+1.0%'}
+    ],
+    forecast: [{m:'T7/26',v:2.03,lo:1.98,hi:2.08},{m:'T8/26',v:2.06,lo:1.99,hi:2.14},{m:'T9/26',v:2.08,lo:2.00,hi:2.18}],
+    forecastNote: 'Cảnh quan n nh, tng nhẹ theo trượt giá chung. Không có yếu t rủi ro ặc bit. Nên mi thầu sm  cht giá tt trưc mùa cao im.',
+    forecastDir: 'stable',
+    impacts: ['low','low','low','low','low','low','low','low','low','low','low','low']
+  },
+  interior: {
+    title: 'Ho n thin ni thất  triu VN/m²',
+    tableLabel: 'Ho n thin ni thất',
+    unit: 'tr/m²',
+    color: '#9C3F3F',
+    history: [
+      {m:'T7/25',v:19.5,chg:null},{m:'T8/25',v:20.0,chg:'+2.6%'},{m:'T9/25',v:20.2,chg:'+1.0%'},
+      {m:'T10/25',v:20.5,chg:'+1.5%'},{m:'T11/25',v:21.0,chg:'+2.4%'},{m:'T12/25',v:21.2,chg:'+1.0%'},
+      {m:'T1/26',v:21.5,chg:'+1.4%'},{m:'T2/26',v:21.8,chg:'+1.4%'},{m:'T3/26',v:22.0,chg:'+0.9%'},
+      {m:'T4/26',v:22.3,chg:'+1.4%'},{m:'T5/26',v:22.6,chg:'+1.3%'},{m:'T6/26',v:22.8,chg:'+0.9%'}
+    ],
+    forecast: [{m:'T7/26',v:23.2,lo:22.8,hi:23.7},{m:'T8/26',v:23.6,lo:23.0,hi:24.3},{m:'T9/26',v:23.8,lo:23.0,hi:24.7}],
+    forecastNote: 'Ni thất cao cấp tiếp tục tng giá do chi phí vật liu nhập khẩu (á, g, thiết b) tng. Báo giá hin tại 98.4 tỷ phản ánh úng xu hưng nhưng ã vượt ngân sách. Cần  m phán hoặc iu chnh spec.',
+    forecastDir: 'up',
+    impacts: ['low','medium','medium','medium','high','medium','high','high','medium','high','high','medium']
+  }
+};
+
+let currentCat = 'concrete';
+let chartInstance = null;
+
+function switchCat(btn, cat) {
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  initChart(cat);
+}
+
+function initChart(cat) {
+  currentCat = cat;
+  const d = priceData[cat];
+  document.getElementById('chart-title').textContent = d.title;
+  document.getElementById('table-cat-label').textContent = d.tableLabel;
+
+  const canvas = document.getElementById('priceChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth;
+  const H = 220;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const allVals = [...d.history.map(h=>h.v), ...d.forecast.map(f=>f.hi), ...d.forecast.map(f=>f.lo)];
+  const minV = Math.min(...allVals) * 0.97;
+  const maxV = Math.max(...allVals) * 1.03;
+  const pad = {l:52, r:20, t:16, b:36};
+  const cw = W - pad.l - pad.r;
+  const ch = H - pad.t - pad.b;
+  const allMonths = [...d.history.map(h=>h.m), ...d.forecast.map(f=>f.m)];
+  const n = allMonths.length;
+
+  function px(i) { return pad.l + (i / (n-1)) * cw; }
+  function py(v) { return pad.t + ch - ((v - minV)/(maxV - minV)) * ch; }
+
+  ctx.clearRect(0, 0, W, H);
+
+  // grid lines
+  const ticks = 5;
+  for(let i = 0; i <= ticks; i++) {
+    const y = pad.t + (i/ticks)*ch;
+    const val = maxV - (i/ticks)*(maxV-minV);
+    ctx.strokeStyle = '#EDE9E3'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W-pad.r, y); ctx.stroke();
+    ctx.fillStyle = '#6B6560'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(val.toFixed(cat==='labor'?0:1), pad.l-6, y+3.5);
+  }
+
+  // forecast zone
+  const fStart = d.history.length - 1;
+  ctx.beginPath();
+  ctx.moveTo(px(fStart), py(d.history[fStart].v));
+  d.forecast.forEach((f,i) => ctx.lineTo(px(fStart+1+i), py(f.hi)));
+  for(let i=d.forecast.length-1;i>=0;i--) ctx.lineTo(px(fStart+1+i), py(d.forecast[i].lo));
+  ctx.closePath();
+  ctx.fillStyle = d.color + '20'; ctx.fill();
+
+  // history line
+  ctx.beginPath();
+  d.history.forEach((h,i) => { i===0 ? ctx.moveTo(px(i),py(h.v)) : ctx.lineTo(px(i),py(h.v)); });
+  ctx.strokeStyle = d.color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.stroke();
+
+  // forecast line (dashed)
+  ctx.beginPath();
+  ctx.moveTo(px(fStart), py(d.history[fStart].v));
+  d.forecast.forEach((f,i) => ctx.lineTo(px(fStart+1+i), py(f.v)));
+  ctx.strokeStyle = d.color; ctx.lineWidth = 2; ctx.setLineDash([6,4]); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // dots (history)
+  d.history.forEach((h,i) => {
+    ctx.beginPath(); ctx.arc(px(i),py(h.v),4,0,Math.PI*2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.strokeStyle = d.color; ctx.lineWidth = 2; ctx.stroke();
+  });
+  // dots (forecast)
+  d.forecast.forEach((f,i) => {
+    ctx.beginPath(); ctx.arc(px(fStart+1+i),py(f.v),4,0,Math.PI*2);
+    ctx.fillStyle = d.color+'60'; ctx.fill();
+    ctx.strokeStyle = d.color; ctx.lineWidth = 1.5; ctx.stroke();
+  });
+
+  // x labels  show every 3 months
+  ctx.fillStyle = '#6B6560'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'center';
+  allMonths.forEach((m,i) => {
+    if (i % 3 === 0 || i === allMonths.length - 1) {
+      ctx.fillStyle = i >= d.history.length ? d.color : '#6B6560';
+      ctx.fillText(m, px(i), H - 8);
+    }
+  });
+
+  // forecast label
+  ctx.fillStyle = d.color; ctx.font = 'bold 10px Inter,sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(' Thực tế   Dự báo ', px(fStart) - 28, pad.t + 10);
+  // divider line
+  ctx.beginPath(); ctx.moveTo(px(fStart),pad.t); ctx.lineTo(px(fStart),pad.t+ch);
+  ctx.strokeStyle = d.color+'50'; ctx.lineWidth = 1; ctx.setLineDash([4,3]); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // table
+  const tbody = document.getElementById('priceTableBody');
+  tbody.innerHTML = '';
+  const impactMap = ['low','low','low','low','low','low','low','low','low','low','low','low'];
+  const impacts = d.impacts || impactMap;
+  [...d.history].reverse().forEach((h, ri) => {
+    const origIdx = d.history.length - 1 - ri;
+    const imp = impacts[origIdx] || 'low';
+    const chgClass = !h.chg ? 'price-fl' : h.chg.startsWith('+') ? 'price-up' : h.chg.startsWith('-') ? 'price-dn' : 'price-fl';
+    const arrow = !h.chg ? '' : h.chg.startsWith('+') ? '' : '';
+    const impLabel = {high:'Cao',med:'Trung bình',low:'Thấp'}[imp];
+    const impCls = `impact-${imp==='medium'?'med':imp}`;
+    tbody.innerHTML += `<tr>
+      <td><b>${h.m}</b></td>
+      <td style="font-weight:600">${h.v} ${d.unit}</td>
+      <td class="${chgClass}">${arrow} ${h.chg||''}</td>
+      <td><span class="impact-chip ${impCls}">${impLabel}</span></td>
+    </tr>`;
+  });
+
+  // forecast panel
+  const fp = document.getElementById('forecastPanel');
+  const dirMap = {
+    'up':      {icon:'',color:'var(--rose)',bg:'var(--rose-lt)',label:'Xu hưng tng'},
+    'up-risk': {icon:' ',color:'#8C2020',bg:'#FDE8E8',label:'Tng  rủi ro cao'},
+    'down':    {icon:'',color:'var(--sage)',bg:'var(--sage-lt)',label:'Xu hưng giảm'},
+    'stable':  {icon:'',color:'var(--brass)',bg:'var(--brass-lt)',label:'n nh'}
+  };
+  const dir = dirMap[d.forecastDir] || dirMap['stable'];
+  fp.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="background:${dir.bg};color:${dir.color};font-size:13px;font-weight:700;padding:4px 12px;border-radius:99px">${dir.icon} ${dir.label}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      ${d.forecast.map(f=>`
+        <div style="flex:1;background:var(--stone);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px">${f.m}</div>
+          <div style="font-size:16px;font-weight:700;color:${dir.color}">${f.v} <span style="font-size:11px;font-weight:400;color:var(--ink-3)">${d.unit}</span></div>
+          <div style="font-size:10px;color:var(--ink-3);margin-top:3px">${f.lo}${f.hi}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--ink-2);line-height:1.6;background:var(--stone);border-radius:8px;padding:10px 12px">${d.forecastNote}</div>`;
+}
+
+
+//  Chat 
+const responses = {
+  'So sánh báo giá ni thất vi dự án tương tự': `Dựa trên 3 dự án tương tự trong portfolio:<table class="ai-table"><tr><th>Dự án</th><th>Giá /m² ni thất</th><th>Hạng mục</th></tr><tr><td>Meridian (hin tại)</td><td style="color:#9C3F3F;font-weight:600">22.8 triu/m²</td><td>Luxury Interior</td></tr><tr><td>Green Valley Ph1</td><td>19.5 triu/m²</td><td>Mid-range</td></tr><tr><td>Harbor Point</td><td>21.2 triu/m²</td><td>Premium</td></tr></table>Báo giá Luxury Interior Co. cao hơn benchmark 7.5%. Có th  m phán lại hoặc xem xét thay thế bằng Ảnh V ng Interior (4.6, ã l m Harbor Point).`,
+  'Gói MEP n o ang chậm nhất?': `3 gói MEP ang m thầu, có 2 gói tim ẩn rủi ro tr:<br><br><b>HVAC (hạn 25/07):</b> 4 vendor ược mi, ch còn 10 ng y. 1 vendor chưa xác nhận tham gia.<br><b>Thang máy (hạn 28/07):</b> Ch có 2 vendor tham dự  nên mi thêm ít nhất 1 vendor  có ủ cơ s so sánh.<br><br>Tôi có th soạn email nhắc nh vendor không?`,
+  'Tng kinh phí hin tại l  bao nhiêu?': `Tng hợp tính ến hôm nay:<table class="ai-table"><tr><th>Trạng thái</th><th>Giá tr</th><th>%</th></tr><tr><td>ã ký & cam kết</td><td style="font-weight:600">523.0 tỷ</td><td>61.5%</td></tr><tr><td>ang thương lượng</td><td>183.7 tỷ</td><td>21.6%</td></tr><tr><td>Chưa phân b</td><td>143.3 tỷ</td><td>16.9%</td></tr><tr><td style="font-weight:700">Tng ngân sách</td><td style="font-weight:700">850.0 tỷ</td><td style="font-weight:700">100%</td></tr></table>Lưu ý: Nếu báo giá ni thất giữ nguyên  98.4 tỷ, tng sẽ vượt tiêu chí hạng mục C 4.2 tỷ.`,
+  'Vendor n o có th thay thế Luxury Interior Co.?': `Trong database, có 2 vendor ni thất cao cấp phù hợp:<br><br><b>Ảnh V ng Interior</b>  4.6 · 11 dự án · ã l m Harbor Point Tower (21.2 triu/m²)<br><b>Signature Living Group</b>  4.4 · 7 dự án · Chuyên phân khúc premium, chưa l m vi công ty mình<br><br>Mun tôi soạn RFQ mi 2 vendor n y báo giá song song không?`
+};
+
+const defaultReply = 'ã ghi nhận câu hi. ang tra cứu trong dữ liu dự án Vui lòng thử mt trong các câu hi gợi ý hoặc mô tả cụ th hơn gói thầu / vendor cần tìm hiu.';
+
+function addMsg(role, html) {
+  const wrap = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg' + (role === 'user' ? ' user' : '');
+  const init = role === 'user' ? 'TN' : 'AI';
+  div.innerHTML = `<div class="msg-avatar ${role}">${init}</div><div class="bubble ${role}">${html}</div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function sendChip(el, text) {
+  el.remove();
+  addMsg('user', text);
+  setTimeout(() => {
+    addMsg('ai', responses[text] || defaultReply);
+  }, 600);
+}
+
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMsg('user', text);
+  const key = Object.keys(responses).find(k => text.toLowerCase().includes(k.toLowerCase().substring(0, 12)));
+  setTimeout(() => {
+    addMsg('ai', key ? responses[key] : defaultReply);
+  }, 700);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+</script>
+</body>
+</html>

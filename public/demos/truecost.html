@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Truecost — Costing &amp; FP&amp;A Co-pilot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F8F5; --surface:#FFFFFF; --surface-2:#F0F3EF;
+  --border:#DFE5DC; --border-strong:#C7D0C2;
+  --ink:#1B211C; --muted:#5C6A5E; --muted-2:#8A968A;
+  --primary:#1F6D4C; --primary-dim:#E4EFE8; --primary-deep:#154D36;
+  --ai:#6C4FD6; --ai-tint:#EFEAFB; --ai-deep:#4E37AD;
+  --good:#1F6D4C; --bad:#B8433F; --bad-tint:#FBEAE9; --warn:#9A6B14; --warn-tint:#FBF1DF;
+  --shadow: 0 1px 2px rgba(20,30,20,.05), 0 4px 14px rgba(20,30,20,.05);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;height:100%;-webkit-font-smoothing:antialiased;}
+body{display:flex;height:100vh;overflow:hidden;}
+h1,h2,h3{margin:0;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#CBD3C7;border-radius:6px;}
+
+/* ============ SIDEBAR ============ */
+.sidebar{width:216px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.side-brand{display:flex;align-items:center;gap:9px;padding:20px 18px 16px;}
+.side-brand .mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary),var(--primary-deep));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:15px;}
+.side-brand .name{font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--ink);}
+.side-nav{flex:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;text-align:left;width:100%;}
+.nav-item:hover{background:var(--surface-2);color:var(--ink);}
+.nav-item.active{background:var(--primary-dim);color:var(--primary-deep);font-weight:600;}
+.nav-item .ic{width:16px;text-align:center;flex-shrink:0;}
+.side-trust{margin:8px 10px 16px;padding:12px 13px;background:var(--surface-2);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.5;}
+.side-trust b{color:var(--ink);display:block;margin-bottom:3px;font-size:11.5px;}
+
+/* ============ MAIN ============ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.ask-row{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:11px 16px;}
+.ask-row .spark{color:var(--ai);font-size:15px;flex-shrink:0;}
+.ask-row input{flex:1;background:transparent;border:none;outline:none;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);}
+.ask-row input::placeholder{color:var(--muted-2);}
+.ask-row button{background:var(--ai);color:#fff;border:none;border-radius:8px;padding:7px 15px;font-size:12.5px;font-weight:600;cursor:pointer;flex-shrink:0;}
+.ask-row button:hover{background:var(--ai-deep);}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px 48px;}
+.page-head{margin-bottom:18px;}
+.page-head h1{font-family:'Fraunces',serif;font-size:22px;font-weight:600;}
+.page-head p{margin:4px 0 0;color:var(--muted);font-size:13px;}
+
+/* ============ BADGES ============ */
+.tag{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:3px 8px;border-radius:12px;letter-spacing:.02em;text-transform:uppercase;}
+.tag.ai{background:var(--ai-tint);color:var(--ai-deep);}
+.tag.verified{background:var(--primary-dim);color:var(--primary-deep);}
+.tag.review{background:var(--warn-tint);color:var(--warn);}
+
+/* ============ DASHBOARD CHARTS ============ */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);}
+.kpi-lab{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;}
+.kpi-val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--ink);}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.chart-row .card{margin-bottom:0;}
+.insight-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:12.5px;}
+.insight-row-text{flex:1;line-height:1.5;}
+
+/* ============ DASHBOARD / INSIGHT CARDS ============ */
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow);}
+.insight-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.insight-card .sku-name{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.insight-card .headline{font-family:'Fraunces',serif;font-size:17px;font-weight:500;line-height:1.4;margin:6px 0 10px;color:var(--ink);}
+.insight-card .headline b{font-weight:600;}
+.insight-card .headline .good-text{color:var(--good);}
+.insight-card .headline .bad-text{color:var(--bad);}
+.trend-pill{display:inline-flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:14px;flex-shrink:0;}
+.trend-pill.up-bad{background:var(--bad-tint);color:var(--bad);}
+.trend-pill.up-good{background:var(--primary-dim);color:var(--primary-deep);}
+.trend-pill.down-good{background:var(--primary-dim);color:var(--primary-deep);}
+.action-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:10px;}
+.action-row b{color:var(--ink);}
+.detail-toggle{font-size:11.5px;color:var(--ai-deep);background:var(--ai-tint);border:none;border-radius:7px;padding:5px 10px;cursor:pointer;font-weight:600;}
+.detail-toggle:hover{background:#e2d9f7;}
+.finance-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border-strong);}
+.finance-detail.open{display:block;}
+.fd-row{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:3px 0;color:var(--ink);}
+.fd-row .lab{color:var(--muted);}
+.fd-row.pos{color:var(--good);}
+.fd-row.neg{color:var(--bad);}
+
+/* ============ SKU COST DETAIL ============ */
+.sku-tabs{display:flex;gap:8px;margin-bottom:18px;}
+.sku-tab{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;}
+.sku-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;}
+.cost-layout{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);}
+.card h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:14px;}
+.step-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
+.step-row:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--surface-2);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:600;}
+.step-label{flex:1;font-size:13px;}
+.step-label .sub{display:block;font-size:11px;color:var(--muted-2);margin-top:1px;}
+.step-val{font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600;}
+.step-total{border-top:2px solid var(--ink);margin-top:6px;padding-top:12px;font-weight:700;}
+.big-number{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--ink);margin:2px 0;}
+.big-number .cents{font-size:20px;color:var(--muted-2);}
+.stack-bar{height:26px;border-radius:6px;overflow:hidden;display:flex;width:100%;margin:14px 0 10px;}
+.stack-bar div{height:100%;}
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.legend-row .sw{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;}
+.margin-line{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 0;border-top:1px solid var(--border);margin-top:14px;}
+
+/* ============ WHAT-IF SIMULATOR ============ */
+.sim-layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.slider-block{margin-bottom:18px;}
+.slider-block .lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;}
+.slider-block .lbl b{font-family:'IBM Plex Mono',monospace;color:var(--primary-deep);}
+.slider-block input[type=range]{width:100%;accent-color:var(--primary);}
+.sim-result{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border);}
+.sim-result:last-child{border-bottom:none;}
+.sim-result .lab{font-size:12.5px;color:var(--muted);}
+.sim-result .val{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;}
+.note-box{background:var(--ai-tint);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--ai-deep);margin-top:14px;line-height:1.5;}
+
+/* ============ ASK & VARIANCE (chat) ============ */
+.chat-wrap{max-width:720px;}
+.chat-msg{margin-bottom:16px;}
+.chat-msg.user .bubble{background:var(--surface-2);display:inline-block;padding:9px 14px;border-radius:10px;font-size:13px;}
+.chat-msg.ai .bubble{background:var(--surface);border:1px solid var(--border);padding:14px 18px;border-radius:12px;box-shadow:var(--shadow);font-size:13.5px;line-height:1.6;}
+.chat-msg .tag-row{margin-bottom:8px;}
+.op-compare{background:var(--primary-dim);border-radius:8px;padding:9px 12px;margin:10px 0;font-size:12.5px;color:var(--primary-deep);font-weight:500;}
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+.chip{font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:6px 12px;cursor:pointer;}
+.chip:hover{border-color:var(--ai);color:var(--ai-deep);}
+
+/* ============ MAKE VS BUY ============ */
+.mvb-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.mvb-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;text-align:center;box-shadow:var(--shadow);}
+.mvb-card h4{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:700;margin-bottom:10px;}
+.mvb-card .amt{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
+.mvb-card input{font-family:'Fraunces',serif;font-size:30px;font-weight:600;border:none;border-bottom:2px dashed var(--border-strong);text-align:center;width:130px;color:var(--ink);background:transparent;outline:none;}
+.mvb-card input:focus{border-color:var(--ai);}
+.recommend-banner{border-radius:12px;padding:16px 20px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;}
+.recommend-banner.keep{background:var(--primary-dim);color:var(--primary-deep);}
+.recommend-banner.switch{background:var(--bad-tint);color:var(--bad);}
+
+/* ============ GUIDED SETUP ============ */
+.wiz-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 28px;max-width:640px;box-shadow:var(--shadow);}
+.wiz-progress{display:flex;gap:5px;margin-bottom:20px;}
+.wiz-progress div{flex:1;height:4px;border-radius:3px;background:var(--surface-2);}
+.wiz-progress div.done{background:var(--primary);}
+.wiz-q{font-family:'Fraunces',serif;font-size:18px;font-weight:500;margin-bottom:16px;line-height:1.4;}
+.wiz-options{display:flex;flex-direction:column;gap:8px;}
+.wiz-opt{text-align:left;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface);font-size:13.5px;cursor:pointer;color:var(--ink);}
+.wiz-opt:hover{border-color:var(--primary);background:var(--primary-dim);}
+.wiz-input-row{display:flex;gap:10px;margin-bottom:14px;}
+.wiz-input-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;outline:none;}
+.wiz-input-row input:focus{border-color:var(--primary);}
+.wiz-draft{background:var(--ai-tint);border-radius:10px;padding:16px 18px;margin-top:10px;}
+.wiz-draft .tag{margin-bottom:8px;}
+.wiz-btn-row{display:flex;gap:10px;margin-top:18px;}
+.wiz-btn{padding:9px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;}
+.wiz-btn.primary{background:var(--primary);color:#fff;}
+.wiz-btn.primary:hover{background:var(--primary-deep);}
+.wiz-btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.wiz-ai-line{display:flex;gap:9px;margin-bottom:14px;font-size:13px;color:var(--muted);align-items:flex-start;}
+.wiz-ai-line .spark{color:var(--ai);flex-shrink:0;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="side-brand"><div class="mark">T</div><div class="name">Truecost</div></div>
+  <div class="side-nav" id="sideNav"></div>
+  <div class="side-trust"><b>Your data stays yours</b>No cross-customer training. Full audit trail on every costing-logic change.</div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="ask-row">
+      <span class="spark">✦</span>
+      <input id="askInput" type="text" placeholder="Ask why something changed, or what a SKU would cost if…" />
+      <button id="askBtn">Ask</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+/* ======================================================================
+   DATA MODEL
+   ====================================================================== */
+const SKUS = {
+  bracket: {
+    id:"bracket", name:"Bracket A-42", volume:3000,
+    material:8.40, labor:5.20, overhead:3.10, special:[{name:"Scrap allowance",val:0.35},{name:"Tooling amortization",val:0.20}],
+    sell:21.00,
+    std:{material:7.95, labor:5.20, overhead:3.10, special:0.55},
+    laborHoursPerUnit: 0.18,
+  },
+  housing: {
+    id:"housing", name:"Housing B-19", volume:1200,
+    material:14.10, labor:6.80, overhead:4.40, special:[{name:"Scrap allowance",val:0.55},{name:"Freight-in",val:0.35}],
+    sell:31.50,
+    std:{material:13.70, labor:6.35, overhead:4.65, special:0.90},
+    laborHoursPerUnit: 0.31,
+  },
+  flange: {
+    id:"flange", name:"Flange C-07", volume:8000,
+    material:3.20, labor:2.10, overhead:1.35, special:[{name:"Scrap allowance",val:0.15}],
+    sell:8.25,
+    std:{material:3.35, labor:2.15, overhead:1.30, special:0.15},
+    laborHoursPerUnit: 0.07,
+  },
+};
+const COMPANY = { monthlyOverheadPool: 42000, monthlyLaborHours: 2450, overheadRatePerHour: 17.14 };
+
+const MONTHS = ["Feb","Mar","Apr","May","Jun","Jul"];
+const MARGIN_HISTORY = {
+  bracket: [19.2, 18.8, 18.5, 18.1, 17.9, 17.9],
+  housing: [18.0, 17.9, 17.5, 17.0, 16.9, 16.8],
+  flange:  [16.0, 16.4, 16.9, 17.2, 17.5, 17.6],
+};
+const SKU_COLORS = { bracket:"#3E7C5C", housing:"#B7862E", flange:"#6C4FD6" };
+const COMPOSITION_COLORS = { material:"#3E7C5C", labor:"#6FA98A", overhead:"#B7CDBB", special:"#D9C79A" };
+
+/* ======================================================================
+   SVG CHART UTILITIES  (no external chart library — hand-rolled, on-brand)
+   ====================================================================== */
+function scaleLinear(dMin, dMax, rMin, rMax){
+  return (v)=> dMax===dMin ? rMin : rMin + (v-dMin)/(dMax-dMin) * (rMax-rMin);
+}
+function svgWrap(width, height, inner, extraClass=""){
+  return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" class="${extraClass}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+}
+
+// Small inline trend sparkline (no axes)
+function sparkline(values, {width=100, height=30, color="#1F6D4C"}={}){
+  const min = Math.min(...values), max = Math.max(...values);
+  const x = scaleLinear(0, values.length-1, 4, width-4);
+  const y = scaleLinear(min===max?min-1:min, min===max?max+1:max, height-5, 5);
+  const pts = values.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
+  const last = values[values.length-1];
+  return svgWrap(width, height, `
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${x(values.length-1)}" cy="${y(last)}" r="2.6" fill="${color}"/>
+  `);
+}
+
+// Multi-line chart with axis + gridlines + legend dots on last point
+function multiLineChart({width=520, height=230, lines, labels}){
+  const pad = {l:38, r:16, t:16, b:26};
+  const allVals = lines.flatMap(l=>l.values);
+  const min = Math.floor(Math.min(...allVals)-1);
+  const max = Math.ceil(Math.max(...allVals)+1);
+  const x = scaleLinear(0, labels.length-1, pad.l, width-pad.r);
+  const y = scaleLinear(min, max, height-pad.b, pad.t);
+  const gridY = 4;
+  let grid = "";
+  for(let i=0;i<=gridY;i++){
+    const val = min + (max-min)*i/gridY;
+    const yy = y(val);
+    grid += `<line x1="${pad.l}" y1="${yy}" x2="${width-pad.r}" y2="${yy}" stroke="#E4E9E1" stroke-width="1"/>`;
+    grid += `<text x="${pad.l-8}" y="${yy+3}" font-size="9.5" fill="#8A968A" text-anchor="end" font-family="IBM Plex Mono, monospace">${val.toFixed(0)}%</text>`;
+  }
+  let xLabels = labels.map((lab,i)=>`<text x="${x(i)}" y="${height-8}" font-size="9.5" fill="#8A968A" text-anchor="middle" font-family="IBM Plex Mono, monospace">${lab}</text>`).join("");
+  let linesSvg = lines.map(l=>{
+    const pts = l.values.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
+    const dots = l.values.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===l.values.length-1?3.2:2}" fill="${l.color}"/>`).join("");
+    return `<polyline points="${pts}" fill="none" stroke="${l.color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+  }).join("");
+  return svgWrap(width, height, grid + xLabels + linesSvg);
+}
+
+// Stacked bar chart comparing categories (e.g. SKUs), each with segmented series (e.g. cost components)
+function stackedBarChart({width=520, height=230, categories, series}){
+  const pad = {l:38, r:16, t:20, b:26};
+  const totals = categories.map(c=> series.reduce((s,ser)=>s+c.values[ser.key],0));
+  const max = Math.ceil(Math.max(...totals) * 1.15);
+  const y = scaleLinear(0, max, height-pad.b, pad.t);
+  const bw = (width-pad.l-pad.r) / categories.length * 0.55;
+  const gap = (width-pad.l-pad.r) / categories.length;
+  let grid = "";
+  const gridN = 4;
+  for(let i=0;i<=gridN;i++){
+    const val = max*i/gridN;
+    const yy = y(val);
+    grid += `<line x1="${pad.l}" y1="${yy}" x2="${width-pad.r}" y2="${yy}" stroke="#E4E9E1" stroke-width="1"/>`;
+    grid += `<text x="${pad.l-8}" y="${yy+3}" font-size="9.5" fill="#8A968A" text-anchor="end" font-family="IBM Plex Mono, monospace">$${val.toFixed(0)}</text>`;
+  }
+  let bars = "";
+  categories.forEach((c,ci)=>{
+    let cum = 0;
+    const cx = pad.l + gap*ci + (gap-bw)/2;
+    series.forEach(ser=>{
+      const v = c.values[ser.key];
+      const y0 = y(cum), y1 = y(cum+v);
+      bars += `<rect x="${cx}" y="${y1}" width="${bw}" height="${y0-y1}" fill="${ser.color}" rx="2"/>`;
+      cum += v;
+    });
+    bars += `<text x="${cx+bw/2}" y="${y(cum)-6}" font-size="10.5" fill="#1B211C" text-anchor="middle" font-weight="600" font-family="Inter, sans-serif">$${cum.toFixed(2)}</text>`;
+    bars += `<text x="${cx+bw/2}" y="${height-8}" font-size="10" fill="#5C6A5E" text-anchor="middle" font-family="Inter, sans-serif">${c.label}</text>`;
+  });
+  return svgWrap(width, height, grid+bars);
+}
+
+// Waterfall chart: standard -> variance steps -> actual
+function waterfallChart({width=520, height=230, steps}){
+  const pad = {l:44, r:16, t:24, b:34};
+  const vals = steps.map(s=>Math.max(s.cumStart,s.cumEnd));
+  const vals2 = steps.map(s=>Math.min(s.cumStart,s.cumEnd));
+  const max = Math.ceil(Math.max(...vals)*1.08);
+  const min = Math.floor(Math.min(0,...vals2)*1.0);
+  const y = scaleLinear(min, max, height-pad.b, pad.t);
+  const gap = (width-pad.l-pad.r)/steps.length;
+  const bw = gap*0.56;
+  let grid = "";
+  const gridN = 4;
+  for(let i=0;i<=gridN;i++){
+    const val = min + (max-min)*i/gridN;
+    const yy = y(val);
+    grid += `<line x1="${pad.l}" y1="${yy}" x2="${width-pad.r}" y2="${yy}" stroke="#E4E9E1" stroke-width="1"/>`;
+    grid += `<text x="${pad.l-8}" y="${yy+3}" font-size="9.5" fill="#8A968A" text-anchor="end" font-family="IBM Plex Mono, monospace">$${val.toFixed(0)}</text>`;
+  }
+  let bars = "";
+  steps.forEach((s,i)=>{
+    const cx = pad.l + gap*i + (gap-bw)/2;
+    const y0 = y(s.cumStart), y1 = y(s.cumEnd);
+    const top = Math.min(y0,y1), h = Math.abs(y0-y1);
+    bars += `<rect x="${cx}" y="${top}" width="${bw}" height="${Math.max(h,2)}" fill="${s.color}" rx="2"/>`;
+    if (i>0 && i<steps.length-1) {
+      const prevCx = pad.l + gap*(i-1) + (gap-bw)/2 + bw;
+      bars += `<line x1="${prevCx}" y1="${y0}" x2="${cx}" y2="${y0}" stroke="#C7D0C2" stroke-width="1" stroke-dasharray="2,2"/>`;
+    }
+    const labelVal = s.isTotal ? `$${s.cumEnd.toFixed(2)}` : `${s.value>=0?'+':''}$${s.value.toFixed(2)}`;
+    bars += `<text x="${cx+bw/2}" y="${top-6}" font-size="10" fill="#1B211C" text-anchor="middle" font-weight="600" font-family="Inter, sans-serif">${labelVal}</text>`;
+    bars += `<text x="${cx+bw/2}" y="${height-10}" font-size="9.5" fill="#5C6A5E" text-anchor="middle" font-family="Inter, sans-serif">${s.label}</text>`;
+  });
+  return svgWrap(width, height, grid+bars);
+}
+
+// Donut chart for cost composition
+function donutChart({size=180, segments, centerLabel, centerSub}){
+  const r = size/2 - 6, cx = size/2, cy = size/2, rInner = r*0.58;
+  const total = segments.reduce((s,x)=>s+x.value,0);
+  let angle = -Math.PI/2;
+  let paths = "";
+  segments.forEach(seg=>{
+    const frac = seg.value/total;
+    const a0 = angle, a1 = angle + frac*Math.PI*2;
+    const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    const xi0=cx+rInner*Math.cos(a1), yi0=cy+rInner*Math.sin(a1);
+    const xi1=cx+rInner*Math.cos(a0), yi1=cy+rInner*Math.sin(a0);
+    const large = frac>0.5?1:0;
+    paths += `<path d="M${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1} L${xi0},${yi0} A${rInner},${rInner} 0 ${large} 0 ${xi1},${yi1} Z" fill="${seg.color}"/>`;
+    angle = a1;
+  });
+  const center = `<text x="${cx}" y="${cy-2}" font-size="17" font-weight="600" fill="#1B211C" text-anchor="middle" font-family="Fraunces, serif">${centerLabel}</text>
+    <text x="${cx}" y="${cy+15}" font-size="9.5" fill="#8A968A" text-anchor="middle" font-family="Inter, sans-serif">${centerSub||''}</text>`;
+  return svgWrap(size, size, paths+center);
+}
+
+// CVP / breakeven chart: revenue & total-cost lines over a volume range
+function cvpChart({width=520, height=250, maxVol, sellPrice, fixedCost, variableCostPerUnit, currentVol, breakevenVol}){
+  const pad = {l:48, r:16, t:18, b:28};
+  const maxRev = sellPrice*maxVol;
+  const maxCost = fixedCost + variableCostPerUnit*maxVol;
+  const maxY = Math.ceil(Math.max(maxRev,maxCost)/1000)*1000;
+  const x = scaleLinear(0, maxVol, pad.l, width-pad.r);
+  const y = scaleLinear(0, maxY, height-pad.b, pad.t);
+  let grid = "";
+  for(let i=0;i<=4;i++){
+    const val = maxY*i/4, yy = y(val);
+    grid += `<line x1="${pad.l}" y1="${yy}" x2="${width-pad.r}" y2="${yy}" stroke="#E4E9E1" stroke-width="1"/>`;
+    grid += `<text x="${pad.l-8}" y="${yy+3}" font-size="9" fill="#8A968A" text-anchor="end" font-family="IBM Plex Mono, monospace">$${(val/1000).toFixed(0)}k</text>`;
+  }
+  const revLine = `${x(0)},${y(0)} ${x(maxVol)},${y(maxRev)}`;
+  const costLine = `${x(0)},${y(fixedCost)} ${x(maxVol)},${y(maxCost)}`;
+  let markers = "";
+  if (breakevenVol>=0 && breakevenVol<=maxVol) {
+    const bx = x(breakevenVol), by = y(sellPrice*breakevenVol);
+    markers += `<line x1="${bx}" y1="${pad.t}" x2="${bx}" y2="${height-pad.b}" stroke="#9A6B14" stroke-width="1" stroke-dasharray="3,3"/>`;
+    markers += `<circle cx="${bx}" cy="${by}" r="4" fill="#9A6B14"/>`;
+    markers += `<text x="${bx}" y="${pad.t+10}" font-size="9.5" fill="#9A6B14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600">breakeven</text>`;
+  }
+  if (currentVol>=0 && currentVol<=maxVol) {
+    const cx2 = x(currentVol);
+    markers += `<line x1="${cx2}" y1="${pad.t}" x2="${cx2}" y2="${height-pad.b}" stroke="#6C4FD6" stroke-width="1.4" stroke-dasharray="4,2"/>`;
+    markers += `<text x="${cx2}" y="${height-pad.b+18}" font-size="9.5" fill="#6C4FD6" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="600">current</text>`;
+  }
+  const xLabel = `<text x="${(pad.l+width-pad.r)/2}" y="${height-6}" font-size="9.5" fill="#8A968A" text-anchor="middle" font-family="Inter, sans-serif">units / month →</text>`;
+  return svgWrap(width, height, grid +
+    `<polyline points="${costLine}" fill="none" stroke="#B8433F" stroke-width="2.2"/>` +
+    `<polyline points="${revLine}" fill="none" stroke="#1F6D4C" stroke-width="2.2"/>` +
+    markers);
+}
+
+let activeNav = "dashboard";
+let activeSkuKey = "bracket";
+let simState = { material:0, labor:0, overhead:0, volumeMult:0 };
+let wizStep = 0;
+let wizData = { basis:null, ohRate:null, notSure:false };
+
+/* ======================================================================
+   COMPUTE HELPERS
+   ====================================================================== */
+function specialTotal(sku){ return sku.special.reduce((s,x)=>s+x.val,0); }
+function actualTotal(sku){ return sku.material + sku.labor + sku.overhead + specialTotal(sku); }
+function stdSpecialTotal(sku){ return sku.std.special; }
+function stdTotal(sku){ return sku.std.material + sku.std.labor + sku.std.overhead + stdSpecialTotal(sku); }
+function margin(sku){ return sku.sell - actualTotal(sku); }
+function marginPct(sku){ return margin(sku)/sku.sell; }
+function variance(sku){
+  return {
+    material: sku.std.material - sku.material,
+    labor: sku.std.labor - sku.labor,
+    overhead: sku.std.overhead - sku.overhead,
+    special: stdSpecialTotal(sku) - specialTotal(sku),
+  };
+}
+function netVariance(sku){ const v = variance(sku); return v.material+v.labor+v.overhead+v.special; }
+function fmt(n,dec=2){ if(n===undefined||isNaN(n)) return "—"; const s=Math.abs(n).toFixed(dec); return (n<0?"-$":"$")+s.replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function fmtPct(n,dec=1){ return (n*100).toFixed(dec)+"%"; }
+function fmtNum(n){ return Math.round(n).toLocaleString(); }
+
+function driverOf(v){ // which variance component dominates
+  const v2 = {material:Math.abs(v.material), labor:Math.abs(v.labor), overhead:Math.abs(v.overhead), special:Math.abs(v.special)};
+  return Object.keys(v2).reduce((a,b)=>v2[a]>=v2[b]?a:b);
+}
+
+/* ======================================================================
+   NAV
+   ====================================================================== */
+const NAV_ITEMS = [
+  {id:"dashboard", label:"Dashboard", ic:"◧"},
+  {id:"skucost", label:"SKU Costs", ic:"▤"},
+  {id:"whatif", label:"What-If Simulator", ic:"⋔"},
+  {id:"ask", label:"Ask & Variance", ic:"✦"},
+  {id:"mvb", label:"Make vs Buy", ic:"⇄"},
+  {id:"setup", label:"Guided Setup", ic:"⚙"},
+];
+function renderNav(){
+  document.getElementById("sideNav").innerHTML = NAV_ITEMS.map(n=>`
+    <button class="nav-item ${activeNav===n.id?'active':''}" data-nav="${n.id}"><span class="ic">${n.ic}</span>${n.label}</button>
+  `).join("");
+}
+document.getElementById("sideNav").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".nav-item");
+  if(!btn) return;
+  activeNav = btn.dataset.nav;
+  render();
+});
+
+/* ======================================================================
+   DASHBOARD
+   ====================================================================== */
+function insightCopy(sku){
+  const v = variance(sku);
+  const net = netVariance(sku);
+  const driver = driverOf(v);
+  const driverLabel = {material:"material cost", labor:"labor efficiency", overhead:"overhead absorption", special:"scrap/other costs"}[driver];
+  const monthlyImpact = Math.abs(net) * sku.volume;
+  const daysOfOverhead = monthlyImpact / (COMPANY.monthlyOverheadPool/30);
+  const pctOfOrderValue = monthlyImpact / (sku.sell*sku.volume) * 100;
+
+  if (net < -0.005) {
+    // unfavorable (actual costs more than standard)
+    return {
+      headline: `<b>${sku.name}</b> cost <span class="bad-text">${fmt(Math.abs(net))} more per unit</span> than standard this month — mostly ${driverLabel}, not a production problem.`,
+      trend: {cls:"up-bad", text:`+${fmt(Math.abs(net))}/unit`},
+      action: `Worth a conversation with ${driver==='material'?'your supplier':'the shop floor'} before it becomes the new normal.`,
+      op: `That's about <b>${monthlyImpact>=COMPANY.monthlyOverheadPool/30 ? fmtNum(daysOfOverhead)+' day'+(daysOfOverhead>=2?'s':'')+' of overhead' : fmt(monthlyImpact)+' this month'}</b> — roughly ${pctOfOrderValue.toFixed(1)}% of this SKU's order value.`,
+    };
+  } else {
+    return {
+      headline: `<b>${sku.name}</b> cost <span class="good-text">${fmt(Math.abs(net))} less per unit</span> than standard this month — ${driverLabel} ran better than planned.`,
+      trend: {cls:"down-good", text:`-${fmt(Math.abs(net))}/unit`},
+      action: `Worth understanding what's working here — it may be repeatable on other SKUs.`,
+      op: `That's roughly <b>${fmt(monthlyImpact)}</b> of margin protected this month across ${fmtNum(sku.volume)} units.`,
+    };
+  }
+}
+
+function financeDetailRows(sku){
+  const v = variance(sku);
+  return [
+    ["Price/material variance", v.material],
+    ["Labor efficiency variance", v.labor],
+    ["Overhead absorption variance", v.overhead],
+    ["Special/other variance", v.special],
+  ];
+}
+
+let dashVarianceSku = "bracket";
+
+function renderDashboard(){
+  const skuList = Object.values(SKUS);
+  const totalMonthlyMargin = skuList.reduce((s,sku)=>s+margin(sku)*sku.volume,0);
+  const avgMarginPct = skuList.reduce((s,sku)=>s+marginPct(sku)*sku.volume*sku.sell,0) / skuList.reduce((s,sku)=>s+sku.volume*sku.sell,0);
+  const totalVarianceImpact = skuList.reduce((s,sku)=>s+netVariance(sku)*sku.volume,0);
+  const totalUnits = skuList.reduce((s,sku)=>s+sku.volume,0);
+
+  let html = `<div class="page-head"><h1>This month, at a glance</h1><p>The shape of your cost and margin story — plain-language read-outs are one click under each chart.</p></div>`;
+
+  // ---- KPI strip ----
+  html += `<div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-lab">Total monthly margin</div>
+      <div class="kpi-val" style="color:${totalMonthlyMargin>=0?'var(--good)':'var(--bad)'}">${fmt(totalMonthlyMargin,0)}</div>
+      ${sparkline([0,1,2].map(()=>1), {width:90,height:26,color:"#1F6D4C"})}
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lab">Blended margin %</div>
+      <div class="kpi-val">${fmtPct(avgMarginPct)}</div>
+      ${sparkline(MARGIN_HISTORY.bracket.map((v,i)=>(MARGIN_HISTORY.bracket[i]+MARGIN_HISTORY.housing[i]+MARGIN_HISTORY.flange[i])/3), {width:90,height:26,color:"#B8433F"})}
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lab">Variance impact / month</div>
+      <div class="kpi-val" style="color:${totalVarianceImpact>=0?'var(--good)':'var(--bad)'}">${totalVarianceImpact>=0?'+':''}${fmt(totalVarianceImpact,0)}</div>
+      <span class="tag ${totalVarianceImpact>=0?'verified':'review'}" style="margin-top:4px;">${totalVarianceImpact>=0?'favorable':'unfavorable'}</span>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lab">Units produced / month</div>
+      <div class="kpi-val">${fmtNum(totalUnits)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">across ${skuList.length} SKUs</div>
+    </div>
+  </div>`;
+
+  // ---- Chart row 1: composition + trend ----
+  const compCategories = skuList.map(sku=>({label:sku.name.split(" ")[0]+" "+sku.name.split(" ")[1], values:{material:sku.material, labor:sku.labor, overhead:sku.overhead, special:specialTotal(sku)}}));
+  const compSeries = [
+    {key:"material", name:"Material", color:COMPOSITION_COLORS.material},
+    {key:"labor", name:"Labor", color:COMPOSITION_COLORS.labor},
+    {key:"overhead", name:"Overhead", color:COMPOSITION_COLORS.overhead},
+    {key:"special", name:"Special/other", color:COMPOSITION_COLORS.special},
+  ];
+  const trendLines = skuList.map(sku=>({name:sku.name, color:SKU_COLORS[sku.id], values:MARGIN_HISTORY[sku.id]}));
+
+  html += `<div class="chart-row">
+    <div class="card">
+      <h3>Cost per unit, by SKU</h3>
+      ${stackedBarChart({categories:compCategories, series:compSeries})}
+      <div class="legend-row" style="margin-top:8px;">${compSeries.map(s=>`<span><span class="sw" style="background:${s.color}"></span>${s.name}</span>`).join("")}</div>
+    </div>
+    <div class="card">
+      <h3>Margin % trend, last 6 months</h3>
+      ${multiLineChart({lines:trendLines, labels:MONTHS})}
+      <div class="legend-row" style="margin-top:8px;">${trendLines.map(l=>`<span><span class="sw" style="background:${l.color}"></span>${l.name}</span>`).join("")}</div>
+    </div>
+  </div>`;
+
+  // ---- Chart row 2: variance waterfall ----
+  const wSku = SKUS[dashVarianceSku];
+  const v = variance(wSku);
+  const std = stdTotal(wSku);
+  let cum = std;
+  const steps = [{label:"Standard", value:std, cumStart:0, cumEnd:std, color:"#C7D0C2", isTotal:true}];
+  [["Material",-v.material],["Labor",-v.labor],["Overhead",-v.overhead],["Special/other",-v.special]].forEach(([label,val])=>{
+    const start = cum; cum += val;
+    steps.push({label, value:val, cumStart:start, cumEnd:cum, color: val<=0 ? "#1F6D4C" : "#B8433F"});
+  });
+  steps.push({label:"Actual", value:cum, cumStart:0, cumEnd:cum, color:"#1B211C", isTotal:true});
+
+  html += `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+      <h3 style="margin-bottom:0;">Why standard cost became actual cost — ${wSku.name}</h3>
+      <div class="sku-tabs" style="margin-bottom:0;">${skuList.map(s=>`<button class="sku-tab ${s.id===dashVarianceSku?'active':''}" data-varsku="${s.id}" style="padding:5px 11px;font-size:11.5px;">${s.name.split(' ')[0]}</button>`).join("")}</div>
+    </div>
+    ${waterfallChart({steps})}
+    <div class="legend-row" style="margin-top:6px;"><span><span class="sw" style="background:#1F6D4C"></span>Favorable</span><span><span class="sw" style="background:#B8433F"></span>Unfavorable</span><span><span class="sw" style="background:#C7D0C2"></span>Standard / Actual</span></div>
+  </div>`;
+
+  // ---- Condensed plain-language insight strip ----
+  html += `<h3 style="margin:22px 0 10px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);">In plain language</h3>`;
+  skuList.forEach(sku=>{
+    const ic = insightCopy(sku);
+    html += `<div class="insight-row">
+      <span class="trend-pill ${ic.trend.cls}">${ic.trend.text}</span>
+      <div class="insight-row-text">${ic.headline} <span style="color:var(--muted);">${ic.op}</span></div>
+      <span class="tag ai">✦ AI</span>
+    </div>`;
+  });
+
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll("[data-varsku]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ dashVarianceSku = btn.dataset.varsku; renderDashboard(); });
+  });
+}
+
+/* ======================================================================
+   SKU COST DETAIL
+   ====================================================================== */
+function renderSkuCost(){
+  const sku = SKUS[activeSkuKey];
+  const total = actualTotal(sku);
+  const m = margin(sku);
+  const materialPct = sku.material/total*100, laborPct = sku.labor/total*100, ohPct = sku.overhead/total*100, spPct = specialTotal(sku)/total*100;
+
+  let html = `<div class="page-head"><h1>Fully loaded cost</h1><p>Direct + indirect + special/other — every dollar accounted for, nothing folded silently into overhead.</p></div>`;
+  html += `<div class="sku-tabs">` + Object.values(SKUS).map(s=>`<button class="sku-tab ${s.id===activeSkuKey?'active':''}" data-sku="${s.id}">${s.name}</button>`).join("") + `</div>`;
+
+  html += `<div class="cost-layout">
+    <div class="card">
+      <h3>Cost build-up</h3>
+      <div class="step-row"><span class="step-num">1</span><span class="step-label">Direct material<span class="sub">Steel, fasteners, components</span></span><span class="step-val">${fmt(sku.material)}</span></div>
+      <div class="step-row"><span class="step-num">2</span><span class="step-label">Direct labor / machine<span class="sub">${sku.laborHoursPerUnit} hrs/unit</span></span><span class="step-val">${fmt(sku.labor)}</span></div>
+      <div class="step-row"><span class="step-num">3</span><span class="step-label">Indirect (overhead)<span class="sub">Allocated by labor hours, $${COMPANY.overheadRatePerHour.toFixed(2)}/hr</span></span><span class="step-val">${fmt(sku.overhead)}</span></div>
+      ${sku.special.map((s,i)=>`<div class="step-row"><span class="step-num">4${sku.special.length>1?'.'+(i+1):''}</span><span class="step-label">${s.name}<span class="sub">Special / other cost item</span></span><span class="step-val">${fmt(s.val)}</span></div>`).join("")}
+      <div class="step-row step-total"><span class="step-num">5</span><span class="step-label">Fully loaded cost / unit</span><span class="step-val">${fmt(total)}</span></div>
+      <span class="tag verified" style="margin-top:10px;">✓ Deterministic engine — not an AI estimate</span>
+    </div>
+    <div class="card">
+      <h3>Cost composition &amp; margin</h3>
+      <div style="display:flex;gap:18px;align-items:center;">
+        ${donutChart({segments:[
+          {label:"Material", value:sku.material, color:COMPOSITION_COLORS.material},
+          {label:"Labor", value:sku.labor, color:COMPOSITION_COLORS.labor},
+          {label:"Overhead", value:sku.overhead, color:COMPOSITION_COLORS.overhead},
+          {label:"Special/other", value:specialTotal(sku), color:COMPOSITION_COLORS.special},
+        ], centerLabel:fmt(total), centerSub:"per unit"})}
+        <div class="legend-row" style="flex-direction:column;gap:6px;align-items:flex-start;">
+          <span><span class="sw" style="background:${COMPOSITION_COLORS.material}"></span>Material ${materialPct.toFixed(0)}%</span>
+          <span><span class="sw" style="background:${COMPOSITION_COLORS.labor}"></span>Labor ${laborPct.toFixed(0)}%</span>
+          <span><span class="sw" style="background:${COMPOSITION_COLORS.overhead}"></span>Overhead ${ohPct.toFixed(0)}%</span>
+          <span><span class="sw" style="background:${COMPOSITION_COLORS.special}"></span>Special/other ${spPct.toFixed(0)}%</span>
+        </div>
+      </div>
+      <div class="margin-line">
+        <span style="font-size:12.5px;color:var(--muted);">Margin / unit</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:${m>=0?'var(--good)':'var(--bad)'}">${fmt(m)} · ${fmtPct(marginPct(sku))}</span>
+      </div>
+      <div class="margin-line" style="border-top:none;padding-top:6px;">
+        <span style="font-size:12.5px;color:var(--muted);">Monthly margin (${fmtNum(sku.volume)} units)</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">${fmt(m*sku.volume,0)}</span>
+      </div>
+      <h3 style="margin-top:18px;">Margin % trend — last 6 months</h3>
+      ${multiLineChart({lines:[{name:sku.name, color:SKU_COLORS[sku.id], values:MARGIN_HISTORY[sku.id]}], labels:MONTHS, height:170})}
+    </div>
+  </div>`;
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll("[data-sku]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ activeSkuKey = btn.dataset.sku; renderSkuCost(); });
+  });
+}
+
+/* ======================================================================
+   WHAT-IF SIMULATOR
+   ====================================================================== */
+function renderWhatIf(){
+  const sku = SKUS[activeSkuKey];
+  const matAdj = sku.material * (1+simState.material/100);
+  const labAdj = sku.labor * (1+simState.labor/100);
+  const volAdj = sku.volume * (1+simState.volumeMult/100);
+  // overhead pool stays fixed; rate per unit changes with volume (absorption) and with overhead % shock (spending)
+  const ohPoolAdj = COMPANY.monthlyOverheadPool * (1+simState.overhead/100);
+  const ohPerUnitAdj = ohPoolAdj / volAdj * (sku.laborHoursPerUnit * COMPANY.monthlyLaborHours / sku.volume); // keep proportion consistent with this SKU's share; simplified
+  const ohSimple = sku.overhead * (1+simState.overhead/100) * (sku.volume/volAdj); // simpler, stable approximation
+  const totalAdj = matAdj + labAdj + ohSimple + specialTotal(sku);
+  const marginAdj = sku.sell - totalAdj;
+  const variableCost = matAdj + labAdj + specialTotal(sku);
+  const fixedCostForSku = sku.overhead * sku.volume * (1+simState.overhead/100);
+  const breakevenVol = fixedCostForSku / (sku.sell - variableCost);
+
+  let html = `<div class="page-head"><h1>What-if simulator</h1><p>Same calculation engine as your standard cost — just called with overridden inputs, recalculated instantly.</p></div>`;
+  html += `<div class="sku-tabs">` + Object.values(SKUS).map(s=>`<button class="sku-tab ${s.id===activeSkuKey?'active':''}" data-sku="${s.id}">${s.name}</button>`).join("") + `</div>`;
+  html += `<div class="sim-layout">
+    <div class="card">
+      <h3>Adjust assumptions</h3>
+      <div class="slider-block"><div class="lbl"><span>Material price</span><b>${simState.material>=0?'+':''}${simState.material}%</b></div><input type="range" id="simMaterial" min="-20" max="30" value="${simState.material}"></div>
+      <div class="slider-block"><div class="lbl"><span>Labor rate</span><b>${simState.labor>=0?'+':''}${simState.labor}%</b></div><input type="range" id="simLabor" min="-20" max="30" value="${simState.labor}"></div>
+      <div class="slider-block"><div class="lbl"><span>Overhead rate</span><b>${simState.overhead>=0?'+':''}${simState.overhead}%</b></div><input type="range" id="simOverhead" min="-20" max="30" value="${simState.overhead}"></div>
+      <div class="slider-block"><div class="lbl"><span>Monthly volume</span><b>${simState.volumeMult>=0?'+':''}${simState.volumeMult}%</b></div><input type="range" id="simVolume" min="-30" max="50" value="${simState.volumeMult}"></div>
+      <div class="note-box"><span class="tag ai" style="margin-bottom:6px;">✦ AI</span><br>Volume changes the overhead absorbed per unit even if nothing else moves — the same equipment cost spreads over more or fewer units.</div>
+    </div>
+    <div class="card">
+      <h3>Recalculated result — ${sku.name}</h3>
+      <div class="sim-result"><span class="lab">Fully loaded cost / unit</span><span class="val">${fmt(totalAdj)}</span></div>
+      <div class="sim-result"><span class="lab">Margin / unit</span><span class="val" style="color:${marginAdj>=0?'var(--good)':'var(--bad)'}">${fmt(marginAdj)}</span></div>
+      <div class="sim-result"><span class="lab">Margin %</span><span class="val">${fmtPct(marginAdj/sku.sell)}</span></div>
+      <div class="sim-result"><span class="lab">Breakeven volume / month</span><span class="val">${fmtNum(breakevenVol)} units</span></div>
+      <div class="sim-result"><span class="lab">Monthly margin (at ${fmtNum(volAdj)} units)</span><span class="val">${fmt(marginAdj*volAdj,0)}</span></div>
+      <span class="tag verified" style="margin-top:12px;">✓ Deterministic — same engine as standard cost</span>
+      <h3 style="margin-top:18px;">Revenue vs. cost, by volume</h3>
+      ${cvpChart({maxVol: Math.max(breakevenVol,volAdj)*1.6, sellPrice:sku.sell, fixedCost: fixedCostForSku, variableCostPerUnit: variableCost, currentVol: volAdj, breakevenVol: breakevenVol})}
+      <div class="legend-row" style="margin-top:6px;"><span><span class="sw" style="background:#1F6D4C"></span>Revenue</span><span><span class="sw" style="background:#B8433F"></span>Total cost</span></div>
+    </div>
+  </div>`;
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll("[data-sku]").forEach(btn=>{ btn.addEventListener("click", ()=>{ activeSkuKey = btn.dataset.sku; renderWhatIf(); }); });
+  ["simMaterial","simLabor","simOverhead","simVolume"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", (e)=>{
+      const key = {simMaterial:"material",simLabor:"labor",simOverhead:"overhead",simVolume:"volumeMult"}[id];
+      simState[key] = parseInt(e.target.value,10);
+      renderWhatIf();
+    });
+  });
+}
+
+/* ======================================================================
+   ASK & VARIANCE (persistent conversational layer)
+   ====================================================================== */
+let chatMessages = [];
+function renderAskPage(){
+  let html = `<div class="page-head"><h1>Ask &amp; variance</h1><p>The same conversational layer lives in the bar at the top of every page — this is its home view.</p></div>`;
+  html += `<div class="chat-wrap" id="chatWrap">`;
+  if (chatMessages.length===0){
+    html += `<div class="chip-row">
+      <div class="chip" data-q="Why did Bracket A-42 get more expensive?">Why did Bracket A-42 get more expensive?</div>
+      <div class="chip" data-q="Why did Housing B-19 cost more this month?">Why did Housing B-19 cost more?</div>
+      <div class="chip" data-q="What's driving the Flange C-07 improvement?">What's driving the Flange C-07 improvement?</div>
+    </div>`;
+  }
+  chatMessages.forEach(m=>{ html += m; });
+  html += `</div>`;
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click", ()=>askQuery(c.dataset.q)));
+  document.querySelectorAll("[data-chatdetail]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const el = document.getElementById("cfd-"+btn.dataset.chatdetail);
+      el.classList.toggle("open");
+      btn.textContent = el.classList.contains("open") ? "Hide finance detail" : "Show finance detail";
+    });
+  });
+  document.getElementById("chatWrap").scrollTop = 999999;
+}
+
+function findSkuByName(text){
+  text = text.toLowerCase();
+  return Object.values(SKUS).find(s=>text.includes(s.name.toLowerCase()) || text.includes(s.id));
+}
+
+function askQuery(qRaw){
+  chatMessages.push(`<div class="chat-msg user"><div class="bubble">${qRaw}</div></div>`);
+  const q = qRaw.toLowerCase();
+  let sku = findSkuByName(q);
+
+  setTimeout(()=>{
+    if (/why|expensive|cost more|driving|improvement/.test(q) && sku) {
+      const v = variance(sku);
+      const net = netVariance(sku);
+      const driver = driverOf(v);
+      const driverLabel = {material:"material price", labor:"labor efficiency", overhead:"overhead absorption", special:"scrap/other costs"}[driver];
+      const monthlyImpact = Math.abs(net)*sku.volume;
+      const daysOfOverhead = monthlyImpact/(COMPANY.monthlyOverheadPool/30);
+      const pctOrder = monthlyImpact/(sku.sell*sku.volume)*100;
+      const unfav = net < 0;
+      const std = stdTotal(sku);
+      let cum = std;
+      const wsteps = [{label:"Standard", value:std, cumStart:0, cumEnd:std, color:"#C7D0C2", isTotal:true}];
+      [["Material",-v.material],["Labor",-v.labor],["Overhead",-v.overhead],["Special",-v.special]].forEach(([label,val])=>{
+        const start = cum; cum += val;
+        wsteps.push({label, value:val, cumStart:start, cumEnd:cum, color: val<=0 ? "#1F6D4C" : "#B8433F"});
+      });
+      wsteps.push({label:"Actual", value:cum, cumStart:0, cumEnd:cum, color:"#1B211C", isTotal:true});
+      const chatId = sku.id+"-"+chatMessages.length;
+      chatMessages.push(`<div class="chat-msg ai"><div class="tag-row"><span class="tag ai">✦ AI, reading the engine's variance output</span></div>
+        <div class="bubble">
+          ${sku.name} ${unfav?'cost':'came in'} <b style="color:${unfav?'var(--bad)':'var(--good)'}">${fmt(Math.abs(net))} ${unfav?'more':'less'} per unit</b> than standard this month — mostly <b>${driverLabel}</b>, ${driver==='labor'||driver==='overhead' ? 'not a purchasing issue' : 'not a shop-floor efficiency issue'}.
+          <div class="op-compare">That's roughly ${monthlyImpact>=COMPANY.monthlyOverheadPool/30 ? fmtNum(daysOfOverhead)+' day'+(daysOfOverhead>=2?'s':'')+" of your total factory overhead" : fmt(monthlyImpact)+" this month"} — about ${pctOrder.toFixed(1)}% of this SKU's order value.</div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+            <button class="detail-toggle" data-chatdetail="${chatId}">Show finance detail</button>
+          </div>
+          <div class="finance-detail" id="cfd-${chatId}">
+            ${waterfallChart({width:460, height:200, steps:wsteps})}
+            <span class="tag verified" style="margin-top:8px;">✓ Engine-computed, not narrated</span>
+          </div>
+        </div></div>`);
+    } else if (/breakeven/.test(q)) {
+      const s = sku || SKUS.bracket;
+      const variableCost = s.material+s.labor+specialTotal(s);
+      const be = COMPANY.monthlyOverheadPool/(s.sell-variableCost);
+      chatMessages.push(`<div class="chat-msg ai"><div class="tag-row"><span class="tag ai">✦ AI</span></div><div class="bubble">${s.name} needs about <b>${fmtNum(be)} units/month</b> to cover the shop's overhead at its current price and cost. You're currently running ${fmtNum(s.volume)}/month.</div></div>`);
+    } else if (/make.?vs.?buy|outsource|supplier/.test(q)) {
+      chatMessages.push(`<div class="chat-msg ai"><div class="tag-row"><span class="tag ai">✦ AI</span></div><div class="bubble">Head to <b>Make vs Buy</b> in the sidebar — drop in a supplier quote and I'll compare it against the engine's fully loaded in-house cost.</div></div>`);
+    } else {
+      chatMessages.push(`<div class="chat-msg ai"><div class="tag-row"><span class="tag ai">✦ AI</span></div><div class="bubble">I can explain why a SKU's cost moved, compute breakeven, or point you to a make-vs-buy comparison. Try naming a SKU — Bracket A-42, Housing B-19, or Flange C-07.</div></div>`);
+    }
+    activeNav = "ask";
+    renderNav();
+    renderAskPage();
+  }, 380);
+  activeNav = "ask";
+  renderNav();
+  renderAskPage();
+}
+
+document.getElementById("askBtn").addEventListener("click", ()=>{
+  const inp = document.getElementById("askInput");
+  if(!inp.value.trim()) return;
+  askQuery(inp.value.trim());
+  inp.value = "";
+});
+document.getElementById("askInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") document.getElementById("askBtn").click(); });
+
+/* ======================================================================
+   MAKE VS BUY
+   ====================================================================== */
+let mvbQuote = 18.90;
+function renderMvb(){
+  const sku = SKUS[activeSkuKey];
+  const inHouse = actualTotal(sku);
+  const diff = mvbQuote - inHouse;
+  const keepInHouse = diff > 0;
+  let html = `<div class="page-head"><h1>Make vs buy</h1><p>Your fully loaded in-house cost, compared against a manually entered supplier quote — no new data pipeline required.</p></div>`;
+  html += `<div class="sku-tabs">` + Object.values(SKUS).map(s=>`<button class="sku-tab ${s.id===activeSkuKey?'active':''}" data-sku="${s.id}">${s.name}</button>`).join("") + `</div>`;
+  html += `<div class="mvb-grid">
+    <div class="mvb-card">
+      <h4>In-house (engine-computed)</h4>
+      <div class="amt">${fmt(inHouse)}</div>
+      <span class="tag verified" style="margin-top:10px;">✓ Fully loaded cost</span>
+    </div>
+    <div class="mvb-card">
+      <h4>Supplier quote (you enter)</h4>
+      <input id="mvbInput" type="text" value="${mvbQuote.toFixed(2)}">
+      <div><span class="tag ai" style="margin-top:10px;">✎ Manual entry</span></div>
+    </div>
+  </div>`;
+  html += `<div class="recommend-banner ${keepInHouse?'keep':'switch'}">
+    ${keepInHouse
+      ? `Keep it in-house — outsourcing would cost <b>${fmt(diff)} more per unit</b>, or about ${fmt(diff*sku.volume,0)}/month at current volume.`
+      : `Outsourcing looks cheaper — by <b>${fmt(Math.abs(diff))} per unit</b>, or about ${fmt(Math.abs(diff)*sku.volume,0)}/month. Worth checking supplier quality and lead time before switching.`}
+  </div>`;
+  html += `<div class="card" style="margin-top:16px;">
+    <h3>Cost per unit — in-house vs. supplier</h3>
+    ${stackedBarChart({categories:[
+        {label:"In-house", values:{material:sku.material, labor:sku.labor, overhead:sku.overhead, special:specialTotal(sku)}},
+        {label:"Supplier quote", values:{material:mvbQuote, labor:0, overhead:0, special:0}},
+      ], series:[
+        {key:"material", name:"In-house: material · Supplier: quoted price", color:COMPOSITION_COLORS.material},
+        {key:"labor", name:"Labor", color:COMPOSITION_COLORS.labor},
+        {key:"overhead", name:"Overhead", color:COMPOSITION_COLORS.overhead},
+        {key:"special", name:"Special/other", color:COMPOSITION_COLORS.special},
+      ]})}
+    <div class="legend-row" style="margin-top:8px;">
+      <span><span class="sw" style="background:${COMPOSITION_COLORS.material}"></span>Material / quoted price</span>
+      <span><span class="sw" style="background:${COMPOSITION_COLORS.labor}"></span>Labor</span>
+      <span><span class="sw" style="background:${COMPOSITION_COLORS.overhead}"></span>Overhead</span>
+      <span><span class="sw" style="background:${COMPOSITION_COLORS.special}"></span>Special/other</span>
+    </div>
+  </div>`;
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll("[data-sku]").forEach(btn=>{ btn.addEventListener("click", ()=>{ activeSkuKey = btn.dataset.sku; renderMvb(); }); });
+  const mvbInput = document.getElementById("mvbInput");
+  mvbInput.addEventListener("change", (e)=>{ const v = parseFloat(e.target.value); if(!isNaN(v)){ mvbQuote = v; } renderMvb(); });
+}
+
+/* ======================================================================
+   GUIDED SETUP (wizard)
+   ====================================================================== */
+function renderSetup(){
+  let html = `<div class="page-head"><h1>Guided setup</h1><p>A structured interview builds your cost structure — company-level once, then a quick pass per SKU.</p></div>`;
+  html += `<div class="wiz-card"><div class="wiz-progress">${[0,1,2].map(i=>`<div class="${i<=wizStep?'done':''}"></div>`).join("")}</div>`;
+
+  if (wizStep === 0) {
+    html += `<div class="wiz-ai-line"><span class="spark">✦</span><span>Let's set up how your factory overhead gets allocated to products.</span></div>
+    <div class="wiz-q">How do you currently spread overhead across what you make?</div>
+    <div class="wiz-options">
+      <button class="wiz-opt" data-opt="labor">By labor hours</button>
+      <button class="wiz-opt" data-opt="machine">By machine hours</button>
+      <button class="wiz-opt" data-opt="flat">A flat % of direct cost</button>
+      <button class="wiz-opt" data-opt="unsure">I'm not sure</button>
+    </div>`;
+  } else if (wizStep === 1) {
+    if (wizData.notSure) {
+      html += `<div class="wiz-ai-line"><span class="spark">✦</span><span>No problem — I can back into a rate for you from two numbers.</span></div>
+      <div class="wiz-q">What's your total monthly overhead spend, and total monthly labor hours across the shop?</div>
+      <div class="wiz-input-row">
+        <input id="wizOhSpend" type="text" placeholder="Monthly overhead spend, e.g. 42000">
+        <input id="wizOhHours" type="text" placeholder="Monthly labor hours, e.g. 2450">
+      </div>
+      <div class="wiz-btn-row"><button class="wiz-btn primary" id="wizComputeRate">Calculate rate</button></div>`;
+    } else {
+      html += `<div class="wiz-ai-line"><span class="spark">✦</span><span>Got it — allocating overhead by <b>${ {labor:"labor hours",machine:"machine hours",flat:"flat % of direct cost"}[wizData.basis] }</b>.</span></div>
+      <div class="wiz-q">Now let's do a quick pass for one SKU. For Bracket A-42, roughly what does the direct material cost per unit?</div>
+      <div class="wiz-input-row"><input id="wizMaterial" type="text" placeholder="e.g. 8.40" value="8.40"></div>
+      <div class="wiz-btn-row"><button class="wiz-btn primary" id="wizNextFromSku">Continue</button></div>`;
+    }
+  } else if (wizStep === 2) {
+    html += `<div class="wiz-ai-line"><span class="spark">✦</span><span>Here's the draft — nothing is saved yet.</span></div>
+    <div class="wiz-draft">
+      <span class="tag ai">✦ AI-proposed draft</span>
+      <div style="display:flex;gap:16px;align-items:center;margin-top:10px;">
+        ${donutChart({size:110, segments:[
+          {label:"Material", value:parseFloat(wizData.material||8.40), color:COMPOSITION_COLORS.material},
+          {label:"Labor", value:5.20, color:COMPOSITION_COLORS.labor},
+          {label:"Overhead", value:3.10, color:COMPOSITION_COLORS.overhead},
+          {label:"Special/other", value:0.55, color:COMPOSITION_COLORS.special},
+        ], centerLabel:fmt(parseFloat(wizData.material||8.40)+8.85), centerSub:"draft/unit"})}
+        <div style="font-size:13px;line-height:1.7;">
+          Overhead basis: <b>${wizData.notSure ? "labor hours (calculated: $"+wizData.ohRate+"/hr)" : {labor:"labor hours",machine:"machine hours",flat:"flat % of direct cost"}[wizData.basis]}</b><br>
+          Bracket A-42 direct material: <b>$${wizData.material || '8.40'}/unit</b><br>
+          Everything else defaults to your existing standard cost until you edit it.
+        </div>
+      </div>
+    </div>
+    <div class="wiz-btn-row">
+      <button class="wiz-btn primary" id="wizConfirm">Confirm &amp; activate</button>
+      <button class="wiz-btn ghost" id="wizEdit">Edit before saving</button>
+    </div>
+    <div id="wizConfirmed" style="display:none;margin-top:14px;">
+      <span class="tag verified">✓ Activated — now part of your Cost Model Store</span>
+    </div>`;
+  }
+  html += `</div>`;
+  document.getElementById("content").innerHTML = html;
+
+  document.querySelectorAll("[data-opt]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      wizData.basis = btn.dataset.opt;
+      wizData.notSure = btn.dataset.opt === "unsure";
+      wizStep = 1;
+      renderSetup();
+    });
+  });
+  const computeBtn = document.getElementById("wizComputeRate");
+  if (computeBtn) computeBtn.addEventListener("click", ()=>{
+    const spend = parseFloat(document.getElementById("wizOhSpend").value) || COMPANY.monthlyOverheadPool;
+    const hours = parseFloat(document.getElementById("wizOhHours").value) || COMPANY.monthlyLaborHours;
+    wizData.ohRate = (spend/hours).toFixed(2);
+    wizData.basis = "labor";
+    wizStep = 2;
+    renderSetup();
+  });
+  const nextBtn = document.getElementById("wizNextFromSku");
+  if (nextBtn) nextBtn.addEventListener("click", ()=>{
+    wizData.material = document.getElementById("wizMaterial").value || "8.40";
+    wizStep = 2;
+    renderSetup();
+  });
+  const confirmBtn = document.getElementById("wizConfirm");
+  if (confirmBtn) confirmBtn.addEventListener("click", ()=>{
+    document.getElementById("wizConfirmed").style.display = "block";
+    confirmBtn.disabled = true;
+    document.getElementById("wizEdit").disabled = true;
+  });
+  const editBtn = document.getElementById("wizEdit");
+  if (editBtn) editBtn.addEventListener("click", ()=>{ wizStep = 0; wizData = {basis:null, ohRate:null, notSure:false}; renderSetup(); });
+}
+
+/* ======================================================================
+   RENDER ORCHESTRATION
+   ====================================================================== */
+function render(){
+  renderNav();
+  if (activeNav === "dashboard") renderDashboard();
+  else if (activeNav === "skucost") renderSkuCost();
+  else if (activeNav === "whatif") renderWhatIf();
+  else if (activeNav === "ask") renderAskPage();
+  else if (activeNav === "mvb") renderMvb();
+  else if (activeNav === "setup") renderSetup();
+}
+
+document.getElementById("askInput").addEventListener("focus", ()=>{});
+render();
+</script>
+</body>
+</html>

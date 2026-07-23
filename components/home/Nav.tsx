@@ -59,12 +59,12 @@ export default function Nav() {
         backdropFilter: "saturate(180%) blur(20px)",
       }}
     >
-      <div className="mx-auto flex h-[68px] max-w-[1120px] items-center gap-6 px-[clamp(22px,5vw,60px)]">
+      <div className="mx-auto flex h-[68px] max-w-[1120px] items-center gap-3 px-[clamp(22px,5vw,60px)]">
         <Link href="/" aria-label="Rockship home" className="shrink-0">
           <Logo height={22} />
         </Link>
 
-        <div className="hidden gap-px overflow-x-auto lg:flex">
+        <div className="hidden gap-px lg:flex">
           {TABS.map((tab) => {
             const active = onHome && current === tab.href;
             return (
@@ -72,7 +72,7 @@ export default function Nav() {
                 key={tab.href}
                 href={onHome ? tab.href : `/${tab.href}`}
                 aria-current={active ? "true" : undefined}
-                className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
+                className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
                 style={{
                   color: active ? "var(--rk-accent)" : "var(--rk-sec)",
                   background: active ? "var(--rk-alt)" : "transparent",
@@ -85,7 +85,7 @@ export default function Nav() {
           <Link
             href="/events"
             aria-current={pathname === "/events" ? "page" : undefined}
-            className="whitespace-nowrap rounded-full px-3.5 py-2 text-[15px] transition-colors hover:text-[color:var(--rk-ink)]"
+            className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
             style={
               pathname === "/events"
                 ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }
@@ -93,6 +93,18 @@ export default function Nav() {
             }
           >
             Events
+          </Link>
+          <Link
+            href="/demos"
+            aria-current={pathname.startsWith("/demos") ? "page" : undefined}
+            className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
+            style={
+              pathname.startsWith("/demos")
+                ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }
+                : { color: "var(--rk-sec)" }
+            }
+          >
+            Demos
           </Link>
         </div>
 
