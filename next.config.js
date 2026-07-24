@@ -21,6 +21,24 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  // The previous rockship.co lived at a different set of URLs, and Google still
+  // serves them: /blogs (the "Knowledge Hub"), /blogs/<Title>-<hash> articles,
+  // /talents and /talent-as-a-service. Every one of them 404s on this site,
+  // which is where the "404: This page could not be found." pageviews in GA4
+  // come from. The old article slugs have no counterpart here, so the whole
+  // /blogs tree lands on the blog index rather than a specific post.
+  async redirects() {
+    return [
+      { source: '/blogs', destination: '/blog', permanent: true },
+      { source: '/blogs/:path*', destination: '/blog', permanent: true },
+      { source: '/knowledge-hub', destination: '/blog', permanent: true },
+      { source: '/talents', destination: '/#services', permanent: true },
+      { source: '/talent-as-a-service', destination: '/#services', permanent: true },
+      { source: '/contact-us', destination: '/contact', permanent: true },
+      { source: '/about-us', destination: '/#team', permanent: true },
+    ]
+  },
+
   // Optimize package imports for better tree-shaking
   experimental: {
     // TypeScript 7 ships the Go compiler and dropped lib/typescript.js, the JS
