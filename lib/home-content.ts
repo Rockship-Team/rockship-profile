@@ -46,7 +46,7 @@ export const OUR_HOURS = { start: 9, end: 18 } as const;
 export const HERO = {
   eyebrow: "Ho Chi Minh City · Singapore · Working worldwide",
   /** Split so a single phrase can carry the one accent colour. */
-  headlineLead: "Senior engineers who",
+  headlineLead: "AI-Native Engineering Team who",
   headlineAccent: "ship outcomes",
   headlineTail: ", not tickets.",
   sub: "We place AI-native senior product engineers — fluent in Spec-Driven Development, Harness Engineering, and the rest of the modern AI toolchain — to build your production-ready idea in weeks, not months.",
@@ -64,7 +64,7 @@ export const SERVICES: Service[] = [
   {
     index: "01",
     title: "Team augmentation",
-    body: "Senior engineers join your repo, your standups, your on-call.",
+    body: "Our AI-Native Engineering Team joins your repo, your standups, your on-call.",
     terms: "From one engineer · month to month",
   },
   {

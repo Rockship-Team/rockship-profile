@@ -16,7 +16,7 @@ import WhyRockship from "@/components/home/WhyRockship";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Rockship — Senior Engineering Teams for Companies Building Internationally",
+  title: "Rockship — AI-Native Engineering Teams for Companies Building Internationally",
   description:
     "Rockship places senior product engineers with teams in the US, Europe, Singapore and Japan. Team augmentation and dedicated product teams, from architecture to production.",
 };

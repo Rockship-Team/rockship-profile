@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   // warning called out in the rebrand brief.
   metadataBase: new URL("https://rockship.co"),
   title: {
-    default: "Rockship — Senior Engineering Teams for Companies Building Internationally",
+    default: "Rockship — AI-Native Engineering Teams for Companies Building Internationally",
     template: "%s | Rockship",
   },
   description:
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "team augmentation",
     "staff augmentation",
     "dedicated development team",
-    "hire senior engineers",
+    "hire an AI-native engineering team",
     "software engineering partner",
     "Rockship",
     "Vietnam software development",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://rockship.co",
-    title: "Rockship — Senior engineers who ship outcomes, not tickets",
+    title: "Rockship — AI-Native Engineering Team who ship outcomes, not tickets",
     description:
       "Senior product engineers placed with teams in the US, Europe, Singapore and Japan — from architecture to production.",
     siteName: "Rockship",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rockship — Senior engineers who ship outcomes, not tickets",
+    title: "Rockship — AI-Native Engineering Team who ship outcomes, not tickets",
     description:
       "Senior product engineers placed with teams in the US, Europe, Singapore and Japan.",
     creator: "@rockshipai",
