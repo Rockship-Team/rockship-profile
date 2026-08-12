@@ -10,7 +10,7 @@ export default function Services() {
           index="01"
           eyebrow="Services"
           headline="Three ways to work with us."
-          intro="Senior engineers only. No junior bench, no account managers."
+          intro="AI-Native Engineering Team only. No junior bench, no account managers."
         />
       </Reveal>
 

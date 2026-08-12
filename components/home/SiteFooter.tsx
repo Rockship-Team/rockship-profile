@@ -31,7 +31,7 @@ export default function SiteFooter() {
         <div>
           <Logo height={18} />
           <p className="mt-3 max-w-[26ch] text-[13px]" style={{ color: "var(--rk-ter)" }}>
-            Senior engineering teams for companies building internationally.
+            AI-Native Engineering Teams for companies building internationally.
           </p>
         </div>
 

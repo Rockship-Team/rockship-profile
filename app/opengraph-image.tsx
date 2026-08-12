@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Rockship — Senior engineers who ship outcomes, not tickets";
+export const alt = "Rockship — AI-Native Engineering Team who ship outcomes, not tickets";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,7 +40,7 @@ export default async function OpenGraphImage() {
             maxWidth: 940,
           }}
         >
-          <span>Senior engineers who</span>
+          <span>AI-Native Engineering Team who</span>
           <span style={{ color: "#FF4D00" }}>ship outcomes,</span>
           <span>not tickets.</span>
         </div>
