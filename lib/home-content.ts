@@ -211,7 +211,7 @@ export const TEAM: Person[] = [
   },
   {
     name: "Hung Tran",
-    role: "CEO",
+    role: "Managing Director",
     photo: "/Hung.png",
     previously: null,
   },
@@ -219,6 +219,13 @@ export const TEAM: Person[] = [
     name: "Quan Do",
     role: "CTO",
     photo: "/Quan.png",
+    previously: null,
+  },
+  {
+    name: "An Nguyen",
+    role: "Head of Product",
+    photo: "/AnNguyen.jpg",
+    photoPosition: "70% top",
     previously: null,
   },
 ];
