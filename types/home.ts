@@ -49,6 +49,8 @@ export interface Person {
   name: string;
   role: string;
   photo: string;
+  /** CSS object-position for the portrait crop. Defaults to "center top". */
+  photoPosition?: string;
   /** "Previously at X" — the credential line. Null until supplied. */
   previously: string | null;
   /** True when the name or role itself is still a placeholder. */
