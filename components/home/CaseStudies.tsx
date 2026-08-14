@@ -12,7 +12,7 @@ export default function CaseStudies() {
           index="04"
           eyebrow="Case studies"
           headline="What we've put into production."
-          intro="Client names withheld under NDA. Metrics measured by the client."
+          intro="150+ client projects across various industries. Please contact us for specific use cases for your needs. Client names withheld under NDA. Metrics measured by the client."
         />
       </Reveal>
 
