@@ -57,7 +57,7 @@ export const PROOF: Metric[] = [
   { value: "5", label: "Systems in production, all still running" },
   { value: "5", label: "Client markets — US, EU, SG, JP, VN" },
   { value: "92.5%", label: "Manual workload removed, best result" },
-  { value: "24", label: "Engineers, avg. 7 years in production", unverified: true },
+  { value: "100+", label: "Engineers, avg. 7 years in production" },
 ];
 
 export const SERVICES: Service[] = [
