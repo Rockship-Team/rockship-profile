@@ -17,7 +17,12 @@ export default function Services() {
       <RevealGroup className="mt-[clamp(48px,6vw,80px)] grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
         {SERVICES.map((service) => (
           <RevealItem key={service.index} className="h-full">
-            <article className="rk-card flex h-full flex-col p-8">
+            <article
+              className={`rk-card relative flex h-full flex-col p-8 ${service.highlight ? "rk-card--highlight" : ""}`}
+            >
+              {service.highlight ? (
+                <span className="rk-badge">Most popular</span>
+              ) : null}
               <span
                 className="text-[44px] font-semibold leading-none tabular-nums"
                 style={{ color: "color-mix(in srgb, var(--rk-ink) 14%, transparent)" }}

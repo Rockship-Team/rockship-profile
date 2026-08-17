@@ -105,7 +105,7 @@ export default function ContactPage() {
                     Email Us
                   </p>
                   <p className="text-lg font-medium group-hover:text-rockship-accent transition-colors">
-                    hans.dang@rockship.co
+                    info@rockship.co
                   </p>
                 </div>
               </div>

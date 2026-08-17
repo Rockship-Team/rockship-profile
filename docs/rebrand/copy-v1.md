@@ -190,7 +190,7 @@ Ideally add 1–2 senior engineers, not just leadership. The buyer is hiring eng
 > **Heading:** Tell us what you're trying to ship
 > **Body:** A 30-minute call with an engineer, not a salesperson. You'll get a written view on the team shape we'd recommend — whether you work with us or not.
 > **Primary button:** Book a 30-minute call
-> **Secondary:** hans.dang@rockship.co
+> **Secondary:** info@rockship.co
 > **Fine print:** Ho Chi Minh City · Replies within one business day
 
 **Recommendation:** replace the contact form with a real Cal.com or Calendly embed. An international buyer three timezones away will not wait a day for a reply to a form. The brief requires "at least one clear, working CTA" — a booking widget satisfies it far better than a form that emails `rockship.ops@gmail.com`.

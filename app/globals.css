@@ -772,6 +772,34 @@ article.prose blockquote {
 }
 .rk-alt .rk-card { background: var(--rk-paper); }
 
+/* Promoted service card: tinted accent background + border, set apart from
+   the otherwise monochrome card set. Paired with the "Most popular" badge. */
+.rk-card--highlight {
+  background: color-mix(in srgb, var(--rk-accent) 10%, var(--rk-paper));
+  border-color: color-mix(in srgb, var(--rk-accent) 45%, transparent);
+}
+.rk-card--highlight:hover {
+  border-color: var(--rk-accent);
+}
+
+.rk-badge {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 980px;
+  background: var(--rk-accent);
+  color: var(--rk-accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--rk-accent) 60%, transparent);
+}
+
 /* Case-study imagery: desaturated by default so the page stays monochrome,
    full colour on hover. */
 .rk-shot img {

@@ -10,6 +10,7 @@
  */
 
 import type {
+  Advisor,
   CareerPillar,
   CaseStudy,
   Differentiator,
@@ -23,7 +24,7 @@ import type {
 } from "@/types/home";
 
 export const CONTACT = {
-  email: "hans.dang@rockship.co",
+  email: "info@rockship.co",
   whatsapp: "https://wa.me/84865791311",
   phoneLabel: "+84 865 791 311",
   linkedin: "https://www.linkedin.com/company/rockship",
@@ -70,8 +71,9 @@ export const SERVICES: Service[] = [
   {
     index: "02",
     title: "Dedicated product teams",
-    body: "A pod that owns a product surface from discovery to launch — and keeps operating it.",
-    terms: "3–8 people · owns delivery",
+    body: "Cross-functional teams (AI engineers, data scientists, product managers) that own your AI product end-to-end, from discovery and build to launch and continuous optimization. We usually partner long-term (1+ years) with most clients to continuously scale your product and maximize ROI.",
+    terms: "3–15 people · own delivery",
+    highlight: true,
   },
   {
     index: "03",
@@ -227,6 +229,16 @@ export const TEAM: Person[] = [
     photo: "/AnNguyen.jpg",
     photoPosition: "70% top",
     previously: null,
+  },
+];
+
+export const ADVISORS: Advisor[] = [
+  {
+    name: "Dr. Wray Buntine",
+    role: "Chief AI Advisor",
+    photo: "/WrayBuntine.jpg",
+    subtext:
+      "Full Professor of Data Science and AI at Monash University, top 0.75% most-cited AI researchers globally",
   },
 ];
 
