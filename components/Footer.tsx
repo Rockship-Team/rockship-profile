@@ -46,12 +46,12 @@ export const Footer = () => {
           </p>
           <div className="flex flex-col gap-3 mb-6">
             <a
-              href="mailto:hans.dang@rockship.co"
+              href="mailto:info@rockship.co"
               className="flex items-center gap-2 link-hover"
-              aria-label="Email us at hans.dang@rockship.co"
+              aria-label="Email us at info@rockship.co"
             >
               <Mail size={18} aria-hidden="true" />
-              <span>hans.dang@rockship.co</span>
+              <span>info@rockship.co</span>
             </a>
             <WhatsAppLink />
           </div>

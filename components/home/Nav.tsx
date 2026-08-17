@@ -14,6 +14,7 @@ const TABS = [
   { href: "#work", label: "Case studies" },
   { href: "#career", label: "Career" },
   { href: "#team", label: "Team" },
+  { href: "#advisors", label: "Advisors" },
   { href: "#faq", label: "FAQ" },
 ];
 

@@ -18,6 +18,8 @@ export interface Service {
   title: string;
   body: string;
   terms: string;
+  /** True to visually promote this card (accent background + "Most popular" badge). */
+  highlight?: boolean;
 }
 
 export interface Differentiator {
@@ -55,6 +57,16 @@ export interface Person {
   previously: string | null;
   /** True when the name or role itself is still a placeholder. */
   unverified?: boolean;
+}
+
+export interface Advisor {
+  name: string;
+  role: string;
+  photo: string;
+  /** CSS object-position for the portrait crop. Defaults to "center top". */
+  photoPosition?: string;
+  /** Short credential line shown under the name and role. */
+  subtext: string;
 }
 
 export interface FaqItem {
