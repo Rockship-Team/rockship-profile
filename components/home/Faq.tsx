@@ -7,7 +7,7 @@ export default function Faq() {
   return (
     <Section id="faq">
       <Reveal>
-        <SectionHead index="08" eyebrow="Questions" headline="The things clients ask first." />
+        <SectionHead index="07" eyebrow="Questions" headline="The things clients ask first." />
       </Reveal>
       <div className="mx-auto mt-[clamp(48px,6vw,80px)] max-w-[720px]">
         {FAQ.map((item, index) => (

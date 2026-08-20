@@ -14,7 +14,6 @@ const TABS = [
   { href: "#work", label: "Case studies" },
   { href: "#career", label: "Career" },
   { href: "#team", label: "Team" },
-  { href: "#advisors", label: "Advisors" },
   { href: "#faq", label: "FAQ" },
 ];
 
@@ -65,7 +64,10 @@ export default function Nav() {
           <Logo height={22} />
         </Link>
 
-        <div className="hidden gap-px lg:flex">
+        {/* Centred track rather than left-packed: with the Advisors tab folded
+            into Team the row is short enough that logo · tabs · CTA reads as
+            three balanced anchors instead of a cluster on the left. */}
+        <div className="hidden min-w-0 flex-1 justify-center gap-px lg:flex">
           {TABS.map((tab) => {
             const active = onHome && current === tab.href;
             return (

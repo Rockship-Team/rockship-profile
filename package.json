@@ -6,6 +6,9 @@
   "packageManager": "bun@1.3.14",
   "scripts": {
     "dev": "next dev --turbopack",
+    "clean:images": "rm -rf .next/dev/cache/images .next/cache/images",
+    "clean": "rm -rf .next",
+    "dev:clean": "bun run clean:images && next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
