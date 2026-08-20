@@ -22,6 +22,29 @@ function chunkRows<T>(items: T[], size: number): T[][] {
   return rows;
 }
 
+/**
+ * Rule-and-label divider above each row. A hairline either side of the label
+ * rather than a left-aligned heading: the portraits are centre-aligned tracks,
+ * so a centred label keeps the column axis intact instead of introducing a
+ * second, competing left edge.
+ */
+function GroupLabel({ children }: { children: string }) {
+  return (
+    // 650px = the three 190px tracks plus their two 40px gutters, so the rule
+    // ends where the portrait grid ends instead of running the full 1120px.
+    <h3 className="mx-auto mb-8 flex w-full max-w-[650px] items-center gap-4">
+      <span aria-hidden className="h-px flex-1" style={{ background: "var(--rk-hair)" }} />
+      <span
+        className="rk-num whitespace-nowrap text-[13px] uppercase"
+        style={{ letterSpacing: "0.08em" }}
+      >
+        {children}
+      </span>
+      <span aria-hidden className="h-px flex-1" style={{ background: "var(--rk-hair)" }} />
+    </h3>
+  );
+}
+
 function PersonRow({ people }: { people: RosterCard[] }) {
   return (
     <RevealGroup className="grid grid-cols-[repeat(auto-fit,190px)] justify-center gap-x-10 gap-y-12">
@@ -41,9 +64,9 @@ function PersonRow({ people }: { people: RosterCard[] }) {
                 style={{ objectPosition: person.photoPosition ?? "center top" }}
               />
             </div>
-            <h3 className="mt-4 text-[18px] font-semibold tracking-[0.011em]">
+            <h4 className="mt-4 text-[18px] font-semibold tracking-[0.011em]">
               {person.unverified ? <TK>{person.name}</TK> : person.name}
-            </h3>
+            </h4>
             <div className="mt-1 text-[14px]" style={{ color: "var(--rk-sec)" }}>
               {person.unverified ? <TK>{person.role}</TK> : person.role}
             </div>
@@ -72,6 +95,13 @@ export default function Team() {
     note: advisor.subtext,
   }));
 
+  /** Each row is a named group, labelled by a rule so the hierarchy is readable. */
+  const groups: { label: string; people: RosterCard[]; id?: string }[] = [
+    { label: "Executive Team", people: staffRows[0] ?? [] },
+    { label: "Management Team", people: staffRows[1] ?? [] },
+    { label: "Advisory Board", people: advisorRow, id: "advisors" },
+  ].filter((group) => group.people.length > 0);
+
   return (
     <Section id="team" alt>
       <Reveal>
@@ -91,15 +121,15 @@ export default function Team() {
           section as a final row — they were their own section until the roster
           was small enough that two headers back to back read as padding. The
           "advisors" id stays put so existing /#advisors links still land. */}
-      <div className="mt-[clamp(48px,6vw,80px)] flex flex-col gap-y-12">
-        {staffRows.map((row, i) => (
-          <PersonRow key={i} people={row} />
-        ))}
-        {advisorRow.length > 0 ? (
-          <div id="advisors" className="scroll-mt-[88px]">
-            <PersonRow people={advisorRow} />
+      <div className="mt-[clamp(48px,6vw,80px)] flex flex-col gap-y-[clamp(44px,5vw,64px)]">
+        {groups.map((group) => (
+          <div key={group.label} id={group.id} className="scroll-mt-[88px]">
+            <Reveal>
+              <GroupLabel>{group.label}</GroupLabel>
+            </Reveal>
+            <PersonRow people={group.people} />
           </div>
-        ) : null}
+        ))}
       </div>
     </Section>
   );
