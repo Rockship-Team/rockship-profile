@@ -226,7 +226,7 @@ export const TEAM: Person[] = [
   },
   {
     name: "Hung Tran",
-    role: "Managing Director",
+    role: "VP of Engineering",
     photo: "/Hung.png",
     previously: null,
   },
