@@ -198,17 +198,30 @@ export const CAREER: CareerPillar[] = [
   },
 ];
 
+/** Ordered for a 3-per-row grid: rows read left to right, top to bottom. */
 export const TEAM: Person[] = [
-  {
-    name: "Huy Dang",
-    role: "Managing Partner",
-    photo: "/Huy.png",
-    previously: null,
-  },
   {
     name: "Son Vo",
     role: "Chief Operating Officer",
     photo: "/Son.png",
+    previously: null,
+  },
+  {
+    name: "Quan Do",
+    role: "Chief Technology Officer",
+    photo: "/Quan.png",
+    previously: null,
+  },
+  {
+    name: "Mimi Nguyen",
+    role: "Chief Marketing Officer",
+    photo: "/MimiNguyen.jpeg",
+    previously: null,
+  },
+  {
+    name: "Huy Dang",
+    role: "Managing Partner",
+    photo: "/Huy.png",
     previously: null,
   },
   {
@@ -218,16 +231,10 @@ export const TEAM: Person[] = [
     previously: null,
   },
   {
-    name: "Quan Do",
-    role: "CTO",
-    photo: "/Quan.png",
-    previously: null,
-  },
-  {
     name: "An Nguyen",
     role: "Head of Product",
     photo: "/AnNguyen.jpg",
-    photoPosition: "70% top",
+    photoPosition: "right top",
     previously: null,
   },
 ];

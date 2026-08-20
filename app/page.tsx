@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Advisors from "@/components/home/Advisors";
 import { BookCallProvider } from "@/components/home/BookCall";
 import Career from "@/components/home/Career";
 import CaseStudies from "@/components/home/CaseStudies";
@@ -36,7 +35,6 @@ export default function Page() {
           <CaseStudies />
           <Career />
           <Team />
-          <Advisors />
           <Faq />
           <FinalCTA />
         </main>
