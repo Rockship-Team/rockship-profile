@@ -13,7 +13,6 @@ export default function Faq() {
         {FAQ.map((item, index) => (
           <details
             key={item.question}
-            open={index === 0}
             className="group"
             style={{
               borderTop: "1px solid var(--rk-hair)",

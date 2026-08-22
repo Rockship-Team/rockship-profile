@@ -55,7 +55,7 @@ export const HERO = {
 } as const;
 
 export const PROOF: Metric[] = [
-  { value: "5", label: "Systems in production, all still running" },
+  { value: "150+", label: "Client projects delivered" },
   { value: "5", label: "Client markets — US, EU, SG, JP, VN" },
   { value: "92.5%", label: "Manual workload removed, best result" },
   { value: "100+", label: "Engineers, avg. 7 years in production" },
@@ -260,6 +260,12 @@ export const FAQ: FaqItem[] = [
     question: "Who owns the IP?",
     answer:
       "You do. Work happens in your accounts, under your access controls, and IP assigns on delivery. Access is revoked the day an engagement ends.",
+    unverified: true,
+  },
+  {
+    question: "How do you ensure data privacy and security in projects?",
+    answer:
+      "We protect your sensitive data using strong encryption and strict access controls, ensuring only authorized team members can reach your systems. Our team follows proven cloud security practices and adheres strictly to top international standards like SOC 2, ISO 27001, HIPAA, and GDPR. By isolating project environments and actively monitoring risks, we keep your data safe at every step.",
     unverified: true,
   },
   {
