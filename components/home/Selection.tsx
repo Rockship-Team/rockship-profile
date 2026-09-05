@@ -14,7 +14,7 @@ export default function Selection() {
     <Section id="selection">
       <Reveal>
         <SectionHead
-        index="03"
+        index="04"
         eyebrow="Selection"
         headline="How we pick the engineers you'll work with."
         intro="Quality is hard to verify from the other side of the world. So we publish the bar."

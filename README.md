@@ -168,7 +168,7 @@ cookie and redirects to `/admin/login`.
 ## The homepage
 
 `app/page.tsx` composes `components/home/*` in order: Hero, Marquee, Services,
-WhyRockship, Selection, CaseStudies, Career, Team, Faq, FinalCTA.
+WhyRockship, Team, Selection, CaseStudies, Career, Faq, FinalCTA.
 
 Two things to know when editing it:
 

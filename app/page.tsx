@@ -31,10 +31,10 @@ export default function Page() {
           <Marquee />
           <Services />
           <WhyRockship />
+          <Team />
           <Selection />
           <CaseStudies />
           <Career />
-          <Team />
           <Faq />
           <FinalCTA />
         </main>

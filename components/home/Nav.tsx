@@ -10,10 +10,10 @@ import { BookCallButton } from "./BookCall";
 const TABS = [
   { href: "#services", label: "Services" },
   { href: "#why", label: "Why Rockship" },
+  { href: "#team", label: "Team" },
   { href: "#selection", label: "Selection" },
   { href: "#work", label: "Case studies" },
   { href: "#career", label: "Career" },
-  { href: "#team", label: "Team" },
   { href: "#faq", label: "FAQ" },
 ];
 
