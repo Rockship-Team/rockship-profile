@@ -55,10 +55,10 @@ export const HERO = {
 } as const;
 
 export const PROOF: Metric[] = [
-  { value: "150+", label: "Client projects delivered" },
+  { value: "80+", label: "Client projects delivered" },
   { value: "5", label: "Client markets — US, EU, SG, JP, VN" },
   { value: "92.5%", label: "Manual workload removed, best result" },
-  { value: "100+", label: "Engineers, avg. 7 years in production" },
+  { value: "100+", label: "Engineers (external in network)" },
 ];
 
 export const SERVICES: Service[] = [
