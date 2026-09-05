@@ -106,7 +106,7 @@ export default function Team() {
     <Section id="team" alt>
       <Reveal>
         <SectionHead
-          index="06"
+          index="03"
           eyebrow="Team"
           headline="The people you'll work with."
           intro="You meet the engineers before you commit."
