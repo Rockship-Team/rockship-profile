@@ -1,14 +1,19 @@
 import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { FeatureFlagProvider } from "@/components/FeatureFlagProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  // Only load weights actually used - reduces font file size
-  weight: ["400", "500", "700"],
+// Self-hosted DM Sans rather than next/font/google. The Google Fonts download
+// runs at `next build` time and intermittently fails CI with "Error: fetch
+// failed"; shipping the woff2 in-repo removes that network step and keeps the
+// build hermetic (and protects the live self-hosted build too). This is the
+// variable font (latin subset), so one file covers the 400/500/700 weights the
+// design uses via Tailwind's font-normal / font-medium / font-bold.
+const dmSans = localFont({
+  src: "./fonts/dm-sans-latin.woff2",
+  weight: "100 1000",
   variable: "--font-dm-sans",
   display: "swap",
   // Preload for faster font loading
