@@ -13,7 +13,7 @@ export default function Career() {
     <Section id="career">
       <Reveal>
         <SectionHead
-          index="06"
+          index="07"
           eyebrow="A career, redefined"
           headline="We build the engineers we place."
           intro="AI writes more of the code every quarter. What's scarce is the engineer who owns the outcome."
