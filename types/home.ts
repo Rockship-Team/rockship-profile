@@ -93,3 +93,31 @@ export interface RockshipEvent {
   description: string;
   href: string;
 }
+
+/** One capability pillar of the AI R&D Lab platform. Mirrors the lab diagram. */
+export interface AiLabCapability {
+  title: string;
+  body: string;
+}
+
+/** The advisor credential note that closes the AI R&D Lab section. */
+export interface AiLabAdvisor {
+  name: string;
+  role: string;
+  photo: string;
+  body: string;
+}
+
+export interface AiLab {
+  intro: string;
+  /** Lead paragraphs, rendered left of the diagram. */
+  body: string[];
+  diagram: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
+  capabilities: AiLabCapability[];
+  advisor: AiLabAdvisor;
+}

@@ -11,6 +11,7 @@
 
 import type {
   Advisor,
+  AiLab,
   CareerPillar,
   CaseStudy,
   Differentiator,
@@ -173,6 +174,56 @@ export const CASE_STUDIES: CaseStudy[] = [
     statLabel: "Applications per officer",
   },
 ];
+
+/**
+ * The R&D section. Source copy: docs/rebrand/ai-rd-lab.md (from the AI R&D Lab
+ * brief). The five capabilities mirror the labels on the platform diagram, so
+ * the same claims are readable to a screen reader and to search — the diagram
+ * carries them as pixels only.
+ */
+export const AI_RD_LAB: AiLab = {
+  intro:
+    "A proprietary Agentic AI & Data Platform that closes the gap between static enterprise data and proactive, goal-driven autonomy.",
+  body: [
+    "Rather than simple chatbots or isolated models, the platform deploys coordinated multi-agent workflows that safely query data silos, reason through high-stakes constraints, and execute mission-critical tasks in real time.",
+    "We are rolling out structured access and early-adopter deployments for global enterprise partners who want to automate domain-specific operations without compromising security or data sovereignty.",
+  ],
+  diagram: {
+    src: "/images/ai-rd-lab.png",
+    alt: "The AI R&D Lab platform: agentic workflows, data silo integration, goal-driven autonomy, security and data sovereignty, and enterprise operations arranged around the Rockship innovation engine.",
+    width: 526,
+    height: 390,
+  },
+  capabilities: [
+    {
+      title: "Agentic workflows",
+      body: "Coordinated multi-agent runs with hand-offs and guardrails, not single-shot prompts.",
+    },
+    {
+      title: "Data silo integration",
+      body: "Governed queries across systems that were never built to talk to each other.",
+    },
+    {
+      title: "Goal-driven autonomy",
+      body: "Agents work towards a stated outcome and reason through the constraints on the way.",
+    },
+    {
+      title: "Security & data sovereignty",
+      body: "Deployed inside your boundary, so the data stays where your regulator expects it.",
+    },
+    {
+      title: "Enterprise operations",
+      body: "Built for the domain-specific, mission-critical work that runs the business.",
+    },
+  ],
+  advisor: {
+    name: "Dr. Wray Buntine",
+    role: "Chief AI Advisor",
+    photo: "/WrayBuntine.jpg",
+    body:
+      "Long before large language models captured global attention, Dr. Buntine's research at NASA Ames, UC Berkeley and Monash University established the frameworks for machine learning, nonparametric topic modelling and Bayesian inference that foundational models rely on today. With over 17,000 citations and a place in the top 0.75% of the most-cited scientists in AI, his ongoing work on reasoning calibration, reward modelling and explainability keeps our agentic systems out of black-box territory — grounded in provable safety and explainable logic.",
+  },
+};
 
 /**
  * Written as proof of our talent bar, not as recruiting. None of Palantir,

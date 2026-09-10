@@ -13,6 +13,7 @@ const TABS = [
   { href: "#team", label: "Team" },
   { href: "#selection", label: "Selection" },
   { href: "#work", label: "Case studies" },
+  { href: "#ai-lab", label: "AI Lab" },
   { href: "#career", label: "Career" },
   { href: "#faq", label: "FAQ" },
 ];
@@ -66,7 +67,11 @@ export default function Nav() {
 
         {/* Centred track rather than left-packed: with the Advisors tab folded
             into Team the row is short enough that logo · tabs · CTA reads as
-            three balanced anchors instead of a cluster on the left. */}
+            three balanced anchors instead of a cluster on the left.
+
+            Tab padding tightens below xl: with the AI Lab tab added the row
+            needs ~909px, and between the lg breakpoint and 1280 the 5vw
+            gutters leave less than that. 8px sides fit; 10px overflow. */}
         <div className="hidden min-w-0 flex-1 justify-center gap-px lg:flex">
           {TABS.map((tab) => {
             const active = onHome && current === tab.href;
@@ -75,7 +80,7 @@ export default function Nav() {
                 key={tab.href}
                 href={onHome ? tab.href : `/${tab.href}`}
                 aria-current={active ? "true" : undefined}
-                className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
+                className="whitespace-nowrap rounded-full px-2 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)] xl:px-2.5"
                 style={{
                   color: active ? "var(--rk-accent)" : "var(--rk-sec)",
                   background: active ? "var(--rk-alt)" : "transparent",
@@ -88,7 +93,7 @@ export default function Nav() {
           <Link
             href="/events"
             aria-current={pathname === "/events" ? "page" : undefined}
-            className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
+            className="whitespace-nowrap rounded-full px-2 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)] xl:px-2.5"
             style={
               pathname === "/events"
                 ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }
@@ -100,7 +105,7 @@ export default function Nav() {
           <Link
             href="/demos"
             aria-current={pathname.startsWith("/demos") ? "page" : undefined}
-            className="whitespace-nowrap rounded-full px-2.5 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)]"
+            className="whitespace-nowrap rounded-full px-2 py-2 text-[14px] transition-colors hover:text-[color:var(--rk-ink)] xl:px-2.5"
             style={
               pathname.startsWith("/demos")
                 ? { color: "var(--rk-accent)", background: "var(--rk-alt)" }

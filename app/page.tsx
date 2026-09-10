@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AiRdLab from "@/components/home/AiRdLab";
 import { BookCallProvider } from "@/components/home/BookCall";
 import Career from "@/components/home/Career";
 import CaseStudies from "@/components/home/CaseStudies";
@@ -34,6 +35,7 @@ export default function Page() {
           <Team />
           <Selection />
           <CaseStudies />
+          <AiRdLab />
           <Career />
           <Faq />
           <FinalCTA />
