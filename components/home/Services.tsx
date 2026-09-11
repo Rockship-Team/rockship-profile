@@ -9,8 +9,8 @@ export default function Services() {
         <SectionHead
           index="01"
           eyebrow="Services"
-          headline="Three ways to work with us."
-          intro="AI-Native Engineering Team only. No junior bench, no account managers."
+          headline="Enterprise-Grade Cognitive Systems. Engineered for Scale, Governance, and Speed."
+          intro="AI-native engineering teams and product leaders only. Zero junior bench. Zero agency brokers. Zero brittle wrappers."
         />
       </Reveal>
 

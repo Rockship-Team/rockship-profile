@@ -65,9 +65,9 @@ export const PROOF: Metric[] = [
 export const SERVICES: Service[] = [
   {
     index: "01",
-    title: "Team augmentation",
-    body: "Our AI-Native Engineering Team joins your repo, your standups, your on-call.",
-    terms: "From one engineer · month to month",
+    title: "Engineering Squads",
+    body: "Senior engineering squads embedded directly in your repositories, CI/CD pipelines, and sprint cadence. We deploy machine learning engineers, systems architects, and distributed systems specialists to accelerate your core roadmap. From custom model fine-tuning (LoRA/QLoRA) to high-throughput data infrastructure, we operate as an immediate force-multiplier for your technical leadership.",
+    terms: "Dedicated squads · Contractual 4-hour sync overlap · Quarterly commitment",
   },
   {
     index: "02",
