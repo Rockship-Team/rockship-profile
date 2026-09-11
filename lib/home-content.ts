@@ -65,22 +65,22 @@ export const PROOF: Metric[] = [
 export const SERVICES: Service[] = [
   {
     index: "01",
-    title: "Team augmentation",
-    body: "Our AI-Native Engineering Team joins your repo, your standups, your on-call.",
-    terms: "From one engineer · month to month",
+    title: "Engineering Squads",
+    body: "Senior engineering squads embedded directly in your repositories, CI/CD pipelines, and sprint cadence. We deploy machine learning engineers, systems architects, and distributed systems specialists to accelerate your core roadmap. From custom model fine-tuning (LoRA/QLoRA) to high-throughput data infrastructure, we operate as an immediate force-multiplier for your technical leadership.",
+    terms: "Dedicated squads · Contractual 4-hour sync overlap · Quarterly commitment",
   },
   {
     index: "02",
-    title: "Dedicated product teams",
-    body: "Cross-functional teams (AI engineers, data scientists, product managers) that own your AI product end-to-end, from discovery and build to launch and continuous optimization. We usually partner long-term (1+ years) with most clients to continuously scale your product and maximize ROI.",
-    terms: "3–15 people · own delivery",
+    title: "AI-Native Product Pods",
+    body: "Autonomous, cross-functional squads led by seasoned Product Managers, ML Engineers, and Systems Architects. We take complete ownership of your AI product domain: technical discovery, system architecture, automated evaluation benchmarking, and compute efficiency at scale. We partner multi-year to scale production throughput and maximize enterprise ROI.",
+    terms: "4–15+ senior specialists · Full SLA & delivery ownership · 100% IP assignment",
     highlight: true,
   },
   {
     index: "03",
-    title: "AI delivery sprints",
-    body: "One workflow taken live, with evals, guardrails and handover included.",
-    terms: "Fixed scope · fixed price",
+    title: "Production AI Sprints",
+    body: "A mission-critical AI capability, multi-agent orchestration, or cognitive pipeline taken from architecture to live production in 4 to 8 weeks. Every sprint ships production-ready with custom evaluation harnesses, deterministic schema guardrails, low-latency routing tiers, and complete enterprise compliance validation.",
+    terms: "Fixed scope · Guaranteed acceptance criteria · SOC 2 / HIPAA / GDPR verified",
   },
 ];
 
@@ -191,8 +191,8 @@ export const AI_RD_LAB: AiLab = {
   diagram: {
     src: "/images/ai-rd-lab.png",
     alt: "The AI R&D Lab platform: agentic workflows, data silo integration, goal-driven autonomy, security and data sovereignty, and enterprise operations arranged around the Rockship innovation engine.",
-    width: 526,
-    height: 390,
+    width: 1936,
+    height: 1437,
   },
   capabilities: [
     {
