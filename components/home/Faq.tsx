@@ -73,12 +73,9 @@ export default function Faq() {
       <div className="mx-auto mt-[clamp(40px,5vw,64px)] max-w-[840px] space-y-16">
         {displayedParts.map((part) => (
           <div key={part.id} className="scroll-mt-24">
-            {/* Part Header */}
+            {/* Category Header */}
             <div className="mb-6 border-b border-[color:var(--rk-hair)] pb-4">
-              <span className="rk-num text-[12px] font-semibold tracking-[0.08em] text-[color:var(--rk-accent)]">
-                {part.part}
-              </span>
-              <h3 className="mt-1.5 text-[22px] font-semibold tracking-[-0.015em] text-[color:var(--rk-ink)] sm:text-[26px]">
+              <h3 className="text-[22px] font-semibold tracking-[-0.015em] text-[color:var(--rk-ink)] sm:text-[26px]">
                 {part.title}
               </h3>
               <p
