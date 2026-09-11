@@ -84,7 +84,6 @@ export interface FaqItem {
 
 export interface FaqPart {
   id: string;
-  part: string;
   shortTitle: string;
   title: string;
   description: string;

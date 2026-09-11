@@ -305,7 +305,6 @@ export const ADVISORS: Advisor[] = [
 export const FAQ_PARTS: FaqPart[] = [
   {
     id: "engagement",
-    part: "Part I",
     shortTitle: "Engagement & Terms",
     title: "Engagement, Commercial Terms & Team Collaboration",
     description: "For evaluating partnership models, IP ownership, and cross-border velocity.",
@@ -384,7 +383,6 @@ export const FAQ_PARTS: FaqPart[] = [
   },
   {
     id: "systems",
-    part: "Part II",
     shortTitle: "Systems & Scalability",
     title: "Systems Engineering, Architecture & Scalability",
     description: "For evaluating latency SLAs, deterministic execution, and database integration.",
@@ -454,7 +452,6 @@ export const FAQ_PARTS: FaqPart[] = [
   },
   {
     id: "security",
-    part: "Part III",
     shortTitle: "Security & Governance",
     title: "Security, Governance & Empirical Reliability",
     description: "For evaluating data isolation, red teaming, eval benchmarks, and model drift.",
