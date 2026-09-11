@@ -109,11 +109,15 @@ export default function Faq() {
                     </span>
                   </summary>
                   <div className="pb-6 pt-1 text-[16px] leading-[1.65] text-[color:var(--rk-sec)] sm:text-[17px]">
-                    {item.answer.split("\n").map((para, idx) => (
-                      <p key={idx} className={idx > 0 ? "mt-2" : ""}>
-                        {para}
-                      </p>
-                    ))}
+                    {item.answer
+                      .split("\n")
+                      .map((p) => p.trim())
+                      .filter(Boolean)
+                      .map((para, idx) => (
+                        <p key={idx} className={idx > 0 ? "mt-3" : ""}>
+                          {para}
+                        </p>
+                      ))}
                     {item.secondaryAnswer && (
                       <p className="mt-3.5">{item.secondaryAnswer}</p>
                     )}

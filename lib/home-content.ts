@@ -313,7 +313,17 @@ export const FAQ_PARTS: FaqPart[] = [
       {
         question: "How do we engage, and how do we exit?",
         answer:
-          "We structure partnerships around validated technical outcomes and production velocity, never commoditized headcount rental. Depending on your operational roadmap, we deploy under three engagement models: Engineering Squads, AI-Native Product Pods, and Production AI Sprints.",
+          "We structure partnerships around validated technical outcomes and production velocity, never commoditized headcount rental. Depending on your operational roadmap, we deploy under two primary engagement models:",
+        points: [
+          {
+            label: "Fixed-Scope AI Delivery Sprints",
+            text: "Concentrated 4- to 8-week production milestones designed to take an AI system from initial architecture to staging and live production deployment under contractually guaranteed acceptance criteria, latency thresholds, and evaluation benchmarks.",
+          },
+          {
+            label: "Dedicated AI Product Pods",
+            text: "Integrated, cross-functional squads — comprising a dedicated Product Lead, Senior Machine Learning Engineers, Full-Stack Developers, and QA Engineers — deployed on quarterly roadmap commitments to own technical domains end-to-end.",
+          },
+        ],
         secondaryAnswer:
           "Every engagement begins with a two-week paid discovery sprint embedded directly within your code repositories and communication channels. If we do not demonstrate exceptional technical velocity, architectural rigor, and cultural alignment during this period, you may terminate the engagement immediately with zero ongoing financial commitment and 100% exclusive ownership of all delivered architecture, configurations, and code.",
       },
@@ -424,7 +434,7 @@ export const FAQ_PARTS: FaqPart[] = [
       {
         question: "Can our agentic systems interact safely with existing enterprise databases and legacy APIs?",
         answer:
-          "Yes. Deploying production AI requires bridging the gap between probabilistic language models and deterministic enterprise databases (PostgreSQL, MySQL, Snowflake, SAP, Salesforce, and proprietary internal REST/GraphQL endpoints). We engineer safe, enterprise-grade tool-calling architectures that ensure:",
+          "Yes. Deploying production AI requires bridging the gap between probabilistic language models and deterministic enterprise databases (PostgreSQL, MySQL, Snowflake, SAP, Salesforce, and proprietary internal REST/GraphQL endpoints).\n\nWe engineer safe, enterprise-grade tool-calling architectures that ensure:",
         points: [
           {
             label: "Governed Schema Mapping",
@@ -452,13 +462,13 @@ export const FAQ_PARTS: FaqPart[] = [
       {
         question: "How does foundational scientific research inform your product engineering?",
         answer:
-          "Unlike traditional development firms that rely entirely on generic public model APIs, Rockship’s technical architecture is grounded in foundational machine learning research. Our internal AI R&D Lab actively enables our engineering teams to:",
+          "Unlike traditional development firms that rely entirely on generic public model APIs, Rockship’s technical architecture is grounded in foundational machine learning research.\n\nOur internal AI R&D Lab enables our engineering teams to:",
         points: [
           {
-            text: "Calibrate model confidence scores to mathematically quantify uncertainty before an autonomous agent executes high-stakes decisions;",
+            text: "Calibrate model confidence scores to mathematically quantify uncertainty before an autonomous agent executes high-stakes decisions.",
           },
           {
-            text: "Engineer explainable decision trees and transparent audit trails for mission-critical enterprise workflows; and",
+            text: "Engineer explainable decision trees and transparent audit trails for mission-critical enterprise workflows.",
           },
           {
             text: 'Keep multi-agent reasoning out of uninterpretable "black-box" failure modes, ensuring provable safety and deterministic reliability in enterprise deployments.',
@@ -499,7 +509,7 @@ export const FAQ_PARTS: FaqPart[] = [
           },
           {
             label: "Private VPC & On-Premise Deployments",
-            text: "For clients with sovereign data constraints (financial services, healthcare, defense), we deploy state-of-the-art open-source foundational models (such as Llama, Mistral, and DeepSeek) entirely within your private VPC (AWS, GCP, Azure) or bare-metal on-premise clusters using secure containerized endpoints (vLLM/TGI), ensuring zero data egress outside your perimeter.",
+            text: "For clients with sovereign data constraints, we deploy state-of-the-art open-source foundational models (such as Llama, Mistral, and DeepSeek) entirely within your private VPC (AWS, GCP, Azure) or bare-metal on-premise clusters using secure containerized endpoints (vLLM/TGI), ensuring zero data egress outside your perimeter.",
           },
         ],
       },
