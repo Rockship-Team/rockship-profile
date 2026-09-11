@@ -78,9 +78,9 @@ export const SERVICES: Service[] = [
   },
   {
     index: "03",
-    title: "AI delivery sprints",
-    body: "One workflow taken live, with evals, guardrails and handover included.",
-    terms: "Fixed scope · fixed price",
+    title: "Production AI Sprints",
+    body: "A mission-critical AI capability, multi-agent orchestration, or cognitive pipeline taken from architecture to live production in 4 to 8 weeks. Every sprint ships production-ready with custom evaluation harnesses, deterministic schema guardrails, low-latency routing tiers, and complete enterprise compliance validation.",
+    terms: "Fixed scope · Guaranteed acceptance criteria · SOC 2 / HIPAA / GDPR verified",
   },
 ];
 
