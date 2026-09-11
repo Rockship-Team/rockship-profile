@@ -112,26 +112,26 @@ export const DIFFERENTIATORS: Differentiator[] = [
 export const SELECTION: SelectionStage[] = [
   {
     index: "01",
-    title: "Application",
-    body: "Referral or direct. Every applicant is screened by an engineer, not a recruiter.",
+    title: "Architectural & Algorithmic Screening",
+    body: "Direct applications are strictly selective; the vast majority of our engineers are sourced through closed referrals and our vetted network of proven technical talent. Every candidate is evaluated directly by our technical directors — never non-technical recruiters. We filter for foundational computer science mastery, memory optimization, concurrency patterns, and production Git history.",
     rate: null,
   },
   {
     index: "02",
-    title: "Technical interview",
-    body: "Systems design and production judgment, not algorithm puzzles.",
+    title: "Distributed Systems & Cognitive Architecture",
+    body: "A live architectural defense under enterprise production constraints. Candidates design resilient, distributed systems: dynamic multi-model routing, low-latency execution, agentic workflows — not memorized LeetCode puzzles.",
     rate: null,
   },
   {
     index: "03",
-    title: "Paid work sample",
-    body: "A scoped piece of real work, reviewed the way we'd review a colleague's pull request.",
+    title: "Production-Grade Work Trial",
+    body: "A compensated, high-intensity technical sprint inside an isolated sandbox. Candidates architect a production capability, build automated evaluation harnesses (LLM-as-a-judge), implement strict schema guardrails (Pydantic/Zod), and submit pull requests reviewed against our highest code standards.",
     rate: null,
   },
   {
     index: "04",
-    title: "Client trial",
-    body: "Two weeks on your codebase. Continued placement depends on your assessment, not ours.",
+    title: "Two-Week Production Discovery Sprint",
+    body: "Embedded directly within your engineering repositories, CI/CD pipelines, and daily sprint cadence. Continued partnership is governed entirely by your technical leadership's evaluation of velocity, code maintainability, and delivery excellence.",
     rate: null,
   },
 ];
