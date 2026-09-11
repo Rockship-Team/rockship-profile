@@ -86,20 +86,20 @@ export const SERVICES: Service[] = [
 
 export const DIFFERENTIATORS: Differentiator[] = [
   {
-    title: "Senior by default",
-    body: "Everyone we place has taken a system to production and owned it after.",
+    title: "Production-tested by default",
+    body: "Every engineer and product leader has architected, shipped, and scaled mission-critical AI systems in enterprise production. Zero junior bench, zero outsourced staffing.",
   },
   {
-    title: "We stay after launch",
-    body: "Four of five shipped systems still run with our involvement.",
+    title: "We scale what we ship",
+    body: "A large percentage of our production deployments evolve into multi-year product partnerships, continuously optimizing inference latency, cost-per-query, and model accuracy as your traffic scales.",
   },
   {
-    title: "Your timezone, in writing",
-    body: "A fixed overlap window with your working day, agreed before kickoff.",
+    title: "Contractual timezone overlap",
+    body: "A guaranteed 4-hour daily synchronous working window with your core engineering team, written directly into our master services agreement.",
   },
   {
-    title: "Your IP, your repo",
-    body: "Your accounts, your controls. IP assigns on delivery.",
+    title: "Complete asset sovereignty",
+    body: "Your repositories, your cloud infrastructure. All source code, fine-tuned model weights, proprietary datasets, and agentic workflows assigned to you immediately upon delivery.",
   },
 ];
 

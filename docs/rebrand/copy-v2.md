@@ -47,14 +47,14 @@ Fixed scope, one workflow, taken live with evals, guardrails and handover includ
 > **Renamed:** "Embedded engineers" → **"Team augmentation"** (thoughtbot's term). "Embedded engineer" returns firmware and hardware results almost exclusively — LinkedIn alone lists *"79,000+ Embedded Engineer jobs"* — and zero of ten researched competitors use it as an offer name. Full evidence in `research-v1.md`.
 
 ## 02 — Why Rockship
+ 
+> **H2:** Production velocity, proven in your codebase.
+> **Lede:** Validate our architectural rigor with a two-week paid discovery sprint. Walk away with full IP ownership if we aren't an exceptional fit.
 
-> **H2:** Proof, not promises.
-> **Lede:** Every number traces to a system running for a paying client.
-
-- **Senior by default** — Everyone we place has taken a system to production and owned it after.
-- **We stay after launch** — Four of five shipped systems still run with our involvement. `TK confirm`
-- **Your timezone, in writing** — A fixed overlap window with your working day, agreed before kickoff. `TK what can we commit to for US clients?`
-- **Your IP, your repo** — Your accounts, your controls. IP assigns on delivery, access ends with the engagement. `TK legal to confirm`
+- **Production-tested by default** — Every engineer and product leader has architected, shipped, and scaled mission-critical AI systems in enterprise production. Zero junior bench, zero outsourced staffing.
+- **We scale what we ship** — A large percentage of our production deployments evolve into multi-year product partnerships, continuously optimizing inference latency, cost-per-query, and model accuracy as your traffic scales.
+- **Contractual timezone overlap** — A guaranteed 4-hour daily synchronous working window with your core engineering team, written directly into our master services agreement.
+- **Complete asset sovereignty** — Your repositories, your cloud infrastructure. All source code, fine-tuned model weights, proprietary datasets, and agentic workflows assigned to you immediately upon delivery.
 
 ## 03 — Case studies
 

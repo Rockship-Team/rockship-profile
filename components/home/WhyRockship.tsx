@@ -1,7 +1,6 @@
 import { DIFFERENTIATORS } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
 import Reveal, { RevealGroup, RevealItem } from "./Reveal";
-import TK from "./TK";
 
 export default function WhyRockship() {
   return (
@@ -10,10 +9,8 @@ export default function WhyRockship() {
         <SectionHead
           index="02"
           eyebrow="Why Rockship"
-          headline="Proof, not promises."
-          intro={
-            <TK>Start with a two-week paid trial. Walk away at the end, owing nothing further.</TK>
-          }
+          headline="Production velocity, proven in your codebase."
+          intro="Validate our architectural rigor with a two-week paid discovery sprint. Walk away with full IP ownership if we aren't an exceptional fit."
         />
       </Reveal>
 
