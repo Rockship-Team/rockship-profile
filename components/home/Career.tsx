@@ -15,8 +15,8 @@ export default function Career() {
         <SectionHead
           index="07"
           eyebrow="A career, redefined"
-          headline="We build the engineers we place."
-          intro="AI writes more of the code every quarter. What's scarce is the engineer who owns the outcome."
+          headline="We forge the product engineers who own the outcome."
+          intro="In the era of automated code generation, syntax is commoditized. What remains exceptionally scarce is the engineer who owns systems architecture, domain constraints, and commercial ROI."
         />
       </Reveal>
 

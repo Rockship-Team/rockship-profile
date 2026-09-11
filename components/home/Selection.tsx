@@ -1,7 +1,6 @@
 import { SELECTION } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
 import Reveal from "./Reveal";
-import TK from "./TK";
 
 /**
  * The highest-leverage section on the page: an international buyer's first
@@ -14,10 +13,10 @@ export default function Selection() {
     <Section id="selection">
       <Reveal>
         <SectionHead
-        index="04"
-        eyebrow="Selection"
-        headline="How we pick the engineers you'll work with."
-        intro="Quality is hard to verify from the other side of the world. So we publish the bar."
+          index="04"
+          eyebrow="Selection"
+          headline="Empirical rigor. Deterministic execution. An uncompromising engineering bar."
+          intro="We evaluate technical talent by production systems reliability, not resume claims. Here is our four-stage vetting protocol."
         />
       </Reveal>
       <div className="mx-auto mt-[clamp(48px,6vw,80px)] max-w-[720px]">

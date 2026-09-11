@@ -69,10 +69,26 @@ export interface Advisor {
   subtext: string;
 }
 
+export interface FaqPoint {
+  label?: string;
+  text: string;
+}
+
 export interface FaqItem {
   question: string;
   answer: string;
+  secondaryAnswer?: string;
+  points?: FaqPoint[];
   unverified?: boolean;
+}
+
+export interface FaqPart {
+  id: string;
+  part: string;
+  shortTitle: string;
+  title: string;
+  description: string;
+  items: FaqItem[];
 }
 
 export interface CareerPillar {
