@@ -191,8 +191,8 @@ export const AI_RD_LAB: AiLab = {
   diagram: {
     src: "/images/ai-rd-lab.png",
     alt: "The AI R&D Lab platform: agentic workflows, data silo integration, goal-driven autonomy, security and data sovereignty, and enterprise operations arranged around the Rockship innovation engine.",
-    width: 526,
-    height: 390,
+    width: 1936,
+    height: 1437,
   },
   capabilities: [
     {
