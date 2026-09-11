@@ -71,9 +71,9 @@ export const SERVICES: Service[] = [
   },
   {
     index: "02",
-    title: "Dedicated product teams",
-    body: "Cross-functional teams (AI engineers, data scientists, product managers) that own your AI product end-to-end, from discovery and build to launch and continuous optimization. We usually partner long-term (1+ years) with most clients to continuously scale your product and maximize ROI.",
-    terms: "3–15 people · own delivery",
+    title: "AI-Native Product Pods",
+    body: "Autonomous, cross-functional squads led by seasoned Product Managers, ML Engineers, and Systems Architects. We take complete ownership of your AI product domain: technical discovery, system architecture, automated evaluation benchmarking, and compute efficiency at scale. We partner multi-year to scale production throughput and maximize enterprise ROI.",
+    terms: "4–15+ senior specialists · Full SLA & delivery ownership · 100% IP assignment",
     highlight: true,
   },
   {
