@@ -10,7 +10,7 @@ export default function Services() {
           index="01"
           eyebrow="Services"
           headline="Enterprise-Grade Cognitive Systems. Engineered for Scale, Governance, and Speed."
-          intro="AI-native engineering teams and product leaders only. Zero junior bench. Zero agency brokers. Zero brittle wrappers."
+          intro="AI-native engineering teams and product leaders. Senior-led architecture. Zero agency middlemen. Zero brittle wrappers."
         />
       </Reveal>
 
