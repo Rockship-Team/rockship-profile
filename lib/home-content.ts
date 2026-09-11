@@ -16,6 +16,7 @@ import type {
   CaseStudy,
   Differentiator,
   FaqItem,
+  FaqPart,
   FaqPoint,
   Market,
   Metric,
@@ -301,155 +302,250 @@ export const ADVISORS: Advisor[] = [
   },
 ];
 
-export const FAQ: FaqItem[] = [
+export const FAQ_PARTS: FaqPart[] = [
   {
-    question: "How do we engage, and how do we exit?",
-    answer:
-      "We structure partnerships around validated technical outcomes and production velocity, never commoditized headcount rental. Depending on your operational roadmap, we deploy under two primary engagement models:",
-    points: [
+    id: "engagement",
+    part: "Part I",
+    shortTitle: "Engagement & Terms",
+    title: "Engagement, Commercial Terms & Team Collaboration",
+    description: "For evaluating partnership models, IP ownership, and cross-border velocity.",
+    items: [
       {
-        label: "Fixed-Scope AI Delivery Sprints",
-        text: "Concentrated 4- to 8-week production milestones designed to take an AI system from initial architecture to staging and live production deployment under contractually guaranteed acceptance criteria, latency thresholds, and evaluation benchmarks.",
+        question: "How do we engage, and how do we exit?",
+        answer:
+          "We structure partnerships around validated technical outcomes and production velocity, never commoditized headcount rental. Depending on your operational roadmap, we deploy under three engagement models: Engineering Squads, AI-Native Product Pods, and Production AI Sprints.",
+        secondaryAnswer:
+          "Every engagement begins with a two-week paid discovery sprint embedded directly within your code repositories and communication channels. If we do not demonstrate exceptional technical velocity, architectural rigor, and cultural alignment during this period, you may terminate the engagement immediately with zero ongoing financial commitment and 100% exclusive ownership of all delivered architecture, configurations, and code.",
       },
       {
-        label: "Dedicated AI Product Pods",
-        text: "Integrated, cross-functional squads — comprising a dedicated Product Lead, Senior Machine Learning Engineers, Full-Stack Developers, and QA Engineers — deployed on quarterly roadmap commitments to own technical domains end-to-end.",
-      },
-    ],
-    secondaryAnswer:
-      "Every engagement begins with a two-week paid discovery sprint embedded directly within your code repositories and communication channels. If we do not demonstrate exceptional technical velocity, architectural rigor, and cultural alignment during this period, you may terminate the engagement immediately with zero ongoing financial commitment and 100% exclusive ownership of all delivered architecture, configurations, and code.",
-  },
-  {
-    question: "Are your systems thin API wrappers, or production-grade AI infrastructure?",
-    answer:
-      "We build deterministic, production-grade AI systems engineered to survive the scale, edge cases, and compliance audits of enterprise environments. While we leverage frontier foundational models, our primary value lies in the proprietary engineering layer that makes generative AI dependable in production:",
-    points: [
-      {
-        label: "Dynamic Multi-Model Routing",
-        text: "Powered by our internal infrastructure, we dynamically route queries across foundational, domain-specialized, and open-source models — optimizing for low latency, reasoning depth, and cost-per-token in real time.",
-      },
-      {
-        label: "Coordinated Multi-Agent Orchestration",
-        text: "We architect state-machine-driven multi-agent workflows with explicit task decomposition, deterministic hand-offs, and automated error-recovery loops — replacing brittle, single-shot prompts with verifiable execution graphs.",
+        question: "Who owns the intellectual property, model weights, and custom datasets?",
+        answer:
+          "You retain 100% exclusive ownership of all intellectual property from day one. Because our engineers develop directly within your cloud infrastructure and GitHub/GitLab organizations, IP never resides on Rockship systems:",
+        points: [
+          {
+            label: "Complete Asset Scope",
+            text: "Your ownership encompasses all source code, fine-tuned model weights (e.g., LoRA and QLoRA adapters), proprietary vector embeddings, synthetic training datasets, custom data pipelines, and architectural system diagrams.",
+          },
+          {
+            label: "Immediate Legal Assignment",
+            text: "All intellectual property rights are assigned to your entity automatically upon creation under bilateral contract. We never retain, claim lien over, or reuse your proprietary domain logic.",
+          },
+          {
+            label: "Clean Decommissioning",
+            text: "On the exact date an engagement concludes, all access credentials, cryptographic tokens, and repository permissions are formally revoked and audited.",
+          },
+        ],
       },
       {
-        label: "Hybrid Retrieval-Augmented Generation (RAG)",
-        text: "We construct multi-stage retrieval pipelines combining dense semantic vector embeddings, sparse lexical retrieval, and relational knowledge graphs to ground model outputs in verifiable enterprise data.",
+        question: "How do you eliminate timezone friction across global teams?",
+        answer:
+          "We eliminate asynchronous communication bottlenecks by contractually guaranteeing a 4-hour daily synchronous working overlap with your core engineering and product leadership, regardless of your geography:",
+        points: [
+          {
+            label: "Seamless Team Integration",
+            text: "Our engineers and product leads integrate directly into your daily sprint rituals — participating in live standups, collaborating in Slack/Teams channels, and conducting real-time GitHub code reviews.",
+          },
+          {
+            label: "Multi-Market Coverage",
+            text: "We actively support enterprise partners across Silicon Valley (PST), New York (EST), London (GMT/CET), Singapore (SGT), and Tokyo (JST). Our overlapping sprint schedules ensure that technical blockers, pull requests, and architectural decisions are resolved synchronously within hours, preserving rapid continuous deployment velocity.",
+          },
+        ],
       },
       {
-        label: "Resilient Middleware",
-        text: "Every deployment includes automated schema enforcement (Pydantic/Zod), semantic prompt caching to eliminate redundant token consumption, and continuous fallbacks to ensure zero user-facing service disruptions.",
-      },
-    ],
-  },
-  {
-    question: "How does foundational scientific research inform your product engineering?",
-    answer:
-      "Unlike traditional development firms that rely entirely on generic public model APIs, Rockship’s technical architecture is grounded in foundational machine learning research.\nOur internal AI R&D Lab enables our engineering teams to:",
-    points: [
-      {
-        text: "Calibrate model confidence scores to mathematically quantify uncertainty before an autonomous agent executes high-stakes decisions.",
-      },
-      {
-        text: "Engineer explainable decision trees and transparent audit trails for mission-critical enterprise workflows.",
-      },
-      {
-        text: 'Keep multi-agent reasoning out of uninterpretable "black-box" failure modes, ensuring provable safety and deterministic reliability in enterprise deployments.',
-      },
-    ],
-  },
-  {
-    question: "Who owns the intellectual property, model weights, and custom datasets?",
-    answer:
-      "You retain 100% exclusive ownership of all intellectual property from day one. Because our engineers develop directly within your cloud infrastructure and GitHub/GitLab organizations, IP never resides on Rockship systems:",
-    points: [
-      {
-        label: "Complete Asset Scope",
-        text: "Your ownership encompasses all source code, fine-tuned model weights (e.g., LoRA and QLoRA adapters), proprietary vector embeddings, synthetic training datasets, custom data pipelines, and architectural system diagrams.",
-      },
-      {
-        label: "Immediate Legal Assignment",
-        text: "All intellectual property rights are assigned to your entity automatically upon creation under bilateral contract. We never retain, claim lien over, or reuse your proprietary domain logic.",
-      },
-      {
-        label: "Clean Decommissioning",
-        text: "On the exact date an engagement concludes, all access credentials, cryptographic tokens, and repository permissions are formally revoked and audited.",
+        question: "How do you ensure our internal engineering team can own and maintain the system after handoff?",
+        answer:
+          "We reject consultant dependency. Our goal is to institutionalize permanent AI capabilities inside your organization so your team can maintain, debug, and extend the system independently:",
+        points: [
+          {
+            label: "Paired Engineering & Architectural Reviews",
+            text: "Throughout the engagement, our engineers and product leads conduct weekly architectural syncs, paired programming sessions, and collaborative pull request reviews with your internal technical staff.",
+          },
+          {
+            label: "Living Specifications",
+            text: "We deliver comprehensive system documentation, architecture decision records (ADRs), interactive API documentation, and automated evaluation suites that serve as executable specifications for future model updates.",
+          },
+          {
+            label: "Turnkey Operational Runbooks",
+            text: "Every handoff includes documented incident-response playbooks, token cost alerting dashboards, and step-by-step procedures for updating retrieval embeddings, re-indexing vector stores, and retraining custom adapters.",
+          },
+        ],
       },
     ],
   },
   {
-    question: "How do you benchmark accuracy, mitigate hallucinations, and govern token economics?",
-    answer:
-      "We treat generative AI quality with the same empirical discipline as high-reliability software engineering:",
-    points: [
+    id: "systems",
+    part: "Part II",
+    shortTitle: "Systems & Scalability",
+    title: "Systems Engineering, Architecture & Scalability",
+    description: "For evaluating latency SLAs, deterministic execution, and database integration.",
+    items: [
       {
-        label: "Automated Evaluation Harnesses",
-        text: "Before shipping any system to staging or production, we establish customized golden benchmark datasets. We run automated regression pipelines utilizing multi-metric evaluation frameworks and LLM-as-a-judge scoring to quantify domain-specific accuracy, contextual relevance, factual recall, and latency.",
+        question: "Are your systems thin API wrappers, or production-grade AI infrastructure?",
+        answer:
+          "We build deterministic, production-grade AI systems engineered to survive the scale, edge cases, and compliance audits of enterprise environments. While we leverage frontier foundational models, our primary value lies in the proprietary engineering layer that makes generative AI dependable in production:",
+        points: [
+          {
+            label: "Dynamic Multi-Model Routing",
+            text: "Powered by our internal infrastructure, we dynamically route queries across foundational, domain-specialized, and open-source models — optimizing for low latency, reasoning depth, and cost-per-token in real time.",
+          },
+          {
+            label: "Coordinated Multi-Agent Orchestration",
+            text: "We architect state-machine-driven multi-agent workflows with explicit task decomposition, deterministic hand-offs, and automated error-recovery loops — replacing brittle, single-shot prompts with verifiable execution graphs.",
+          },
+          {
+            label: "Hybrid Retrieval-Augmented Generation (RAG)",
+            text: "We construct multi-stage retrieval pipelines combining dense semantic vector embeddings, sparse lexical retrieval, and relational knowledge graphs to ground model outputs in verifiable enterprise data.",
+          },
+          {
+            label: "Resilient Middleware",
+            text: "Every deployment includes automated schema enforcement (Pydantic/Zod), semantic prompt caching to eliminate redundant token consumption, and continuous fallbacks to ensure zero user-facing service disruptions.",
+          },
+        ],
       },
       {
-        label: "Deterministic Production Guardrails",
-        text: "We deploy automated input/output guardrail layers that execute strict JSON schema validation, regex PII masking, toxicity filtering, and prompt injection defense prior to model inference and before output rendering.",
+        question: "What latency, concurrency, and throughput SLAs do your production systems support?",
+        answer:
+          "We build AI systems designed for high-concurrency enterprise workloads where unpredictable latency breaks user experience or downstream transaction pipelines:",
+        points: [
+          {
+            label: "Real-Time Transactional Routing",
+            text: "For customer-facing, latency-critical applications (such as fraud detection, payment authorization, and real-time recommendation engines), we engineer optimized execution paths that maintain low P95 latency thresholds.",
+          },
+          {
+            label: "Asynchronous Agentic Workflows",
+            text: "For complex multi-agent orchestrations requiring deep multi-step reasoning, we decouple execution using distributed message queues (Kafka, Redis, RabbitMQ) with persistent state recovery, streaming intermediate updates via WebSockets or Server-Sent Events (SSE).",
+          },
+          {
+            label: "Horizontal Elastic Scaling",
+            text: "All services are containerized under Kubernetes (EKS/GKE) with automated horizontal pod autoscaling (HPA) and model-serving engines optimized for continuous batching and high GPU throughput under peak enterprise traffic.",
+          },
+        ],
       },
       {
-        label: "Token Cost Governance & Compute Optimization",
-        text: "We continuously profile cost-per-query. By implementing semantic prompt caching, model distillation (distilling large frontier models into high-speed, 8B/70B parameter open-source variants), and context-window optimization, we maintain linear, predictable compute budgets as your user traffic scales.",
+        question: "Can our agentic systems interact safely with existing enterprise databases and legacy APIs?",
+        answer:
+          "Yes. Deploying production AI requires bridging the gap between probabilistic language models and deterministic enterprise databases (PostgreSQL, MySQL, Snowflake, SAP, Salesforce, and proprietary internal REST/GraphQL endpoints). We engineer safe, enterprise-grade tool-calling architectures that ensure:",
+        points: [
+          {
+            label: "Governed Schema Mapping",
+            text: "Dynamic generation of structured SQL queries and API payloads validated against strict data dictionaries before execution.",
+          },
+          {
+            label: "Read/Write Permission Boundaries",
+            text: "Autonomous agents are restricted to sandboxed read environments by default. Any write, update, or financial transaction requires deterministic validation rules or an explicit human-in-the-loop (HITL) approval gate.",
+          },
+          {
+            label: "Transactional Rollbacks & Idempotency",
+            text: "All state-changing actions are engineered with idempotent execution keys and automated rollback mechanisms, preventing database corruption or duplicated API calls in the event of upstream network failures.",
+          },
+        ],
       },
     ],
   },
   {
-    question: "How do you guarantee enterprise data privacy and regulatory compliance?",
-    answer:
-      "We engineer AI solutions specifically for enterprises operating under rigorous international security and data protection frameworks, maintaining strict alignment with SOC 2 Type II, ISO 27001, HIPAA, and EU GDPR standards:",
-    points: [
+    id: "security",
+    part: "Part III",
+    shortTitle: "Security & Governance",
+    title: "Security, Governance & Empirical Reliability",
+    description: "For evaluating data isolation, red teaming, eval benchmarks, and model drift.",
+    items: [
       {
-        label: "Zero Data Retention (ZDR)",
-        text: "For cloud API integrations, we configure and contractually enforce Zero Data Retention agreements, ensuring external model vendors never store, log, or cache your payload data.",
+        question: "How does foundational scientific research inform your product engineering?",
+        answer:
+          "Unlike traditional development firms that rely entirely on generic public model APIs, Rockship’s technical architecture is grounded in foundational machine learning research. Our internal AI R&D Lab actively enables our engineering teams to:",
+        points: [
+          {
+            text: "Calibrate model confidence scores to mathematically quantify uncertainty before an autonomous agent executes high-stakes decisions;",
+          },
+          {
+            text: "Engineer explainable decision trees and transparent audit trails for mission-critical enterprise workflows; and",
+          },
+          {
+            text: 'Keep multi-agent reasoning out of uninterpretable "black-box" failure modes, ensuring provable safety and deterministic reliability in enterprise deployments.',
+          },
+        ],
       },
       {
-        label: "Zero Training on Enterprise Telemetry",
-        text: "Your proprietary data, customer interactions, and system inputs are never used to train public or foundational models.",
+        question: "How do you benchmark accuracy, mitigate hallucinations, and govern token economics?",
+        answer:
+          "We treat generative AI quality with the same empirical discipline as high-reliability software engineering:",
+        points: [
+          {
+            label: "Automated Evaluation Harnesses",
+            text: "Before shipping any system to staging or production, we establish customized golden benchmark datasets. We run automated regression pipelines utilizing multi-metric evaluation frameworks and LLM-as-a-judge scoring to quantify domain-specific accuracy, contextual relevance, factual recall, and latency.",
+          },
+          {
+            label: "Deterministic Production Guardrails",
+            text: "We deploy automated input/output guardrail layers that execute strict JSON schema validation, regex PII masking, toxicity filtering, and prompt injection defense prior to model inference and before output rendering.",
+          },
+          {
+            label: "Token Cost Governance & Compute Optimization",
+            text: "We continuously profile cost-per-query. By implementing semantic prompt caching, model distillation (distilling large frontier models into high-speed, 8B/70B parameter open-source variants), and context-window optimization, we maintain linear, predictable compute budgets as your user traffic scales.",
+          },
+        ],
       },
       {
-        label: "Private VPC & On-Premise Deployments",
-        text: "For clients with sovereign data constraints (financial services, healthcare, defense), we deploy state-of-the-art open-source foundational models (such as Llama, Mistral, and DeepSeek) entirely within your private VPC (AWS, GCP, Azure) or bare-metal on-premise clusters using secure containerized endpoints (vLLM/TGI), ensuring zero data egress outside your perimeter.",
-      },
-    ],
-  },
-  {
-    question: "Can our agentic systems interact safely with existing enterprise databases and legacy APIs?",
-    answer:
-      "Yes. Deploying production AI requires bridging the gap between probabilistic language models and deterministic enterprise databases (PostgreSQL, MySQL, Snowflake, SAP, Salesforce, and proprietary internal REST/GraphQL endpoints).\nWe engineer safe, enterprise-grade tool-calling architectures that ensure:",
-    points: [
-      {
-        label: "Governed Schema Mapping",
-        text: "Dynamic generation of structured SQL queries and API payloads validated against strict data dictionaries before execution.",
-      },
-      {
-        label: "Read/Write Permission Boundaries",
-        text: "Autonomous agents are restricted to sandboxed read environments by default. Any write, update, or financial transaction requires deterministic validation rules or an explicit human-in-the-loop (HITL) approval gate.",
-      },
-      {
-        label: "Transactional Rollbacks & Idempotency",
-        text: "All state-changing actions are engineered with idempotent execution keys and automated rollback mechanisms, preventing database corruption or duplicated API calls in the event of upstream network failures.",
-      },
-    ],
-  },
-  {
-    question: "How do you eliminate timezone friction across global teams?",
-    answer:
-      "We eliminate asynchronous communication bottlenecks by contractually guaranteeing a 4-hour daily synchronous working overlap with your core engineering and product leadership, regardless of your geography:",
-    points: [
-      {
-        label: "Seamless Team Integration",
-        text: "Our engineers and product leads integrate directly into your daily sprint rituals — participating in live standups, collaborating in Slack/Teams channels, and conducting real-time GitHub code reviews.",
+        question: "How do you guarantee enterprise data privacy and regulatory compliance?",
+        answer:
+          "We engineer AI solutions specifically for enterprises operating under rigorous international security and data protection frameworks, maintaining strict alignment with SOC 2 Type II, ISO 27001, HIPAA, and EU GDPR standards:",
+        points: [
+          {
+            label: "Zero Data Retention (ZDR)",
+            text: "For cloud API integrations, we configure and contractually enforce Zero Data Retention agreements, ensuring external model vendors never store, log, or cache your payload data.",
+          },
+          {
+            label: "Zero Training on Enterprise Telemetry",
+            text: "Your proprietary data, customer interactions, and system inputs are never used to train public or foundational models.",
+          },
+          {
+            label: "Private VPC & On-Premise Deployments",
+            text: "For clients with sovereign data constraints (financial services, healthcare, defense), we deploy state-of-the-art open-source foundational models (such as Llama, Mistral, and DeepSeek) entirely within your private VPC (AWS, GCP, Azure) or bare-metal on-premise clusters using secure containerized endpoints (vLLM/TGI), ensuring zero data egress outside your perimeter.",
+          },
+        ],
       },
       {
-        label: "Multi-Market Coverage",
-        text: "We actively support enterprise partners across Silicon Valley (PST), New York (EST), London (GMT/CET), Singapore (SGT), and Tokyo (JST). Our overlapping sprint schedules ensure that technical blockers, pull requests, and architectural decisions are resolved synchronously within hours, preserving rapid continuous deployment velocity.",
+        question: "How do you defend against adversarial prompt injection and data exfiltration?",
+        answer:
+          "Autonomous agents that read external documents, user inputs, or web content are inherently vulnerable to indirect prompt injection and data exfiltration attacks. We deploy defense-in-depth security at every layer of the cognitive stack:",
+        points: [
+          {
+            label: "Dual-Boundary Sanitization",
+            text: "We isolate untrusted external content (emails, uploaded PDFs, customer chats) from the agent’s system instructions using strict input-parsing delimiters, structural JSON enforcement, and semantic sanitization filters.",
+          },
+          {
+            label: "Sandboxed Execution Environments",
+            text: "Any dynamic tool calling, Python interpreter execution, or automated SQL generation is restricted to isolated, stateless, network-isolated sandboxes with pre-configured memory limits and strict execution timeouts.",
+          },
+          {
+            label: "Automated Adversarial Red Teaming",
+            text: "Prior to production rollout, our AI R&D Lab subjects the application to continuous automated red teaming—probing model endpoints against thousands of known jailbreaks, prompt leaks, and privilege-escalation vectors to verify guardrail resilience.",
+          },
+        ],
+      },
+      {
+        question: "How do you manage model drift, data distribution shifts, and continuous production reliability?",
+        answer:
+          "Shipping to production is only day one of an AI system’s lifecycle. Real-world user prompts, schema changes, and upstream data formats evolve continuously. We ensure long-term model reliability through continuous production observability:",
+        points: [
+          {
+            label: "Continuous Observability & Telemetry",
+            text: "We log full execution traces (input tokens, retrieval chunks, intermediate tool-call arguments, output tokens, and latency) with automated telemetry export into enterprise monitoring stacks (Datadog, OpenTelemetry, Langfuse, Arize).",
+          },
+          {
+            label: "Automated Drift & Hallucination Audits",
+            text: "Our background eval jobs continuously sample live production traffic—scoring responses against golden factual benchmarks to detect semantic drift, declining retrieval accuracy, or unexpected changes in user intent.",
+          },
+          {
+            label: "Shadow Deployments & Safe Rollbacks",
+            text: "When updating prompts, retrieval pipelines, or fine-tuned model weights, we route a percentage of live traffic through shadow deployments, comparing performance metrics side-by-side with production before completing canary cutovers.",
+          },
+        ],
       },
     ],
   },
 ];
+
+export const FAQ: FaqItem[] = FAQ_PARTS.flatMap((part) => part.items);
 
 /**
  * Real events, most recent first. Recommendation in research-v2.md Part 5 is a

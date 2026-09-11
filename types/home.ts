@@ -82,6 +82,15 @@ export interface FaqItem {
   unverified?: boolean;
 }
 
+export interface FaqPart {
+  id: string;
+  part: string;
+  shortTitle: string;
+  title: string;
+  description: string;
+  items: FaqItem[];
+}
+
 export interface CareerPillar {
   index: string;
   title: string;
