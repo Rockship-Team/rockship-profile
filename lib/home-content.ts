@@ -235,17 +235,17 @@ export const CAREER: CareerPillar[] = [
   {
     index: "01",
     title: "Forward-deployed by default",
-    body: "Our engineers sit with your stakeholders, gather the requirements themselves, and ship. No translation layer.",
+    body: "Our engineers and product leads embed directly with your executive stakeholders, analyze regulatory and business constraints in real time, and ship production code. Zero account-manager dilution, zero requirements lost in translation.",
   },
   {
     index: "02",
-    title: "AI-native practice",
-    body: "Evaluation harnesses, guardrails and cost control are standard practice here, not a specialisation.",
+    title: "AI-native engineering discipline",
+    body: "Automated evaluation harnesses, deterministic guardrails, and inference cost governance are foundational engineering standards here — not post-launch afterthoughts.",
   },
   {
     index: "03",
-    title: "Mentored, then trusted",
-    body: "Every engineer works under a senior lead before they lead. That's why we can put them in front of you.",
+    title: "Institutional mentorship, proven ownership",
+    body: "Shipping mission-critical systems and cultivating technical leaders are the same discipline. Every engineer apprentices under a seasoned systems architect — advancing through rigorous production rubrics before leading client roadmaps.",
   },
 ];
 
