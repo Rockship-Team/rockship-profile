@@ -6,9 +6,9 @@ const COLUMNS = [
   {
     heading: "Services",
     links: [
-      { label: "Team augmentation", href: "/#services" },
-      { label: "Dedicated teams", href: "/#services" },
-      { label: "AI delivery sprints", href: "/#services" },
+      { label: "Engineering Squads", href: "/#services" },
+      { label: "AI-Native Product Pods", href: "/#services" },
+      { label: "Production AI Sprints", href: "/#services" },
       { label: "How we select", href: "/#selection" },
     ],
   },
@@ -19,7 +19,6 @@ const COLUMNS = [
       { label: "Case studies", href: "/case-studies" },
       { label: "Team", href: "/#team" },
       { label: "Events", href: "/events" },
-      { label: "Blog", href: "/blog" },
     ],
   },
 ];
@@ -64,15 +63,6 @@ export default function SiteFooter() {
                 style={{ color: "var(--rk-sec)" }}
               >
                 {CONTACT.email}
-              </a>
-            </li>
-            <li>
-              <a
-                href={CONTACT.whatsapp}
-                className="text-[12px] hover:underline"
-                style={{ color: "var(--rk-sec)" }}
-              >
-                {CONTACT.phoneLabel}
               </a>
             </li>
             <li>

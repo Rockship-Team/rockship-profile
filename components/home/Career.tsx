@@ -31,9 +31,11 @@ export default function Career() {
                 {pillar.index}
               </span>
               <h3 className="rk-item mt-6">{pillar.title}</h3>
-              <p className="mt-3 text-[17px]" style={{ color: "var(--rk-sec)" }}>
-                {pillar.body}
-              </p>
+              {pillar.body && (
+                <p className="mt-3 text-[17px]" style={{ color: "var(--rk-sec)" }}>
+                  {pillar.body}
+                </p>
+              )}
             </article>
           </RevealItem>
         ))}

@@ -6,14 +6,9 @@ import Section, { SectionHead } from "./Section";
 import Reveal from "./Reveal";
 
 export default function Faq() {
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>(FAQ_PARTS[0].id);
 
-  const totalQuestions = FAQ_PARTS.reduce((acc, p) => acc + p.items.length, 0);
-
-  const displayedParts =
-    activeTab === "all"
-      ? FAQ_PARTS
-      : FAQ_PARTS.filter((part) => part.id === activeTab);
+  const displayedParts = FAQ_PARTS.filter((part) => part.id === activeTab);
 
   return (
     <Section id="faq">
@@ -27,24 +22,6 @@ export default function Faq() {
 
       {/* Category Filter Pills */}
       <div className="mx-auto mt-10 flex max-w-[880px] flex-wrap items-center justify-center gap-2 px-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab("all")}
-          className="cursor-pointer rounded-full px-4 py-2 text-[14px] font-medium transition-all"
-          style={{
-            background:
-              activeTab === "all"
-                ? "var(--rk-ink)"
-                : "color-mix(in srgb, var(--rk-ink) 5%, transparent)",
-            color: activeTab === "all" ? "var(--rk-paper)" : "var(--rk-sec)",
-            border:
-              activeTab === "all"
-                ? "1px solid var(--rk-ink)"
-                : "1px solid var(--rk-hair)",
-          }}
-        >
-          All ({totalQuestions})
-        </button>
         {FAQ_PARTS.map((part) => {
           const isActive = activeTab === part.id;
           return (

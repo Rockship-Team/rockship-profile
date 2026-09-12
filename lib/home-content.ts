@@ -53,7 +53,7 @@ export const HERO = {
   headlineLead: "AI-Native Engineering and Product-Led Growth Team who",
   headlineAccent: "ship outcomes",
   headlineTail: ", not tickets.",
-  sub: "We deploy elite AI engineers and product leaders — fluent in state-of-the-art AI — to build and ship your production-ready product in weeks, not months. Trusted by early-stage startups to major enterprises, we build AI systems that generate millions (and soon billions) in revenue.",
+  sub: "We deploy elite AI engineers and product leaders — fluent in state-of-the-art AI — to build and ship your production-ready product in weeks, not months. Trusted by high-growth companies and leaders globally, we architect and deploy mission-critical AI systems that deliver production scale and measurable business impact.",
   meta: "30 minutes, with an engineer — not a salesperson.",
 } as const;
 
@@ -247,7 +247,7 @@ export const CAREER: CareerPillar[] = [
   {
     index: "03",
     title: "Institutional mentorship, proven ownership",
-    body: "Shipping mission-critical systems and cultivating technical leaders are the same discipline. Emerging engineers and associate PMs execute under seasoned leads — advancing through structured production rubrics before leading client roadmaps.",
+    body: "Building high-impact software demands equal rigor across product discovery and systems engineering. Emerging product managers and engineers hone their craft embedded within senior cross-functional pods — proving their execution across live production milestones before directing client roadmaps.",
   },
 ];
 

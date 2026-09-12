@@ -93,7 +93,7 @@ export interface FaqPart {
 export interface CareerPillar {
   index: string;
   title: string;
-  body: string;
+  body?: string;
 }
 
 export type EventStatus = "upcoming" | "past";
