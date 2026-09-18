@@ -251,8 +251,8 @@ export const CAREER: CareerPillar[] = [
   },
 ];
 
-/** Ordered for a 3-per-row grid: rows read left to right, top to bottom. */
-export const TEAM: Person[] = [
+/** Each array renders as one centred row, read left to right. */
+export const BOARD: Person[] = [
   {
     name: "Son Vo",
     role: "Chief Operating Officer",
@@ -265,12 +265,9 @@ export const TEAM: Person[] = [
     photo: "/Quan.png",
     previously: null,
   },
-  {
-    name: "Mimi Nguyen",
-    role: "Chief People Officer",
-    photo: "/MimiNguyen.jpeg",
-    previously: null,
-  },
+];
+
+export const LEADERSHIP: Person[] = [
   {
     name: "Huy Dang",
     role: "Managing Partner",
@@ -290,13 +287,18 @@ export const TEAM: Person[] = [
     photoPosition: "right top",
     previously: null,
   },
+  {
+    name: "Mimi Nguyen",
+    role: "Head of People",
+    photo: "/MimiNguyen.jpeg",
+    previously: null,
+  },
 ];
 
 export const ADVISORS: Advisor[] = [
   {
     name: "Dr. Wray Buntine",
     role: "Chief AI Advisor",
-    photo: "/WrayBuntine.jpg",
     subtext:
       "Full Professor of Data Science and AI at Monash University, top 0.75% most-cited AI researchers globally",
   },
