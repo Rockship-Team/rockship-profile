@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ADVISORS, BOARD, LEADERSHIP } from "@/lib/home-content";
+import { BOARD, LEADERSHIP } from "@/lib/home-content";
 import Section, { SectionHead } from "./Section";
 import Reveal, { RevealGroup, RevealItem } from "./Reveal";
 import TK from "./TK";
@@ -8,9 +8,9 @@ import TK from "./TK";
 interface RosterCard {
   name: string;
   role: string;
-  photo?: string;
+  photo: string;
   photoPosition?: string;
-  /** Credential line under the role: "Previously X" for staff, the bio for advisors. */
+  /** Credential line under the role: "Previously X". Null until supplied. */
   note: string | null;
   unverified?: boolean;
 }
@@ -44,22 +44,20 @@ function PersonRow({ people }: { people: RosterCard[] }) {
       {people.map((person) => (
         <RevealItem key={person.name}>
           <article className="group text-center">
-            {person.photo ? (
-              <div
-                className="relative mb-4 aspect-[4/5] w-full overflow-hidden rounded-[16px]"
-                style={{ background: "var(--rk-paper)", border: "1px solid var(--rk-hair)" }}
-              >
-                <Image
-                  src={person.photo}
-                  alt={person.name}
-                  fill
-                  sizes="190px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  style={{ objectPosition: person.photoPosition ?? "center top" }}
-                />
-              </div>
-            ) : null}
-            <h4 className="text-[18px] font-semibold tracking-[0.011em]">
+            <div
+              className="relative aspect-[4/5] w-full overflow-hidden rounded-[16px]"
+              style={{ background: "var(--rk-paper)", border: "1px solid var(--rk-hair)" }}
+            >
+              <Image
+                src={person.photo}
+                alt={person.name}
+                fill
+                sizes="190px"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                style={{ objectPosition: person.photoPosition ?? "center top" }}
+              />
+            </div>
+            <h4 className="mt-4 text-[18px] font-semibold tracking-[0.011em]">
               {person.unverified ? <TK>{person.name}</TK> : person.name}
             </h4>
             <div className="mt-1 text-[14px]" style={{ color: "var(--rk-sec)" }}>
@@ -82,16 +80,10 @@ export default function Team() {
     ...person,
     note: person.previously ? `Previously ${person.previously}` : null,
   });
-  const advisorRow: RosterCard[] = ADVISORS.map((advisor) => ({
-    ...advisor,
-    note: advisor.subtext,
-  }));
-
   /** Each row is a named group, labelled by a rule so the hierarchy is readable. */
-  const groups: { label: string; people: RosterCard[]; id?: string }[] = [
+  const groups: { label: string; people: RosterCard[] }[] = [
     { label: "Board of Directors", people: BOARD.map(toStaffCard) },
     { label: "Leadership Team", people: LEADERSHIP.map(toStaffCard) },
-    { label: "Advisory Board", people: advisorRow, id: "advisors" },
   ].filter((group) => group.people.length > 0);
 
   return (
@@ -107,15 +99,12 @@ export default function Team() {
 
       {/* Fixed 190px tracks rather than stretched 1fr columns: at 1120px the
           old auto-fit grid rendered ~232x290 portraits, which read as hero
-          images instead of headshots. Rows of three rather than one auto-fill
-          grid, so the roster reads as a deliberate arrangement instead of
-          wrapping wherever the container happens to break. Advisors close the
-          section as a final row — they were their own section until the roster
-          was small enough that two headers back to back read as padding. The
-          "advisors" id stays put so existing /#advisors links still land. */}
+          images instead of headshots. One row per group rather than one
+          auto-fill grid, so the roster reads as a deliberate arrangement
+          instead of wrapping wherever the container happens to break. */}
       <div className="mt-[clamp(48px,6vw,80px)] flex flex-col gap-y-[clamp(44px,5vw,64px)]">
         {groups.map((group) => (
-          <div key={group.label} id={group.id} className="scroll-mt-[88px]">
+          <div key={group.label} className="scroll-mt-[88px]">
             <Reveal>
               <GroupLabel>{group.label}</GroupLabel>
             </Reveal>

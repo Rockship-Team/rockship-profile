@@ -33,9 +33,9 @@ export default function Page() {
           <Services />
           <WhyRockship />
           <Team />
+          <AiRdLab />
           <Selection />
           <CaseStudies />
-          <AiRdLab />
           <Career />
           <Faq />
           <FinalCTA />

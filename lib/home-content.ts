@@ -10,7 +10,6 @@
  */
 
 import type {
-  Advisor,
   AiLab,
   CareerPillar,
   CaseStudy,
@@ -275,7 +274,7 @@ export const LEADERSHIP: Person[] = [
     previously: null,
   },
   {
-    name: "Hung Tran",
+    name: "Jay Tran",
     role: "VP of Engineering",
     photo: "/Hung.png",
     previously: null,
@@ -288,19 +287,10 @@ export const LEADERSHIP: Person[] = [
     previously: null,
   },
   {
-    name: "Mimi Nguyen",
+    name: "Mimi Le",
     role: "Head of People",
     photo: "/MimiNguyen.jpeg",
     previously: null,
-  },
-];
-
-export const ADVISORS: Advisor[] = [
-  {
-    name: "Dr. Wray Buntine",
-    role: "Chief AI Advisor",
-    subtext:
-      "Full Professor of Data Science and AI at Monash University, top 0.75% most-cited AI researchers globally",
   },
 ];
 

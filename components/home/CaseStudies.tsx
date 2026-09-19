@@ -9,7 +9,7 @@ export default function CaseStudies() {
     <Section id="work" alt>
       <Reveal>
         <SectionHead
-          index="05"
+          index="06"
           eyebrow="Case studies"
           headline="What we've put into production."
           intro="80+ client projects across various industries. Please contact us for specific use cases for your needs. Client names withheld under NDA. Metrics measured by the client."

@@ -18,62 +18,17 @@ export default function AiRdLab() {
     <Section id="ai-lab">
       <Reveal>
         <SectionHead
-          index="06"
+          index="04"
           eyebrow="AI R&D Lab"
           headline="Our innovation engine."
           intro={intro}
         />
       </Reveal>
 
-      {/* The prose is two paragraphs against a 4:3 diagram, so the columns are
-          centred against each other rather than top-aligned — top-aligned left
-          a third of the right column empty. On mobile the diagram takes order-1
-          so the picture lands directly under the intro it illustrates. */}
-      <div className="mt-[clamp(48px,6vw,80px)] grid items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
-        <Reveal className="order-2 flex flex-col gap-4 lg:order-1">
-          {body.map((paragraph) => (
-            <p key={paragraph} className="text-[17px]" style={{ color: "var(--rk-sec)" }}>
-              {paragraph}
-            </p>
-          ))}
-        </Reveal>
-
-        <Reveal delay={0.08} className="order-1 lg:order-2">
-          <Image
-            src={diagram.src}
-            alt={diagram.alt}
-            width={diagram.width}
-            height={diagram.height}
-            sizes="(max-width: 1024px) 100vw, 520px"
-            className="h-auto w-full rounded-[18px]"
-          />
-        </Reveal>
-      </div>
-
-      {/* A hairline-topped strip rather than another card grid: case studies
-          above and Career below are both card grids, and a third in between
-          would flatten the page into one long deck.
-
-          Explicit column counts rather than auto-fit: five items auto-fit into
-          four columns plus a lone fifth at this width. 5 / 3+2 / 2+2+1 / 1 all
-          read as deliberate; 4+1 reads as a mistake. */}
-      <RevealGroup className="mt-[clamp(48px,6vw,72px)] grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-        {capabilities.map((capability) => (
-          <RevealItem key={capability.title}>
-            <div className="border-t pt-5" style={{ borderColor: "var(--rk-hair)" }}>
-              <h3 className="text-[17px] font-semibold leading-snug">{capability.title}</h3>
-              <p className="mt-2 text-[15px]" style={{ color: "var(--rk-sec)" }}>
-                {capability.body}
-              </p>
-            </div>
-          </RevealItem>
-        ))}
-      </RevealGroup>
-
-      {/* Dr. Buntine also appears in the Team roster. He is repeated here in a
-          different register: Team answers who you work with, this answers why
-          the lab is credible. */}
-      <Reveal className="mt-[clamp(48px,6vw,72px)]">
+      {/* The advisor opens the section: who vouches for the lab is the first
+          question a buyer asks of an R&D claim, so his credentials lead and the
+          platform argument follows. */}
+      <Reveal className="mt-[clamp(48px,6vw,80px)]">
         <article className="rk-card flex flex-col gap-6 p-8 sm:flex-row sm:items-start sm:gap-8">
           <Image
             src={advisor.photo}
@@ -94,6 +49,51 @@ export default function AiRdLab() {
           </div>
         </article>
       </Reveal>
+
+      {/* The prose is two paragraphs against a 4:3 diagram, so the columns are
+          centred against each other rather than top-aligned — top-aligned left
+          a third of the right column empty. On mobile the diagram takes order-1
+          so the picture lands directly under the intro it illustrates. */}
+      <div className="mt-[clamp(48px,6vw,72px)] grid items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
+        <Reveal className="order-2 flex flex-col gap-4 lg:order-1">
+          {body.map((paragraph) => (
+            <p key={paragraph} className="text-[17px]" style={{ color: "var(--rk-sec)" }}>
+              {paragraph}
+            </p>
+          ))}
+        </Reveal>
+
+        <Reveal delay={0.08} className="order-1 lg:order-2">
+          <Image
+            src={diagram.src}
+            alt={diagram.alt}
+            width={diagram.width}
+            height={diagram.height}
+            sizes="(max-width: 1024px) 100vw, 520px"
+            className="h-auto w-full rounded-[18px]"
+          />
+        </Reveal>
+      </div>
+
+      {/* A hairline-topped strip rather than another card grid: the sections
+          on either side are card grids, and a third in between would flatten
+          the page into one long deck.
+
+          Explicit column counts rather than auto-fit: five items auto-fit into
+          four columns plus a lone fifth at this width. 5 / 3+2 / 2+2+1 / 1 all
+          read as deliberate; 4+1 reads as a mistake. */}
+      <RevealGroup className="mt-[clamp(48px,6vw,72px)] grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        {capabilities.map((capability) => (
+          <RevealItem key={capability.title}>
+            <div className="border-t pt-5" style={{ borderColor: "var(--rk-hair)" }}>
+              <h3 className="text-[17px] font-semibold leading-snug">{capability.title}</h3>
+              <p className="mt-2 text-[15px]" style={{ color: "var(--rk-sec)" }}>
+                {capability.body}
+              </p>
+            </div>
+          </RevealItem>
+        ))}
+      </RevealGroup>
     </Section>
   );
 }

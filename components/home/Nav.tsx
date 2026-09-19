@@ -11,9 +11,9 @@ const TABS = [
   { href: "#services", label: "Services" },
   { href: "#why", label: "Why Rockship" },
   { href: "#team", label: "Team" },
+  { href: "#ai-lab", label: "AI Lab" },
   { href: "#selection", label: "Selection" },
   { href: "#work", label: "Case studies" },
-  { href: "#ai-lab", label: "AI Lab" },
   { href: "#career", label: "Career" },
   { href: "#faq", label: "FAQ" },
 ];

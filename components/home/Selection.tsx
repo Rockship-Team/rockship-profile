@@ -13,7 +13,7 @@ export default function Selection() {
     <Section id="selection">
       <Reveal>
         <SectionHead
-          index="04"
+          index="05"
           eyebrow="Selection"
           headline="Empirical rigor. Deterministic execution. An uncompromising engineering bar."
           intro="We evaluate technical talent by production systems reliability, not resume claims. Here is our four-stage vetting protocol."

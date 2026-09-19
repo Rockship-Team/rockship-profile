@@ -59,17 +59,6 @@ export interface Person {
   unverified?: boolean;
 }
 
-export interface Advisor {
-  name: string;
-  role: string;
-  /** Omitted when the portrait already appears elsewhere on the page. */
-  photo?: string;
-  /** CSS object-position for the portrait crop. Defaults to "center top". */
-  photoPosition?: string;
-  /** Short credential line shown under the name and role. */
-  subtext: string;
-}
-
 export interface FaqPoint {
   label?: string;
   text: string;

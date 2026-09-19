@@ -2,7 +2,14 @@ import Link from "next/link";
 import { CONTACT } from "@/lib/home-content";
 import Logo from "./Logo";
 
-const COLUMNS = [
+interface FooterLink {
+  label: string;
+  href: string;
+  /** Opens in a new tab — used for destinations off rockship.co. */
+  external?: boolean;
+}
+
+const COLUMNS: { heading: string; links: FooterLink[] }[] = [
   {
     heading: "Services",
     links: [
@@ -19,6 +26,11 @@ const COLUMNS = [
       { label: "Case studies", href: "/case-studies" },
       { label: "Team", href: "/#team" },
       { label: "Events", href: "/events" },
+      {
+        label: "Blog",
+        href: "https://www.linkedin.com/newsletters/rocket-builders-7160255132914376704/",
+        external: true,
+      },
     ],
   },
 ];
@@ -44,6 +56,9 @@ export default function SiteFooter() {
                     href={link.href}
                     className="text-[12px] hover:underline"
                     style={{ color: "var(--rk-sec)" }}
+                    {...(link.external
+                      ? { target: "_blank", rel: "noreferrer" }
+                      : {})}
                   >
                     {link.label}
                   </Link>
