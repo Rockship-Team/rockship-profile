@@ -93,12 +93,16 @@ export default function SiteFooter() {
         </div>
       </div>
 
+      {/* Stacked rather than a single wrapping row: the two registered
+          entities are a legal statement, and wrapping them mid-line reads as
+          one run-on sentence. */}
       <div
-        className="mx-auto flex w-full max-w-[1120px] flex-wrap gap-3.5 px-[clamp(22px,5vw,60px)] pt-5 text-[12px]"
+        className="mx-auto flex w-full max-w-[1120px] flex-col gap-1 px-[clamp(22px,5vw,60px)] pt-5 text-[12px]"
         style={{ borderTop: "1px solid var(--rk-hair)", color: "var(--rk-ter)" }}
       >
-        <span>© {new Date().getFullYear()} Rockship</span>
-        <span>{CONTACT.city}</span>
+        <span>© {new Date().getFullYear()} Rockship. All rights reserved.</span>
+        <span>Rockship Pte. Ltd. (UEN: 201928285H, Singapore)</span>
+        <span>Rockship Co., Ltd. (MST: 0314642897, Vietnam)</span>
       </div>
     </footer>
   );

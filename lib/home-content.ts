@@ -288,8 +288,8 @@ export const LEADERSHIP: Person[] = [
   },
   {
     name: "Mimi Le",
-    role: "Head of People",
-    photo: "/MimiNguyen.jpeg",
+    role: "Head of People Operations",
+    photo: "/mimi-le.jpeg",
     previously: null,
   },
 ];
