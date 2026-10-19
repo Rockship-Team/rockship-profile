@@ -275,7 +275,7 @@ export const LEADERSHIP: Person[] = [
   },
   {
     name: "Jay Tran",
-    role: "VP of Engineering",
+    role: "Head of Engineering",
     photo: "/Hung.png",
     previously: null,
   },
@@ -288,7 +288,7 @@ export const LEADERSHIP: Person[] = [
   },
   {
     name: "Mimi Le",
-    role: "Head of People Operations",
+    role: "Head of Operations",
     photo: "/mimi-le.jpeg",
     previously: null,
   },
