@@ -5,7 +5,7 @@
 #   ./scripts/deploy.sh                 build -> push -> release (the full ride)
 #   ./scripts/deploy.sh build           1. build Next.js standalone on this machine
 #   ./scripts/deploy.sh image           2. build the Docker image locally (this arch)
-#   ./scripts/deploy.sh push            2+3. build multi-arch image and push to ECR
+#   ./scripts/deploy.sh push            2+3. build multi-arch image and push to the registry
 #   ./scripts/deploy.sh release         4. ssh to the server, swap the container
 #   ./scripts/deploy.sh run-local       smoke-test the local image on :3000
 #   ./scripts/deploy.sh logs            tail the container logs on the server
@@ -45,7 +45,7 @@ need() { command -v "$1" >/dev/null 2>&1 || die "\`$1\` is not installed or not 
 
 [ -f deploy.config ] || die "deploy.config not found. Run: cp deploy.config.example deploy.config"
 
-SETTINGS="AWS_REGION AWS_ACCOUNT_ID ECR_REPOSITORY AWS_PROFILE IMAGE_TAG PLATFORMS
+SETTINGS="REGISTRY IMAGE_NAME REGISTRY_USER REGISTRY_TOKEN IMAGE_TAG PLATFORMS
           SSH_HOST SSH_USER SSH_PORT SSH_KEY SSH_KNOWN_HOSTS_FILE CONTAINER_NAME
           DOCKER_NETWORK HOST_PORT CONTAINER_PORT LOCAL_PORT REMOTE_ENV_FILE"
 
@@ -60,16 +60,8 @@ done
 set -a; source ./deploy.config; set +a
 eval "$_overrides"
 
-# `set -a` exported everything, including AWS_PROFILE="". The AWS CLI reads that
-# as a profile literally named "" and fails with "The config profile () could
-# not be found" — empty has to mean absent, so unset it.
-[ -z "${AWS_PROFILE:-}" ] && unset AWS_PROFILE
-
-true # the test above must not decide the script's exit status under `set -e`
-
-: "${AWS_REGION:?set AWS_REGION in deploy.config}"
-: "${AWS_ACCOUNT_ID:?set AWS_ACCOUNT_ID in deploy.config}"
-: "${ECR_REPOSITORY:?set ECR_REPOSITORY in deploy.config}"
+: "${REGISTRY:?set REGISTRY in deploy.config}"
+: "${IMAGE_NAME:?set IMAGE_NAME in deploy.config}"
 : "${PLATFORMS:=linux/amd64,linux/arm64}"
 : "${CONTAINER_NAME:=rockship-profile}"
 : "${CONTAINER_PORT:=3000}"
@@ -90,18 +82,19 @@ if [ -z "${IMAGE_TAG:-}" ]; then
   fi
 fi
 
-REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-IMAGE="${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-IMAGE_LATEST="${REGISTRY}/${ECR_REPOSITORY}:latest"
-LOCAL_IMAGE="${ECR_REPOSITORY}:${IMAGE_TAG}"
+# REGISTRY is the registry host plus namespace (registry.digitalocean.com/
+# rockship-temp); docker login wants the host alone.
+REGISTRY_HOST="${REGISTRY%%/*}"
+IMAGE="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+IMAGE_LATEST="${REGISTRY}/${IMAGE_NAME}:latest"
+LOCAL_IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 STAGE_DIR=".deploy"
 
-aws_cli() {
-  if [ -n "${AWS_PROFILE:-}" ]; then
-    aws --region "$AWS_REGION" --profile "$AWS_PROFILE" "$@"
-  else
-    aws --region "$AWS_REGION" "$@"
-  fi
+# DigitalOcean's registry takes the API token as both username and password, so
+# the user defaults to the token.
+require_registry_token() {
+  : "${REGISTRY_TOKEN:?set REGISTRY_TOKEN (a DigitalOcean API token with registry access) in the environment}"
+  : "${REGISTRY_USER:=$REGISTRY_TOKEN}"
 }
 
 ssh_cmd() {
@@ -159,7 +152,7 @@ cmd_build() {
   # NEXT_PUBLIC_* is compiled into the bundle by `next build`, so a wrong value
   # here cannot be corrected on the server. A placeholder does not fail the
   # build — it yields a site whose blog is silently empty — so catch it now.
-  # Mirrors the same check in .github/workflows/deploy-ecr.yml.
+  # Mirrors the same check in .github/workflows/deploy.yml.
   local env_file=""
   for f in .env.production.local .env.production; do
     [ -f "$f" ] && env_file="$f" && break
@@ -215,68 +208,28 @@ cmd_image() {
   step "2/4  Building Docker image for this machine ($(uname -m))"
   need docker
   require_stage
-  docker build -t "$LOCAL_IMAGE" -t "${ECR_REPOSITORY}:latest" .
+  docker build -t "$LOCAL_IMAGE" -t "${IMAGE_NAME}:latest" .
   ok "Built $LOCAL_IMAGE"
   dim "Smoke-test it with: ./scripts/deploy.sh run-local"
 }
 
-# --------------------------------------------- 2+3. multi-arch + push ECR ----
+# ---------------------------------------- 2+3. multi-arch + push registry ----
 
-ecr_login() {
-  info "Logging in to ECR (${REGISTRY})…"
-  aws_cli ecr get-login-password | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
-}
-
-# Validate credentials before anything that mutates AWS state. Getting this
-# wrong used to surface as a confusing failure *after* the script had already
-# tried to create a repository.
-aws_preflight() {
-  local profiles account
-
-  if [ -n "${AWS_PROFILE:-}" ]; then
-    profiles="$(aws configure list-profiles 2>/dev/null || true)"
-    if ! printf '%s\n' "$profiles" | grep -qxF "$AWS_PROFILE"; then
-      die "AWS profile \"${AWS_PROFILE}\" (set in deploy.config) does not exist.
-
-       Available profiles:
-$(printf '%s\n' "$profiles" | sed 's/^/         /')
-
-       Note this is a *profile* name from ~/.aws/config, not an IAM user name.
-       Leave AWS_PROFILE=\"\" to use the default profile."
-    fi
-  fi
-
-  account="$(aws_cli sts get-caller-identity --query Account --output text 2>/dev/null || true)"
-
-  if [ -z "$account" ]; then
-    die "Could not authenticate to AWS${AWS_PROFILE:+ with profile \"$AWS_PROFILE\"}.
-       Credentials may be missing or expired — try: aws sso login"
-  fi
-
-  # Pushing to the wrong account is silent and slow to notice. Refuse instead.
-  if [ "$account" != "$AWS_ACCOUNT_ID" ]; then
-    die "Credentials resolve to account ${account}, but deploy.config says ${AWS_ACCOUNT_ID}.
-       Fix AWS_ACCOUNT_ID, or point AWS_PROFILE at the right account."
-  fi
-
-  dim "aws account ${account}${AWS_PROFILE:+ · profile ${AWS_PROFILE}}"
+# Logging in first also validates the token, so a bad one fails here rather
+# than after a multi-minute build.
+registry_login() {
+  require_registry_token
+  info "Logging in to ${REGISTRY_HOST}…"
+  printf '%s' "$REGISTRY_TOKEN" \
+    | docker login "$REGISTRY_HOST" --username "$REGISTRY_USER" --password-stdin >/dev/null
 }
 
 cmd_push() {
-  step "2+3/4  Building multi-arch image and pushing to ECR"
+  step "2+3/4  Building multi-arch image and pushing to ${REGISTRY}"
   need docker
-  need aws
   require_stage
-  aws_preflight
 
-  if ! aws_cli ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1; then
-    info "Repository $ECR_REPOSITORY does not exist — creating it…"
-    aws_cli ecr create-repository \
-      --repository-name "$ECR_REPOSITORY" \
-      --image-scanning-configuration scanOnPush=true >/dev/null
-  fi
-
-  ecr_login
+  registry_login
 
   # The default `docker` buildx driver cannot emit multi-platform manifests.
   if ! docker buildx inspect rockship-builder >/dev/null 2>&1; then
@@ -321,9 +274,19 @@ cmd_release() {
     die "Neither HOST_PORT nor DOCKER_NETWORK is set — nothing could reach the container."
   fi
 
+  require_registry_token
+
+  # The server holds no registry credentials of its own: the pull authenticates
+  # with a docker config made for this release and deleted when it ends, so
+  # there is no long-lived key on the server to expire or rotate. It travels in
+  # the script on ssh's stdin, never on a command line where ps could see it.
+  local registry_auth
+  registry_auth="$(printf '%s:%s' "$REGISTRY_USER" "$REGISTRY_TOKEN" | base64 | tr -d '\n')"
+
   # Heredoc is unquoted so these expand HERE, on the laptop; the server only
-  # ever sees literal values. No secrets are interpolated — the runtime env
-  # comes from REMOTE_ENV_FILE, which already lives on the server.
+  # ever sees literal values. The one secret interpolated is registry_auth
+  # (base64, so it needs no quoting); the runtime env comes from
+  # REMOTE_ENV_FILE, which already lives on the server.
   ssh_cmd bash -euo pipefail -s <<EOF
     if [ ! -f "${REMOTE_ENV_FILE}" ]; then
       echo "error: ${REMOTE_ENV_FILE} is missing on this server." >&2
@@ -338,14 +301,15 @@ cmd_release() {
       exit 1
     fi
 
-    echo "--> Logging in to ECR"
-    aws ecr get-login-password --region "${AWS_REGION}" \
-      | docker login --username AWS --password-stdin "${REGISTRY}"
+    pull_config="\$(mktemp -d)"
+    trap 'rm -rf "\$pull_config"' EXIT
+    printf '{"auths":{"%s":{"auth":"%s"}}}' "${REGISTRY_HOST}" "${registry_auth}" \
+      > "\$pull_config/config.json"
 
     # Pull BEFORE removing the old container: if the pull fails, the currently
     # running version keeps serving traffic.
     echo "--> Pulling ${IMAGE}"
-    docker pull "${IMAGE}"
+    docker --config "\$pull_config" pull "${IMAGE}"
 
     echo "--> Removing old container (if any)"
     docker rm -f "${CONTAINER_NAME}" 2>/dev/null || true

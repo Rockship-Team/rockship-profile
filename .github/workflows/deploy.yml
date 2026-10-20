@@ -1,6 +1,6 @@
 # Builds the Next.js standalone bundle on the runner with bun, packages it into
-# a multi-arch Docker image, pushes to ECR, and swaps the container on the EC2
-# host over SSH.
+# a multi-arch Docker image, pushes to the DigitalOcean Container Registry, and
+# swaps the container on the EC2 host over SSH.
 #
 # This reuses ./scripts/deploy.sh rather than reimplementing the steps, so CI
 # and a local `bun run deploy` cannot drift apart. The workflow's only job is to
@@ -8,7 +8,7 @@
 #
 # Setup: docs/deployment.md ("Deploying from GitHub Actions").
 
-name: Deploy to ECR
+name: Deploy
 
 on:
   # Fires on every merge into main — merge commit, squash or rebase all arrive
@@ -23,22 +23,24 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Existing ECR tag to release (rollback). Leave empty to build this commit."
+        description: "Existing registry tag to release (rollback). Leave empty to build this commit."
         required: false
         type: string
 
 # Never let two deploys race for the same container. Deploys are not cancelled
 # mid-flight — that could leave the server with no running container.
 concurrency:
-  group: deploy-ecr
+  group: deploy
   cancel-in-progress: false
 
 jobs:
   deploy:
     name: Build, push and release
     # Self-hosted runner. Unlike a GitHub-hosted VM this box persists between
-    # jobs, so nothing here may write to shared locations (~/.ssh, ~/.aws) or
-    # assume a clean workspace.
+    # jobs, so nothing here may write to shared locations (~/.ssh) or assume a
+    # clean workspace. The one exception is the docker login in
+    # scripts/deploy.sh push, which lands in the runner's ~/.docker like the
+    # other repositories that push to this registry from the same runner.
     runs-on: self-hosted
     environment: production
 
@@ -61,24 +63,15 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      # Checked up front because the AWS action reports missing credentials as
-      # the opaque "Could not load credentials from any providers".
-      - name: Check AWS credentials are present
+      # Checked up front so a missing token fails in seconds, not after the build.
+      - name: Check registry token is present
         env:
-          KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
-          if [ -z "$KEY_ID" ] || [ -z "$SECRET" ]; then
-            echo "::error::AWS_ACCESS_KEY_ID and/or AWS_SECRET_ACCESS_KEY secrets are not set. Add them under Settings -> Secrets and variables -> Actions (see docs/deployment.md)."
+          if [ -z "$REGISTRY_TOKEN" ]; then
+            echo "::error::REGISTRY_TOKEN secret is not set. Add a DigitalOcean API token with registry access under Settings -> Secrets and variables -> Actions (see docs/deployment.md)."
             exit 1
           fi
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Set up QEMU
         if: env.ROLLBACK != 'true'
@@ -93,9 +86,8 @@ jobs:
       # printf %q emits shell-safe literals, and deploy.config is sourced by bash.
       - name: Write deploy.config
         env:
-          CFG_AWS_REGION: ${{ vars.AWS_REGION }}
-          CFG_AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
-          CFG_ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          CFG_REGISTRY: ${{ vars.REGISTRY }}
+          CFG_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           CFG_PLATFORMS: ${{ vars.PLATFORMS }}
           CFG_SSH_HOST: ${{ vars.SSH_HOST }}
           CFG_SSH_USER: ${{ vars.SSH_USER }}
@@ -107,18 +99,14 @@ jobs:
           CFG_REMOTE_ENV_FILE: ${{ vars.REMOTE_ENV_FILE }}
         run: |
           # Fail here with a readable message rather than deep inside the script.
-          : "${CFG_AWS_REGION:?set the AWS_REGION repository variable}"
-          : "${CFG_AWS_ACCOUNT_ID:?set the AWS_ACCOUNT_ID repository variable}"
-          : "${CFG_ECR_REPOSITORY:?set the ECR_REPOSITORY repository variable}"
+          : "${CFG_REGISTRY:?set the REGISTRY repository variable}"
           : "${CFG_SSH_HOST:?set the SSH_HOST repository variable}"
           : "${CFG_SSH_USER:?set the SSH_USER repository variable}"
           : "${CFG_REMOTE_ENV_FILE:?set the REMOTE_ENV_FILE repository variable}"
 
           {
-            printf 'AWS_REGION=%q\n'      "$CFG_AWS_REGION"
-            printf 'AWS_ACCOUNT_ID=%q\n'  "$CFG_AWS_ACCOUNT_ID"
-            printf 'ECR_REPOSITORY=%q\n'  "$CFG_ECR_REPOSITORY"
-            printf 'AWS_PROFILE=%q\n'     ""
+            printf 'REGISTRY=%q\n'        "$CFG_REGISTRY"
+            printf 'IMAGE_NAME=%q\n'      "${CFG_IMAGE_NAME:-rockship-profile}"
             printf 'PLATFORMS=%q\n'       "${CFG_PLATFORMS:-linux/amd64,linux/arm64}"
             printf 'SSH_HOST=%q\n'        "$CFG_SSH_HOST"
             printf 'SSH_USER=%q\n'        "$CFG_SSH_USER"
@@ -178,11 +166,19 @@ jobs:
         if: env.ROLLBACK != 'true'
         run: ./scripts/deploy.sh build
 
-      - name: Build multi-arch image and push to ECR
+      - name: Build multi-arch image and push to the registry
         if: env.ROLLBACK != 'true'
+        # The token logs in for the push; release forwards it to the server for
+        # the pull. An empty REGISTRY_USER means the token itself.
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: ./scripts/deploy.sh push
 
       - name: Release on server
+        env:
+          REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: ./scripts/deploy.sh release
 
       - name: Summary

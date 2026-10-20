@@ -6,7 +6,7 @@ which keeps image builds to a few seconds and avoids installing the full
 dependency tree in the container.
 
 ```
- laptop                                    ECR                    server
+ laptop                                    DOCR                   server
 ┌──────────────────────────┐            ┌───────┐            ┌──────────────┐
 │ 1. bun run build         │            │       │            │              │
 │    → .next/standalone    │            │       │            │              │
@@ -18,120 +18,39 @@ dependency tree in the container.
 
 ## Getting access (new developer, start here)
 
-You need two things before you can deploy: AWS credentials that can push to ECR,
-and an SSH key the server trusts. Neither is in the repo — both are granted by an
-admin (**@axing**).
+You need two things before you can deploy: a DigitalOcean API token that can
+push to the `rockship-temp` container registry, and an SSH key the server
+trusts. Neither is in the repo — both are granted by an admin (**@axing**).
 
-### 1. Install the AWS CLI
+### 1. Ask @axing for a registry token
 
-```bash
-brew install awscli          # macOS
-aws --version                # must report aws-cli/2.x
-```
+Ask for a DigitalOcean API token with read and write access to the
+`rockship-temp` container registry. It starts with `dop_v1_`.
 
-If you get `aws-cli/1.x`, upgrade — v1 cannot log in to ECR the way the deploy
-script expects.
+> The token is shown exactly once, at creation. If you lose it, you need a new
+> one — it cannot be recovered.
 
-### 2. Ask @axing for AWS credentials
+### 2. Keep the token out of files
 
-Ask for an IAM user in account **471112636744** with permission to push to the
-`rockship-profile` ECR repository. You'll be given an **Access Key ID** and a
-**Secret Access Key**.
-
-> The secret is shown exactly once, at creation. If you lose it, you need a new
-> key pair — it cannot be recovered.
-
-<details>
-<summary>For @axing: the policy that user needs</summary>
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "ecr:GetAuthorizationToken",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
-        "ecr:DescribeRepositories",
-        "ecr:InitiateLayerUpload",
-        "ecr:ListImages",
-        "ecr:PutImage",
-        "ecr:UploadLayerPart"
-      ],
-      "Resource": "arn:aws:ecr:ap-southeast-1:471112636744:repository/rockship-profile"
-    }
-  ]
-}
-```
-</details>
-
-### 3. Configure an AWS profile
-
-A *profile* is a named set of credentials stored on your machine. Create one:
+`scripts/deploy.sh` reads the token from the environment, never from the repo.
+Export it in the shell you deploy from:
 
 ```bash
-aws configure --profile rockship
+export REGISTRY_TOKEN=dop_v1_...
 ```
 
-Answer the four prompts:
-
-```
-AWS Access Key ID [None]: AKIA................
-AWS Secret Access Key [None]: ....................................
-Default region name [None]: ap-southeast-1
-Default output format [None]: json
-```
-
-This writes to `~/.aws/credentials` (the keys) and `~/.aws/config` (region and
-output). Verify it works and points at the right account:
+DigitalOcean takes the token as both username and password, so `REGISTRY_USER`
+defaults to it. Check it works:
 
 ```bash
-aws sts get-caller-identity --profile rockship
+printf '%s' "$REGISTRY_TOKEN" \
+  | docker login registry.digitalocean.com -u "$REGISTRY_TOKEN" --password-stdin
 ```
 
-```json
-{
-  "UserId": "AIDA................",
-  "Account": "471112636744",
-  "Arn": "arn:aws:iam::471112636744:user/your-name"
-}
-```
+`Login Succeeded` means the push will authenticate. The server needs no token of
+its own: `release` forwards yours for the one pull and deletes it afterwards.
 
-The `Account` **must** be `471112636744`. The deploy script refuses to push if it
-isn't, so a wrong profile fails loudly rather than pushing to someone else's
-registry.
-
-Then point the deploy config at it:
-
-```bash
-# deploy.config
-AWS_PROFILE="rockship"
-```
-
-> **Profile name ≠ IAM user name.** The profile is the label you chose in
-> `aws configure --profile <name>`, not the username in the ARN. Run
-> `aws configure list-profiles` to see valid values. Leave `AWS_PROFILE=""` to
-> use the `[default]` profile.
-
-<details>
-<summary>If your org uses AWS SSO instead of access keys</summary>
-
-```bash
-aws configure sso --profile rockship
-aws sso login --profile rockship        # repeat when the session expires
-```
-
-Everything else is identical. Expired SSO sessions show up as
-`Could not authenticate to AWS` from the deploy script.
-</details>
-
-### 4. Generate an SSH key
+### 3. Generate an SSH key
 
 Make a key dedicated to this server rather than reusing a personal one:
 
@@ -153,7 +72,7 @@ This produces two files:
 > and the server accepts it; ed25519 is just shorter and faster. Use rsa only if
 > something rejects ed25519.
 
-### 5. Send the **public** key to @axing
+### 4. Send the **public** key to @axing
 
 ```bash
 cat ~/.ssh/rockship-profile.pub | pbcopy    # macOS: copies to clipboard
@@ -175,7 +94,7 @@ chmod 600 ~/.ssh/authorized_keys
 Append — don't overwrite, or you'll lock out everyone else.
 </details>
 
-### 6. Test the connection
+### 5. Test the connection
 
 ```bash
 ssh -i ~/.ssh/rockship-profile ubuntu@13.251.100.184 'docker ps --format "{{.Names}}"'
@@ -184,17 +103,16 @@ ssh -i ~/.ssh/rockship-profile ubuntu@13.251.100.184 'docker ps --format "{{.Nam
 The first connection asks you to trust the host key — type `yes`. A list of
 running containers means you're in.
 
-### 7. Fill in `deploy.config`
+### 6. Fill in `deploy.config`
 
 ```bash
 cp deploy.config.example deploy.config    # gitignored; never commit it
 ```
 
-Set the four values specific to you and the server:
+Set the three values specific to you and the server:
 
 ```bash
-AWS_PROFILE="rockship"                    # from step 3
-SSH_KEY="$HOME/.ssh/rockship-profile"     # from step 4 — the PRIVATE key
+SSH_KEY="$HOME/.ssh/rockship-profile"     # from step 3 — the PRIVATE key
 SSH_HOST="13.251.100.184"
 SSH_USER="ubuntu"
 ```
@@ -215,9 +133,8 @@ Confirm everything resolves before deploying anything:
 
 | Error | Fix |
 |---|---|
-| `The config profile (x) could not be found` | `AWS_PROFILE` names a profile that doesn't exist. Check `aws configure list-profiles`; it is not your IAM username |
-| `Credentials resolve to account X, but deploy.config says Y` | Wrong profile selected — you're pointed at a different AWS account |
-| `Could not authenticate to AWS` | Keys are wrong, or an SSO session expired (`aws sso login --profile rockship`) |
+| `set REGISTRY_TOKEN ... in the environment` | `export REGISTRY_TOKEN=dop_v1_...` in the shell you deploy from |
+| `unauthorized: authentication required` on login or pull | The token is wrong, revoked, or lacks access to `rockship-temp` |
 | `Permissions 0644 for '...' are too open` | `chmod 600 ~/.ssh/rockship-profile` — SSH refuses world-readable private keys |
 | `Permission denied (publickey)` | @axing hasn't installed your key yet, or `SSH_KEY` points at the `.pub` instead of the private key |
 | `Host key verification failed` | The server was rebuilt. Remove the stale entry: `ssh-keygen -R 13.251.100.184` |
@@ -228,7 +145,7 @@ Confirm everything resolves before deploying anything:
 
 ```bash
 cp deploy.config.example deploy.config   # then fill it in (gitignored)
-aws sso login                            # or however you authenticate
+export REGISTRY_TOKEN=dop_v1_...         # see "Getting access"
 ```
 
 Install bun if you don't have it (`curl -fsSL https://bun.sh/install | bash`).
@@ -247,8 +164,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
 ### Server
 
-Install Docker and the AWS CLI, give the instance an IAM role with
-`AmazonEC2ContainerRegistryReadOnly`, then create the **runtime** env file. This
+Install Docker, then create the **runtime** env file. The server needs no
+registry credentials: each release pulls with a token forwarded for that pull
+alone. This
 file is never uploaded by the deploy script — provision it once, by hand:
 
 ```bash
@@ -304,7 +222,7 @@ Or one step at a time:
 |---|---|---|
 | `./scripts/deploy.sh build` | 1 | `bun install` + `next build`, stages output into `.deploy/` |
 | `./scripts/deploy.sh image` | 2 | Builds the image for *your* arch only, for local testing |
-| `./scripts/deploy.sh push` | 2+3 | Multi-arch `buildx` build, pushes to ECR |
+| `./scripts/deploy.sh push` | 2+3 | Multi-arch `buildx` build, pushes to the registry |
 | `./scripts/deploy.sh release` | 4 | SSH: pull, remove old container, run new one, wait for healthy |
 | `./scripts/deploy.sh run-local` | — | Runs the local image on `:3000` to smoke-test |
 | `./scripts/deploy.sh logs` | — | Tails container logs on the server |
@@ -322,7 +240,7 @@ changes) and `latest`. Override with `IMAGE_TAG=v1.2.3 ./scripts/deploy.sh`.
 
 ### Rollback
 
-Every SHA tag stays in ECR, so redeploy any previous build without rebuilding:
+Every SHA tag stays in the registry, so redeploy any previous build without rebuilding:
 
 ```bash
 IMAGE_TAG=<old-sha> ./scripts/deploy.sh release
@@ -350,7 +268,7 @@ signature verified on every request.
 
 ## Deploying from GitHub Actions
 
-`.github/workflows/deploy-ecr.yml` runs on every push to `main` and on manual
+`.github/workflows/deploy.yml` runs on every push to `main` and on manual
 dispatch. It does not reimplement the deploy — it writes a `deploy.config` from
 repo variables and then calls the same `scripts/deploy.sh`, so CI and your
 laptop cannot drift apart.
@@ -370,7 +288,6 @@ The deploy needs these on the runner's PATH:
 | Tool | Used for | Check |
 |---|---|---|
 | `docker` + `buildx` | building and pushing the image | `docker buildx version` |
-| `aws` (v2) | ECR login and repository checks in `scripts/deploy.sh` | `aws --version` |
 | `ssh`, `ssh-keyscan` | releasing on the server | `ssh -V` |
 | `git` | checkout | `git --version` |
 
@@ -405,9 +322,7 @@ secret; they are the same values as your local `deploy.config`.
 
 | Variable | Value for this project |
 |---|---|
-| `AWS_REGION` | `ap-southeast-1` |
-| `AWS_ACCOUNT_ID` | `471112636744` |
-| `ECR_REPOSITORY` | `rockship-profile` |
+| `REGISTRY` | `registry.digitalocean.com/rockship-temp` |
 | `SSH_HOST` | `13.251.100.184` |
 | `SSH_USER` | `ubuntu` |
 | `REMOTE_ENV_FILE` | `/home/ubuntu/rockship-profile/.env.production` |
@@ -416,6 +331,7 @@ secret; they are the same values as your local `deploy.config`.
 
 | Variable | Default | Set it only if |
 |---|---|---|
+| `IMAGE_NAME` | `rockship-profile` | the registry repository is renamed |
 | `DOCKER_NETWORK` | `nginx` | the proxy network is renamed |
 | `CONTAINER_NAME` | `rockship-profile` | you rename the container (nginx-proxy-manager routes to this name) |
 | `CONTAINER_PORT` | `3000` | the app listens elsewhere |
@@ -435,14 +351,14 @@ Same page, **Secrets** tab.
 
 | Secret | How to get it |
 |---|---|
-| `AWS_ACCESS_KEY_ID` | Access key for a dedicated CI IAM user — see "AWS credentials for CI" below |
-| `AWS_SECRET_ACCESS_KEY` | The matching secret, shown only once at creation |
+| `REGISTRY_TOKEN` | DigitalOcean API token with read and write access to `rockship-temp` — see "Registry token for CI" below |
 | `SSH_PRIVATE_KEY` | Contents of the private key whose public half is in the server's `~/.ssh/authorized_keys`. Paste the **whole file**, including the `-----BEGIN...` and `-----END...` lines |
 
 **Recommended:**
 
 | Secret | How to get it |
 |---|---|
+| `REGISTRY_USER` | Leave unset: it defaults to the token, which is what DigitalOcean expects |
 | `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 13.251.100.184`. Without it the workflow trusts the host key on first use and logs a warning — that window is MITM-able |
 
 **Optional — all four are build-time values compiled into the client bundle:**
@@ -468,15 +384,13 @@ in `REMOTE_ENV_FILE` on the server and are never seen by CI.
 gh auth login
 REPO=Rockship-Team/rockship-profile
 
-gh variable set AWS_REGION      --repo "$REPO" --body "ap-southeast-1"
-gh variable set AWS_ACCOUNT_ID  --repo "$REPO" --body "471112636744"
-gh variable set ECR_REPOSITORY  --repo "$REPO" --body "rockship-profile"
+gh variable set REGISTRY        --repo "$REPO" --body "registry.digitalocean.com/rockship-temp"
+gh variable set IMAGE_NAME      --repo "$REPO" --body "rockship-profile"
 gh variable set SSH_HOST        --repo "$REPO" --body "13.251.100.184"
 gh variable set SSH_USER        --repo "$REPO" --body "ubuntu"
 gh variable set REMOTE_ENV_FILE --repo "$REPO" --body "/home/ubuntu/rockship-profile/.env.production"
 
-gh secret set AWS_ACCESS_KEY_ID     --repo "$REPO"      # paste the access key id
-gh secret set AWS_SECRET_ACCESS_KEY --repo "$REPO"      # paste the secret
+gh secret set REGISTRY_TOKEN      --repo "$REPO"     # paste the dop_v1_ token
 gh secret set SSH_PRIVATE_KEY     --repo "$REPO" < ~/Desktop/aws/rockitflow
 ssh-keyscan -p 22 13.251.100.184 2>/dev/null \
   | gh secret set SSH_KNOWN_HOSTS --repo "$REPO"
@@ -490,100 +404,25 @@ The workflow targets `environment: production`. If that environment does not
 exist yet, create it under Settings → Environments (add required reviewers there
 if you want deploys to wait for approval).
 
-### AWS credentials for CI
+### Registry token for CI
 
-CI authenticates with a plain access key. Create a **dedicated IAM user** for it
-rather than reusing your own — the key lives in GitHub until you rotate it, and a
-separate user can be revoked without disturbing your local setup.
+CI authenticates with a DigitalOcean API token stored as the `REGISTRY_TOKEN`
+secret. Create a token dedicated to this repository (DigitalOcean → API →
+Tokens → Generate New Token, custom scopes, `registry` read and write) rather
+than reusing a personal one, so it can be revoked without disturbing anything
+else.
 
-```bash
-aws iam create-user --user-name github-actions-rockship-profile
-```
+The same token covers the pull on the server: `deploy.sh release` writes it into
+a temporary docker config on the server for that one pull and deletes it when
+the release ends. Nothing on the server has to be rotated when the token is.
 
-Attach a policy limited to pushing this one repository:
+**Rotating.** Generate a new token, update the secret, then delete the old token
+in the DigitalOcean console.
 
-```bash
-cat > /tmp/ecr-push.json <<'JSON'
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "ecr:GetAuthorizationToken",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
-        "ecr:DescribeRepositories",
-        "ecr:InitiateLayerUpload",
-        "ecr:ListImages",
-        "ecr:PutImage",
-        "ecr:UploadLayerPart"
-      ],
-      "Resource": "arn:aws:ecr:ap-southeast-1:471112636744:repository/rockship-profile"
-    }
-  ]
-}
-JSON
-
-aws iam put-user-policy \
-  --user-name github-actions-rockship-profile \
-  --policy-name ecr-push-rockship-profile \
-  --policy-document file:///tmp/ecr-push.json
-```
-
-`ecr:GetAuthorizationToken` cannot be scoped to a repository — that is an AWS
-constraint, not an oversight. Everything else is pinned to this repository, so
-the key cannot touch other images in the account.
-
-Create the key and read the two values:
-
-```bash
-aws iam create-access-key --user-name github-actions-rockship-profile \
-  --query 'AccessKey.{id:AccessKeyId,secret:SecretAccessKey}' --output table
-```
-
-The secret is displayed **once**. If you lose it, delete the key and make a new
-one — it cannot be retrieved later.
-
-Pipe them straight into GitHub without them touching your shell history:
-
-```bash
-REPO=Rockship-Team/rockship-profile
-
-aws iam create-access-key --user-name github-actions-rockship-profile \
-  --output json > /tmp/ci-key.json
-
-jq -r '.AccessKey.AccessKeyId'     /tmp/ci-key.json | gh secret set AWS_ACCESS_KEY_ID     --repo "$REPO"
-jq -r '.AccessKey.SecretAccessKey' /tmp/ci-key.json | gh secret set AWS_SECRET_ACCESS_KEY --repo "$REPO"
-
-rm -f /tmp/ci-key.json          # do not leave this on disk
-```
-
-Verify the key works before relying on a deploy:
-
-```bash
-AWS_ACCESS_KEY_ID=<id> AWS_SECRET_ACCESS_KEY=<secret> AWS_REGION=ap-southeast-1 \
-  aws sts get-caller-identity
-```
-
-`Account` must read `471112636744`.
-
-**Rotating.** Access keys do not expire on their own. To rotate, create a second
-key, update both GitHub secrets, then delete the old one:
-
-```bash
-aws iam list-access-keys --user-name github-actions-rockship-profile
-aws iam delete-access-key --user-name github-actions-rockship-profile --access-key-id <old-id>
-```
-
-> Static keys are the trade-off here: anyone who can read the GitHub secrets, or
-> who compromises a workflow, holds ECR push access until the key is rotated.
-> Role assumption via GitHub's OIDC provider avoids long-lived credentials
-> entirely and is worth revisiting if this repo's CI grows more permissions.
+**Registry space.** Every deploy pushes a new multi-arch image and nothing
+deletes old tags. The registry is shared with other projects and its plan caps
+storage, so delete old `rockship-profile` tags and run garbage collection from
+time to time (DigitalOcean → Container Registry → Settings).
 
 ### Rollback from the Actions tab
 
@@ -591,8 +430,9 @@ Run the workflow manually and set **image_tag** to a previously pushed tag. The
 build and push steps are skipped entirely; only the release step runs.
 
 CI tags images with the full commit SHA (`github.sha`), while local deploys use
-the short SHA. Both land in the same repository — `aws ecr list-images
---repository-name rockship-profile` shows everything available to roll back to.
+the short SHA. Both land in the same repository —
+`doctl registry repository list-tags rockship-profile` shows everything
+available to roll back to.
 
 ## How it fits together
 
