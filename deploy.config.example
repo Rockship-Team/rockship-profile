@@ -4,12 +4,14 @@
 # Every value can also be supplied as an environment variable, which wins over
 # this file:  IMAGE_TAG=hotfix ./scripts/deploy.sh
 
-# ---------------------------------------------------------------- AWS / ECR --
-AWS_REGION="ap-southeast-1"
-AWS_ACCOUNT_ID="471112636744"
-ECR_REPOSITORY="rockship-profile"
-# Named AWS CLI profile to use locally. Leave empty for the default profile.
-AWS_PROFILE=""
+# ------------------------------------------------------------ Registry --
+# Registry host plus namespace. Images land at ${REGISTRY}/${IMAGE_NAME}:<tag>.
+REGISTRY="registry.digitalocean.com/rockship-temp"
+IMAGE_NAME="rockship-profile"
+# Registry credentials (DigitalOcean: any username + an API token with registry
+# read/write). Used for `docker login` on the laptop and on the server.
+REGISTRY_USER="you@example.com"
+REGISTRY_TOKEN="dop_v1_..."
 
 # Image tag. Defaults to the short git SHA (plus "-dirty" on uncommitted work).
 # The script always also pushes/updates the `latest` tag.

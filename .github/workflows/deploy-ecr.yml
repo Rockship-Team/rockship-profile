@@ -1,6 +1,6 @@
 # Builds the Next.js standalone bundle on the runner with bun, packages it into
-# a multi-arch Docker image, pushes to ECR, and swaps the container on the EC2
-# host over SSH.
+# a multi-arch Docker image, pushes to the DigitalOcean container registry, and
+# swaps the container on the server over SSH.
 #
 # This reuses ./scripts/deploy.sh rather than reimplementing the steps, so CI
 # and a local `bun run deploy` cannot drift apart. The workflow's only job is to
@@ -8,7 +8,7 @@
 #
 # Setup: docs/deployment.md ("Deploying from GitHub Actions").
 
-name: Deploy to ECR
+name: Deploy
 
 on:
   # Fires on every merge into main — merge commit, squash or rebase all arrive
@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Existing ECR tag to release (rollback). Leave empty to build this commit."
+        description: "Existing registry tag to release (rollback). Leave empty to build this commit."
         required: false
         type: string
 
@@ -49,6 +49,10 @@ jobs:
       # Explicit so scripts/deploy.sh does not derive it from git state.
       IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
       ROLLBACK: ${{ inputs.image_tag != '' }}
+      # Read by scripts/deploy.sh as overrides of deploy.config, so the token is
+      # never written to a file in the workspace.
+      REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
 
     steps:
       - name: Checkout
@@ -61,24 +65,20 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      # Checked up front because the AWS action reports missing credentials as
-      # the opaque "Could not load credentials from any providers".
-      - name: Check AWS credentials are present
-        env:
-          KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Check registry credentials are present
         run: |
-          if [ -z "$KEY_ID" ] || [ -z "$SECRET" ]; then
-            echo "::error::AWS_ACCESS_KEY_ID and/or AWS_SECRET_ACCESS_KEY secrets are not set. Add them under Settings -> Secrets and variables -> Actions (see docs/deployment.md)."
+          if [ -z "$REGISTRY_USER" ] || [ -z "$REGISTRY_TOKEN" ]; then
+            echo "::error::REGISTRY_USER and/or REGISTRY_TOKEN secrets are not set. Add them under Settings -> Secrets and variables -> Actions."
             exit 1
           fi
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+      # `docker login` stores the token in $DOCKER_CONFIG/config.json. The
+      # default ~/.docker is shared by every job on this self-hosted runner, so
+      # point it at the per-job RUNNER_TEMP instead. Must run before buildx setup.
+      - name: Use a job-scoped Docker config
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
         if: env.ROLLBACK != 'true'
@@ -93,9 +93,8 @@ jobs:
       # printf %q emits shell-safe literals, and deploy.config is sourced by bash.
       - name: Write deploy.config
         env:
-          CFG_AWS_REGION: ${{ vars.AWS_REGION }}
-          CFG_AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
-          CFG_ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          CFG_REGISTRY: ${{ vars.REGISTRY }}
+          CFG_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           CFG_PLATFORMS: ${{ vars.PLATFORMS }}
           CFG_SSH_HOST: ${{ vars.SSH_HOST }}
           CFG_SSH_USER: ${{ vars.SSH_USER }}
@@ -107,18 +106,14 @@ jobs:
           CFG_REMOTE_ENV_FILE: ${{ vars.REMOTE_ENV_FILE }}
         run: |
           # Fail here with a readable message rather than deep inside the script.
-          : "${CFG_AWS_REGION:?set the AWS_REGION repository variable}"
-          : "${CFG_AWS_ACCOUNT_ID:?set the AWS_ACCOUNT_ID repository variable}"
-          : "${CFG_ECR_REPOSITORY:?set the ECR_REPOSITORY repository variable}"
+          : "${CFG_REGISTRY:?set the REGISTRY repository variable}"
           : "${CFG_SSH_HOST:?set the SSH_HOST repository variable}"
           : "${CFG_SSH_USER:?set the SSH_USER repository variable}"
           : "${CFG_REMOTE_ENV_FILE:?set the REMOTE_ENV_FILE repository variable}"
 
           {
-            printf 'AWS_REGION=%q\n'      "$CFG_AWS_REGION"
-            printf 'AWS_ACCOUNT_ID=%q\n'  "$CFG_AWS_ACCOUNT_ID"
-            printf 'ECR_REPOSITORY=%q\n'  "$CFG_ECR_REPOSITORY"
-            printf 'AWS_PROFILE=%q\n'     ""
+            printf 'REGISTRY=%q\n'        "$CFG_REGISTRY"
+            printf 'IMAGE_NAME=%q\n'      "${CFG_IMAGE_NAME:-rockship-profile}"
             printf 'PLATFORMS=%q\n'       "${CFG_PLATFORMS:-linux/amd64,linux/arm64}"
             printf 'SSH_HOST=%q\n'        "$CFG_SSH_HOST"
             printf 'SSH_USER=%q\n'        "$CFG_SSH_USER"
@@ -178,7 +173,7 @@ jobs:
         if: env.ROLLBACK != 'true'
         run: ./scripts/deploy.sh build
 
-      - name: Build multi-arch image and push to ECR
+      - name: Build multi-arch image and push to registry
         if: env.ROLLBACK != 'true'
         run: ./scripts/deploy.sh push
 
@@ -224,4 +219,5 @@ jobs:
           # Never remove ~/.ssh/* here: on a self-hosted runner that directory is
           # shared with every other job on the machine.
           rm -f "$RUNNER_TEMP/deploy_key" "$RUNNER_TEMP/known_hosts"
+          rm -rf "$RUNNER_TEMP/docker"
           rm -f deploy.config .env.production
