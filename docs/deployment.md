@@ -443,6 +443,7 @@ Same page, **Secrets** tab.
 
 | Secret | How to get it |
 |---|---|
+| `SSH_KEY_PASSPHRASE` | Only if `SSH_PRIVATE_KEY` has a passphrase. CI has no tty to prompt on, so without it a protected key fails as `Permission denied (publickey)`. The workflow unlocks the key into a job-scoped `ssh-agent` |
 | `SSH_KNOWN_HOSTS` | `ssh-keyscan -p 22 13.251.100.184`. Without it the workflow trusts the host key on first use and logs a warning — that window is MITM-able |
 
 **Optional — all four are build-time values compiled into the client bundle:**

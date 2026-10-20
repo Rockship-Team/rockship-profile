@@ -131,6 +131,7 @@ jobs:
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KEY_PASSPHRASE: ${{ secrets.SSH_KEY_PASSPHRASE }}
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_PORT: ${{ vars.SSH_PORT }}
@@ -145,6 +146,42 @@ jobs:
           # jobs on this machine and let concurrent runs clobber each other.
           printf '%s\n' "$SSH_PRIVATE_KEY" > "$RUNNER_TEMP/deploy_key"
           chmod 600 "$RUNNER_TEMP/deploy_key"
+
+          # A passphrase-protected key cannot prompt here — there is no tty — and
+          # ssh reports that as a bare "Permission denied (publickey)". Unlock it
+          # into a job-scoped agent instead. The askpass helper reads the
+          # passphrase from its environment, so the secret never lands on disk
+          # or in any process's argv. It answers only once: on a wrong passphrase
+          # ssh-add re-asks forever, which would hang the job instead of failing.
+          if [ -n "$SSH_KEY_PASSPHRASE" ]; then
+            sock="$RUNNER_TEMP/ssh-agent.sock"
+            eval "$(ssh-agent -s -a "$sock")" > /dev/null
+
+            askpass="$RUNNER_TEMP/askpass.sh"
+            cat > "$askpass" <<'ASKPASS'
+          #!/bin/sh
+          [ -e "$0.used" ] && exit 1
+          : > "$0.used"
+          printf '%s\n' "$SSH_KEY_PASSPHRASE"
+          ASKPASS
+            chmod 700 "$askpass"
+
+            if ! SSH_ASKPASS="$askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=none \
+                ssh-add "$RUNNER_TEMP/deploy_key" < /dev/null 2> /dev/null; then
+              echo "::error::Could not unlock SSH_PRIVATE_KEY with SSH_KEY_PASSPHRASE."
+              ssh-agent -k > /dev/null
+              exit 1
+            fi
+            rm -f "$askpass" "$askpass.used"
+
+            # deploy.sh passes `-i deploy_key -o IdentitiesOnly=yes`; ssh matches
+            # the agent's key to it through this public half.
+            ssh-add -L > "$RUNNER_TEMP/deploy_key.pub"
+
+            # Later steps need the agent too.
+            echo "SSH_AUTH_SOCK=$sock" >> "$GITHUB_ENV"
+            echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+          fi
 
           if [ -n "$SSH_KNOWN_HOSTS" ]; then
             printf '%s\n' "$SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/known_hosts"
@@ -218,6 +255,13 @@ jobs:
         run: |
           # Never remove ~/.ssh/* here: on a self-hosted runner that directory is
           # shared with every other job on the machine.
-          rm -f "$RUNNER_TEMP/deploy_key" "$RUNNER_TEMP/known_hosts"
+          # The agent outlives its step, so stop it explicitly.
+          if [ -n "${SSH_AGENT_PID:-}" ]; then
+            ssh-agent -k > /dev/null 2>&1 || true
+          fi
+          rm -f "$RUNNER_TEMP/deploy_key" "$RUNNER_TEMP/deploy_key.pub" \
+                "$RUNNER_TEMP/known_hosts" \
+                "$RUNNER_TEMP/askpass.sh" "$RUNNER_TEMP/askpass.sh.used" \
+                "$RUNNER_TEMP/ssh-agent.sock"
           rm -rf "$RUNNER_TEMP/docker"
           rm -f deploy.config .env.production
